@@ -43,7 +43,7 @@ public abstract class BaseHashAlgorithm : IFeature
     {
         if (!string.IsNullOrWhiteSpace(text))
         {
-            var inputBytes = System.Text.Encoding.ASCII.GetBytes(text);
+            var inputBytes = System.Text.Encoding.UTF8.GetBytes(text);
             CalculateHash(inputBytes, lowerCase);
             return;
         }

@@ -10,6 +10,7 @@ var features = new List<IFeature>()
     new Sha256Feature(),
     new Sha384Feature(),
     new Sha512Feature(),
+    new Base64Feature(),
 };
 
 var rootCommand = new RootCommand("Hash utilities in command-line mode");
