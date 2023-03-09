@@ -18,7 +18,7 @@ public class HumanizeFeature : IFeature
     private Command GetFeatureCommand()
     {
         var command = new Command("humanize",
-            "Humanizer text (Pascal-case, Camel-case, Kebab, Underscore, lowercase etc)");
+            "Humanizer text (Pascal-case, Camel-case, Kebab, Underscore, lowercase, etc)");
         command.AddArgument(_humanizeType);
         command.AddArgument(_textArgument);
         command.SetHandler(CalculateText, _textArgument, _humanizeType);

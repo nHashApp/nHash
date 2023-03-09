@@ -9,7 +9,7 @@ public class GuidFeature : IFeature
 
     private Command GetCommand()
     {
-        var command = new Command("uuid", "Generate Universally unique identifier (UUID/GUID)")
+        var command = new Command("uuid", "Generate a Universally unique identifier (UUID/GUID)")
         {
             _withBracket,
             _withoutHyphen
