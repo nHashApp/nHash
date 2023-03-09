@@ -4,9 +4,17 @@ public static class Startup
 {
     public static async Task<int> StartAsync(IEnumerable<string> args)
     {
-        var features = GetFeatureClasses();
+        var features = new List<IFeature>()
+        {
+            new GuidFeature(),
+            new UrlFeature(),
+            new HtmlFeature(),
+            new HashAlgorithmFeature(),
+            new Base64Feature(),
+            new HumanizeFeature()
+        };
 
-        var rootCommand = new RootCommand("Hash utilities in command-line mode");
+        var rootCommand = new RootCommand("Hash and Text utilities in command-line mode");
         foreach (var command in features)
         {
             rootCommand.AddCommand(command.Command);
@@ -37,24 +45,5 @@ public static class Startup
         }
 
         return list.Where(_ => !string.IsNullOrWhiteSpace(_)).ToArray();
-    }
-
-    private static IEnumerable<IFeature> GetFeatureClasses()
-    {
-        var res = new List<IFeature>();
-        try
-        {
-            var featureType = typeof(IFeature);
-            var types = typeof(Program).Assembly.GetTypes()
-                .Where(_ => _ is { IsInterface: false, IsAbstract: false } && featureType.IsAssignableFrom(_))
-                .Select(_ => Activator.CreateInstance(_) as IFeature);
-            res.AddRange(types!);
-        }
-        catch
-        {
-            //
-        }
-
-        return res;
     }
 }
