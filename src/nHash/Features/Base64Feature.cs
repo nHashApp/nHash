@@ -1,4 +1,4 @@
-namespace nHash.Features.HashAlgorithms;
+namespace nHash.Features;
 
 public class Base64Feature : IFeature
 {
@@ -40,9 +40,9 @@ public class Base64Feature : IFeature
         return Convert.ToBase64String(plainTextBytes);
     }
 
-    private static string Base64Decode(string base64EncodedData)
+    private static string Base64Decode(string encodedData)
     {
-        var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
+        var base64EncodedBytes = Convert.FromBase64String(encodedData);
         return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
     }
 }
