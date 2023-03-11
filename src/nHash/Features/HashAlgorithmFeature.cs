@@ -15,7 +15,7 @@ public class HashAlgorithmFeature : IFeature
     public HashAlgorithmFeature()
     {
         _algorithmType = new Argument<AlgorithmType>("type", "Algorithm type");
-        _textArgument = new Argument<string>("text", "Text for calculate fingerprint");
+        _textArgument = new Argument<string>("text", GetDefaultString, "Text for calculate fingerprint");
         _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
         _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
     }
@@ -46,6 +46,12 @@ public class HashAlgorithmFeature : IFeature
 
         if (!string.IsNullOrWhiteSpace(fileName))
         {
+            if (!File.Exists(fileName))
+            {
+                Console.WriteLine($"File {fileName} does not exists!");
+                return;
+            }
+            
             var fileBytes = File.ReadAllBytes(fileName);
             CalculateHash(fileBytes, algorithmType, lowerCase);
         }
@@ -73,4 +79,6 @@ public class HashAlgorithmFeature : IFeature
 
         Console.WriteLine(hashedText);
     }
+
+    private static string GetDefaultString() => string.Empty;
 }
