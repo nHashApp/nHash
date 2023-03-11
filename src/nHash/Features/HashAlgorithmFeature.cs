@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using nHash.Providers.Hashing;
 
 namespace nHash.Features;
 
@@ -55,13 +56,14 @@ public class HashAlgorithmFeature : IFeature
 
     private static void CalculateHash(byte[] inputBytes, bool lowerCase)
     {
-        var algorithms = new Dictionary<string, HashAlgorithm>()
+        var algorithms = new Dictionary<string, IHash>()
         {
-            { "MD5", MD5.Create() },
-            { "SHA-1", SHA1.Create() },
-            { "SHA-256", SHA256.Create() },
-            { "SHA-384", SHA384.Create() },
-            { "SHA-512", SHA512.Create() }
+            { "MD5", new MD5Hash() },
+            { "SHA-1", new SHA1Hash() },
+            { "SHA-256", new SHA256Hash() },
+            { "SHA-384", new SHA384Hash() },
+            { "SHA-512", new SHA512Hash() },
+            { "CRC32", new CRC32Hash() }
         };
 
         foreach (var algorithm in algorithms)
