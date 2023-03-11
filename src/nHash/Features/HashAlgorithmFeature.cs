@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using nHash.Features.Models;
 
 namespace nHash.Features;
 
@@ -7,14 +6,12 @@ public class HashAlgorithmFeature : IFeature
 {
     public Command Command => GetFeatureCommand();
     private readonly Argument<string> _textArgument;
-    private readonly Argument<AlgorithmType> _algorithmType;
     private readonly Option<string> _fileName;
     private readonly Option<bool> _lowerCase;
 
 
     public HashAlgorithmFeature()
     {
-        _algorithmType = new Argument<AlgorithmType>("type", "Algorithm type");
         _textArgument = new Argument<string>("text", GetDefaultString, "Text for calculate fingerprint");
         _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
         _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
@@ -28,19 +25,18 @@ public class HashAlgorithmFeature : IFeature
             _fileName,
             _lowerCase,
         };
-        command.AddArgument(_algorithmType);
         command.AddArgument(_textArgument);
-        command.SetHandler(CalculateText, _textArgument, _algorithmType, _lowerCase, _fileName);
+        command.SetHandler(CalculateText, _textArgument, _lowerCase, _fileName);
 
         return command;
     }
 
-    private static void CalculateText(string text, AlgorithmType algorithmType, bool lowerCase, string fileName)
+    private static void CalculateText(string text, bool lowerCase, string fileName)
     {
         if (!string.IsNullOrWhiteSpace(text))
         {
             var inputBytes = System.Text.Encoding.UTF8.GetBytes(text);
-            CalculateHash(inputBytes, algorithmType, lowerCase);
+            CalculateHash(inputBytes, lowerCase);
             return;
         }
 
@@ -51,33 +47,36 @@ public class HashAlgorithmFeature : IFeature
                 Console.WriteLine($"File {fileName} does not exists!");
                 return;
             }
-            
+
             var fileBytes = File.ReadAllBytes(fileName);
-            CalculateHash(fileBytes, algorithmType, lowerCase);
+            CalculateHash(fileBytes, lowerCase);
         }
     }
 
-    private static void CalculateHash(byte[] inputBytes, AlgorithmType algorithmType, bool lowerCase)
+    private static void CalculateHash(byte[] inputBytes, bool lowerCase)
     {
-        HashAlgorithm provider = algorithmType switch
+        var algorithms = new Dictionary<string, HashAlgorithm>()
         {
-            AlgorithmType.MD5 => MD5.Create(),
-            AlgorithmType.SHA1 => SHA1.Create(),
-            AlgorithmType.SHA256 => SHA256.Create(),
-            AlgorithmType.SHA384 => SHA384.Create(),
-            AlgorithmType.SHA512 => SHA512.Create(),
-            _ => throw new ArgumentOutOfRangeException(nameof(algorithmType), algorithmType, null)
+            { "MD5", MD5.Create() },
+            { "SHA-1", SHA1.Create() },
+            { "SHA-256", SHA256.Create() },
+            { "SHA-384", SHA384.Create() },
+            { "SHA-512", SHA512.Create() }
         };
 
-        var hashBytes = provider.ComputeHash(inputBytes);
-        var hashedText = Convert.ToHexString(hashBytes);
-
-        if (lowerCase)
+        foreach (var algorithm in algorithms)
         {
-            hashedText = hashedText.ToLower();
-        }
+            var hashBytes = algorithm.Value.ComputeHash(inputBytes);
+            var hashedText = Convert.ToHexString(hashBytes);
 
-        Console.WriteLine(hashedText);
+            if (lowerCase)
+            {
+                hashedText = hashedText.ToLower();
+            }
+
+            Console.WriteLine($"{algorithm.Key}:");
+            Console.WriteLine(hashedText);
+        }
     }
 
     private static string GetDefaultString() => string.Empty;
