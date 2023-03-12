@@ -17,17 +17,128 @@ Options:
 
 ```
 
-|Commands|                                                                                                           |
-|----|-----------------------------------------------------------------------------------------------------------|
-| uuid | Generate Universally unique identifier (UUID/GUID)                                                        |
-| url <text> | URL Encode/Decode                                                                                         |
-| html <text> | HTML Encode/Decode                                                                                        |
-| hash <type> <text> | Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32)                                 |
-| base64 <text> | Encode/Decode Base64                                                                                      |
-| humanize <type> <text> | Humanizer text (Humanize, Dehumanize, Camel, Hyphenate, Kebab, Pascal, Under-score, Uppercase, Lowercase) | 
+| Commands                    |                                                                                                           |
+|-----------------------------|-----------------------------------------------------------------------------------------------------------|
+| [uuid](#uuid)               | Generate Universally unique identifier (UUID/GUID)                                                        |
+| url <text>                  | URL Encode/Decode                                                                                         |
+| html <text>                 | HTML Encode/Decode                                                                                        |
+| [hash](#hash) <type> <text> | Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32)                                 |
+| base64 <text>               | Encode/Decode Base64                                                                                      |
+| humanize <type> <text>      | Humanizer text (Humanize, Dehumanize, Camel, Hyphenate, Kebab, Pascal, Under-score, Uppercase, Lowercase) | 
  
 ## Commands
+
+### UUID
+```
+❯ nhash uuid --help
+Description:
+  Generate Universally unique identifier (UUID/GUID)
+
+Usage:
+  nhash uuid [options]
+
+Options:
+  --bracket       Generate with brackets
+  --no-hyphen     Generate without hyphens
+  -?, -h, --help  Show help and usage information
+```  
+#### Sample
+```
+❯ nhash uuid
+29bee9e6-8eab-477b-b643-e2699f0029db
+ 
+❯ nhash uuid --bracket
+{898486f4-0447-46ba-9bd1-54e0542069dd}
   
+❯ nhash uuid --no-hyphen
+dcb5d66f6b604e27bd8d7da77156d07d
+  
+❯ nhash uuid --no-hyphen --bracket
+{ddee757350644a38bb6486cf6846d66e}  
+```    
+---
+
+### URL
+```
+❯ nhash url --help
+Description:
+  URL Encode/Decode
+
+Usage:
+  nhash url <text> [options]
+
+Arguments:
+  <text>  text for url encode/decode
+
+Options:
+  --decode        Decode url-encoded text
+  -?, -h, --help  Show help and usage information
+```  
+#### Sample
+```
+❯ nhash url https://google.com
+https%3a%2f%2fgoogle.com
+ 
+❯ nhash url https%3a%2f%2fgoogle.com --decode
+https://google.com 
+```    
+---
+
+### HTML
+```
+❯ nhash html --help
+Description:
+  HTML Encode/Decode
+
+Usage:
+  nhash html <text> [options]
+
+Arguments:
+  <text>  text for html encode/decode
+
+Options:
+  --decode        Decode html-encoded text
+  -?, -h, --help  Show help and usage information
+```  
+#### Sample
+```
+❯ nhash html '<html><body><h1>hello</h1></body></html>'
+&lt;html&gt;&lt;body&gt;&lt;h1&gt;hello&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;
+ 
+❯ nhash html '&lt;html&gt;&lt;body&gt;&lt;h1&gt;hello&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;' --decode
+<html><body><h1>hello</h1></body></html>
+```    
+---
+
+### Base64
+```
+❯ nhash base64 --help
+Description:
+  Encode/Decode Base64
+
+Usage:
+  nhash base64 <text> [options]
+
+Arguments:
+  <text>  text for encode/decode Base64
+
+Options:
+  --decode        Decode Base64 text
+  -?, -h, --help  Show help and usage information
+```  
+#### Sample
+```
+❯ nhash base64 hello
+aGVsbG8=
+ 
+❯ nhash base64 aGVsbG8= --decode
+hello
+
+❯ nhash base64 hello | nhash base64 --decode
+hello
+```    
+---
+
 ### Hash
 ```
 ❯ nhash hash --help
@@ -98,36 +209,8 @@ CRC32:
     
 ---
     
-### UUID
- 
-```
-❯ nhash uuid --help
-Description:
-  Generate Universally unique identifier (UUID/GUID)
 
-Usage:
-  nhash uuid [options]
-
-Options:
-  --bracket       Generate with brackets
-  --no-hyphen     Generate without hyphens
-  -?, -h, --help  Show help and usage information
-  
-```  
-#### Sample  
-```
-❯ nhash uuid
-29bee9e6-8eab-477b-b643-e2699f0029db
- 
-❯ nhash uuid --bracket
-{898486f4-0447-46ba-9bd1-54e0542069dd}
-  
-❯ nhash uuid --no-hyphen
-dcb5d66f6b604e27bd8d7da77156d07d
-  
-❯ nhash uuid --no-hyphen --bracket
-{ddee757350644a38bb6486cf6846d66e}  
-```  
   
 ## References
 * Humanizer: https://github.com/Humanizr/Humanizer 
+* MlkPwgen: https://github.com/mkropat/MlkPwgen
