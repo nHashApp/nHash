@@ -1,3 +1,5 @@
+using nHash.Providers.Text;
+
 namespace nHash;
 
 public static class Startup
@@ -11,7 +13,8 @@ public static class Startup
             new HtmlFeature(),
             new HashAlgorithmFeature(),
             new Base64Feature(),
-            new HumanizeFeature()
+            new HumanizeFeature(),
+            new PassGenerator()
         };
 
         var rootCommand = new RootCommand("Hash and Text utilities in command-line mode");
