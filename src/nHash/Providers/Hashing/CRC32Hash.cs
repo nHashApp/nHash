@@ -30,7 +30,9 @@ public class CRC32Hash : IHash
 
         int current;
         while ((current = stream.ReadByte()) != -1)
+        {
             result = _checksumTable[(result & 0xFF) ^ (byte)current] ^ (result >> 8);
+        }
 
         var hash = BitConverter.GetBytes(~result);
         Array.Reverse(hash);

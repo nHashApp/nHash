@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using nHash.Providers.Hashing;
 
 namespace nHash.Features;
@@ -10,7 +9,6 @@ public class HashAlgorithmFeature : IFeature
     private readonly Option<string> _fileName;
     private readonly Option<bool> _lowerCase;
 
-
     public HashAlgorithmFeature()
     {
         _textArgument = new Argument<string>("text", GetDefaultString, "Text for calculate fingerprint");
@@ -21,7 +19,7 @@ public class HashAlgorithmFeature : IFeature
     private Command GetFeatureCommand()
     {
         var command = new Command("hash",
-            "Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512)")
+            "Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC64, CRC, )")
         {
             _fileName,
             _lowerCase,
@@ -63,7 +61,7 @@ public class HashAlgorithmFeature : IFeature
             { "SHA-256", new SHA256Hash() },
             { "SHA-384", new SHA384Hash() },
             { "SHA-512", new SHA512Hash() },
-            { "CRC32", new CRC32Hash() }
+            { "CRC-32", new CRC32Hash() },
         };
 
         foreach (var algorithm in algorithms)
