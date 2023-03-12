@@ -20,10 +20,10 @@ Options:
 | Commands                    |                                                                                                           |
 |-----------------------------|-----------------------------------------------------------------------------------------------------------|
 | [uuid](#uuid)               | Generate Universally unique identifier (UUID/GUID)                                                        |
-| url <text>                  | URL Encode/Decode                                                                                         |
-| html <text>                 | HTML Encode/Decode                                                                                        |
+| [url](#url) <text>          | URL Encode/Decode                                                                                         |
+| [html](#html) <text>        | HTML Encode/Decode                                                                                        |
 | [hash](#hash) <type> <text> | Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32)                                 |
-| base64 <text>               | Encode/Decode Base64                                                                                      |
+| [base64](#base64) <text>    | Encode/Decode Base64                                                                                      |
 | humanize <type> <text>      | Humanizer text (Humanize, Dehumanize, Camel, Hyphenate, Kebab, Pascal, Under-score, Uppercase, Lowercase) | 
  
 ## Commands
@@ -110,35 +110,6 @@ Options:
 ```    
 ---
 
-### Base64
-```
-❯ nhash base64 --help
-Description:
-  Encode/Decode Base64
-
-Usage:
-  nhash base64 <text> [options]
-
-Arguments:
-  <text>  text for encode/decode Base64
-
-Options:
-  --decode        Decode Base64 text
-  -?, -h, --help  Show help and usage information
-```  
-#### Sample
-```
-❯ nhash base64 hello
-aGVsbG8=
- 
-❯ nhash base64 aGVsbG8= --decode
-hello
-
-❯ nhash base64 hello | nhash base64 --decode
-hello
-```    
----
-
 ### Hash
 ```
 ❯ nhash hash --help
@@ -206,7 +177,35 @@ CRC32:
 363A3020
 
 ```
-    
+---
+
+### Base64
+```
+❯ nhash base64 --help
+Description:
+  Encode/Decode Base64
+
+Usage:
+  nhash base64 <text> [options]
+
+Arguments:
+  <text>  text for encode/decode Base64
+
+Options:
+  --decode        Decode Base64 text
+  -?, -h, --help  Show help and usage information
+```  
+#### Sample
+```
+❯ nhash base64 hello
+aGVsbG8=
+ 
+❯ nhash base64 aGVsbG8= --decode
+hello
+
+❯ nhash base64 hello | nhash base64 --decode
+hello
+```    
 ---
     
 
