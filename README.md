@@ -1,4 +1,4 @@
-# nHash (inprogress)
+# ![nHash](images/icon_32.png) nHash
 Hash utilities with command-line. like: MD5, SHA1, Base64 etc
 
 Download: https://github.com/nRafinia/nHash/releases
@@ -25,6 +25,7 @@ Options:
 | [hash](#hash) <type> <text> | Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32)                                 |
 | [base64](#base64) <text>    | Encode/Decode Base64                                                                                      |
 | humanize <type> <text>      | Humanizer text (Humanize, Dehumanize, Camel, Hyphenate, Kebab, Pascal, Under-score, Uppercase, Lowercase) | 
+| password                    | Generate a random password with custom length, prefix, suffix, character, etc options                     |
  
 ## Commands
 
