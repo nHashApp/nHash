@@ -1,6 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 
-namespace nHash.Providers.Decodes;
+namespace nHash.SubFeatures.Encodes;
 
 public class JwtTokenDecodeFeature : IFeature
 {

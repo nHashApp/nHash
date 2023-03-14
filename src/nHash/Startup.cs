@@ -1,5 +1,7 @@
-using nHash.Providers.Decodes;
 using nHash.Providers.Text;
+using nHash.SubFeatures;
+using nHash.SubFeatures.Encodes;
+using nHash.SubFeatures.Texts;
 
 namespace nHash;
 
@@ -10,13 +12,10 @@ public static class Startup
         var features = new List<IFeature>()
         {
             new GuidFeature(),
-            new UrlFeature(),
-            new HtmlFeature(),
+            new EncodeFeature(),
             new HashAlgorithmFeature(),
-            new Base64Feature(),
-            new HumanizeFeature(),
+            new TextFeature(),
             new PassGenerator(),
-            new JwtTokenDecodeFeature()
         };
 
         var rootCommand = new RootCommand("Hash and Text utilities in command-line mode");

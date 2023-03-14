@@ -1,4 +1,4 @@
-namespace nHash.Features;
+namespace nHash.SubFeatures.Encodes;
 
 public class Base64Feature : IFeature
 {

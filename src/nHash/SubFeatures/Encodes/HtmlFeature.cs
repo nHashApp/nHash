@@ -1,7 +1,6 @@
-using System.Security.Cryptography;
 using System.Web;
 
-namespace nHash.Features;
+namespace nHash.SubFeatures.Encodes;
 
 public class HtmlFeature : IFeature
 {
