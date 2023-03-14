@@ -1,3 +1,4 @@
+using System.Text;
 using MlkPwgen;
 
 namespace nHash.Providers.Text;
@@ -96,28 +97,28 @@ public class PassGenerator : IFeature
             return customChar;
         }
 
-        var passStr = string.Empty;
+        var passStr = new StringBuilder();
 
         if (!noLowerCase)
         {
-            passStr += CharsLCase;
+            passStr.Append(CharsLCase);
         }
 
         if (!noUpperCase)
         {
-            passStr += CharsUCase;
+            passStr.Append(CharsUCase);
         }
 
         if (!noNumeric)
         {
-            passStr += CharsNumeric;
+            passStr.Append(CharsNumeric);
         }
 
         if (!noSpecialChar)
         {
-            passStr += CharsSpecial;
+            passStr.Append(CharsSpecial);
         }
 
-        return passStr;
+        return passStr.ToString();
     }
 }

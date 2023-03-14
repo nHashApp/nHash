@@ -19,7 +19,7 @@ public class HashAlgorithmFeature : IFeature
     private Command GetFeatureCommand()
     {
         var command = new Command("hash",
-            "Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC64, CRC, )")
+            "Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC64, CRC, ...)")
         {
             _fileName,
             _lowerCase,
@@ -61,6 +61,7 @@ public class HashAlgorithmFeature : IFeature
             { "SHA-256", new SHA256Hash() },
             { "SHA-384", new SHA384Hash() },
             { "SHA-512", new SHA512Hash() },
+            { "CRC-8", new CRC8Hash() },
             { "CRC-32", new CRC32Hash() },
         };
 
@@ -68,7 +69,8 @@ public class HashAlgorithmFeature : IFeature
         {
             var hashBytes = algorithm.Value.ComputeHash(inputBytes);
             var hashedText = Convert.ToHexString(hashBytes);
-
+            //var hashedText = BitConverter.ToString(hashBytes).Replace("-","");
+            
             if (lowerCase)
             {
                 hashedText = hashedText.ToLower();
