@@ -1,7 +1,7 @@
 using System.Text;
 using MlkPwgen;
 
-namespace nHash.Providers.Text;
+namespace nHash.Providers;
 
 public class PassGenerator : IFeature
 {

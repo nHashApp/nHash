@@ -1,4 +1,4 @@
-using nHash.Providers.Text;
+using nHash.Providers;
 using nHash.SubFeatures;
 using nHash.SubFeatures.Encodes;
 using nHash.SubFeatures.Texts;
