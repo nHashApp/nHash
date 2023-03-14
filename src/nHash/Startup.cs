@@ -1,3 +1,4 @@
+using nHash.Providers.Decodes;
 using nHash.Providers.Text;
 
 namespace nHash;
@@ -14,7 +15,8 @@ public static class Startup
             new HashAlgorithmFeature(),
             new Base64Feature(),
             new HumanizeFeature(),
-            new PassGenerator()
+            new PassGenerator(),
+            new JwtTokenDecodeFeature()
         };
 
         var rootCommand = new RootCommand("Hash and Text utilities in command-line mode");
