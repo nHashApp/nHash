@@ -1,7 +1,4 @@
 using nHash.Providers;
-using nHash.SubFeatures;
-using nHash.SubFeatures.Encodes;
-using nHash.SubFeatures.Texts;
 
 namespace nHash;
 
