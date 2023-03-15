@@ -1,4 +1,7 @@
-using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using System.Text.Json.Nodes;
+using System.Web;
+using nHash.Providers;
 
 namespace nHash.SubFeatures.Encodes;
 
@@ -17,7 +20,7 @@ public class JwtTokenDecodeFeature : IFeature
 
     private Command GetFeatureCommand()
     {
-        var command = new Command("jwt", "JWT token decode")
+        var command = new Command("jwt", "JWT token decode (Comply with GDPR rules)")
         {
             _noWriteInformation
         };
@@ -29,17 +32,30 @@ public class JwtTokenDecodeFeature : IFeature
 
     private static void DecodeJwtToken(string text, bool noWriteInformation)
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var jwt = tokenHandler.ReadJwtToken(text);
+        var parts = text.Split('.');
+        var header = parts[0];
+        var payload = parts[1];
+        //var signature = parts[2];
 
-        
+
+        var decodedHeader = HttpUtility.UrlDecode(Encoding.UTF8.GetString(Convert.FromBase64String(header)));
+        payload = payload.PadRight(payload.Length + (payload.Length * 3) % 4, '=');
+        var decodedPayload = HttpUtility.UrlDecode(Encoding.UTF8.GetString(Convert.FromBase64String(payload)));
+
+        //Console.WriteLine("JWT payload: " + decodedPayload);
+        var jsonBeautifier = new JsonBeautifier();
+        var prettyHeader = jsonBeautifier.Set(decodedHeader);
+        var prettyPayload = jsonBeautifier.Set(decodedPayload);
+
         Console.WriteLine();
         Console.WriteLine("Header: (ALGORITHM & TOKEN TYPE)");
-        WriteHeaders(jwt);
-
+        Console.WriteLine(prettyHeader);
+        
         Console.WriteLine();
         Console.WriteLine("Payload: (DATA)");
-        WritePayload(jwt);
+        Console.WriteLine(prettyPayload);
+        
+        //WritePayload(jwt);
 
         if (noWriteInformation)
         {
@@ -48,10 +64,12 @@ public class JwtTokenDecodeFeature : IFeature
 
         Console.WriteLine();
         Console.WriteLine("Summary:");
-        WriteSummary(jwt);
+        WriteSummary(decodedHeader, decodedPayload);
+        //Console.WriteLine("JWT algorithm: " + JsonObject.Parse(decodedHeader)["alg"]);
+        //jwtObject.has
     }
 
-    private static void WriteHeaders(JwtSecurityToken jwt)
+    /*private static void WriteHeaders(JwtSecurityToken jwt)
     {
         foreach (var header in jwt.Header)
         {
@@ -65,45 +83,64 @@ public class JwtTokenDecodeFeature : IFeature
         {
             Console.WriteLine("    " + claim.Key + ": " + claim.Value);
         }
-    }
+    }*/
 
-    private static void WriteSummary(JwtSecurityToken jwt)
+    private static void WriteSummary(string header, string payload)
     {
-        // Get algorithm and other data from JWT token
-        Console.WriteLine("    Algorithm: " + jwt.Header.Alg);
-        if (!string.IsNullOrWhiteSpace(jwt.Issuer))
+        var jwtObjectHeader = JsonNode.Parse(header);
+        if (jwtObjectHeader is null)
         {
-            Console.WriteLine("    Issuer: " + jwt.Issuer);
+            return;
         }
 
-        if (jwt.IssuedAt != DateTime.MinValue)
+        var algorithm = jwtObjectHeader["alg"];
+        if (algorithm is not null)
         {
-            Console.WriteLine("    Issued at: " + jwt.IssuedAt);
+            Console.WriteLine("    Algorithm: " + algorithm);
         }
 
-        if (!string.IsNullOrWhiteSpace(jwt.Id))
+        var jwtObjectPayload = JsonNode.Parse(payload);
+        if (jwtObjectPayload is null)
         {
-            Console.WriteLine("    Id: " + jwt.Id);
+            return;
         }
 
-        if (jwt.Audiences.Any())
+        var issuer = jwtObjectPayload["iss"];
+        if (issuer is not  null)
         {
-            Console.WriteLine("    Audience: " + string.Join(", ", jwt.Audiences));
+            Console.WriteLine("    Issuer: " + issuer);
         }
 
-        if (!string.IsNullOrWhiteSpace(jwt.Subject))
+        var issuedAt = jwtObjectPayload["iat"];
+        if (issuedAt is not  null)
         {
-            Console.WriteLine("    Subject: " + jwt.Subject);
+            var issueValue = Convert.ToInt64(issuedAt.ToString());
+            Console.WriteLine("    Issued at: " + DateTimeOffset.FromUnixTimeSeconds(issueValue).DateTime);
         }
 
-        if (!string.IsNullOrWhiteSpace(jwt.Actor))
+        var id = jwtObjectPayload["id"];
+        if (id is not null)
         {
-            Console.WriteLine("    Actor: " + jwt.Actor);
+            Console.WriteLine("    Id: " + id);
         }
 
-        if (jwt.ValidTo != DateTime.MinValue)
+        var audience = jwtObjectPayload["aud"];
+        if (audience is not null)
         {
-            Console.WriteLine("    Expiration: " + jwt.ValidTo);
+            Console.WriteLine("    Audience: " + audience);
+        }
+
+        var subject = jwtObjectPayload["sub"];
+        if (subject is not null)
+        {
+            Console.WriteLine("    Subject: " + subject);
+        }
+
+        var expirationAt = jwtObjectPayload["exp"];
+        if (expirationAt is not null)
+        {
+            var expirationValue = Convert.ToInt64(expirationAt.ToString());
+            Console.WriteLine("    Expiration: " + DateTimeOffset.FromUnixTimeSeconds(expirationValue).DateTime);
         }
     }
 }
