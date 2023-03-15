@@ -17,47 +17,73 @@ Options:
 
 ```
 
-| Commands                    |                                                                                                           |
-|-----------------------------|-----------------------------------------------------------------------------------------------------------|
-| [uuid](#uuid)               | Generate Universally unique identifier (UUID/GUID)                                                        |
-| [url](#url) <text>          | URL Encode/Decode                                                                                         |
-| [html](#html) <text>        | HTML Encode/Decode                                                                                        |
-| [hash](#hash) <type> <text> | Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32)                                 |
-| [base64](#base64) <text>    | Encode/Decode Base64                                                                                      |
-| humanize <type> <text>      | Humanizer text (Humanize, Dehumanize, Camel, Hyphenate, Kebab, Pascal, Under-score, Uppercase, Lowercase) | 
-| password                    | Generate a random password with custom length, prefix, suffix, character, etc options                     |
+| Commands               |                                                                                       |
+|------------------------|---------------------------------------------------------------------------------------|
+| [uuid](#uuid)          | Generate a Universally unique identifier (UUID/GUID) version 1 to 5                   |
+| [encode](#encode)      | Encode/Decode features (JWT, Base64, URL, HTML)                                       |
+| [hash](#hash) <text>   | Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32)             |
+| [text](#text)          | Encode/Decode Base64                                                                  |
+| password               | Generate a random password with custom length, prefix, suffix, character, etc options |
  
 ## Commands
 
-### UUID
+## UUID
 ```
 ❯ nhash uuid --help
 Description:
-  Generate Universally unique identifier (UUID/GUID)
+  Generate a Universally unique identifier (UUID/GUID) version 1 to 5
 
 Usage:
   nhash uuid [options]
 
 Options:
-  --bracket       Generate with brackets
-  --no-hyphen     Generate without hyphens
-  -?, -h, --help  Show help and usage information
+  --bracket                       Generate with brackets
+  --no-hyphen                     Generate without hyphens
+  --version <All|V1|V2|V3|V4|V5>  Select UUID version [default: All]
+  -?, -h, --help                  Show help and usage information
 ```  
 #### Sample
 ```
 ❯ nhash uuid
-29bee9e6-8eab-477b-b643-e2699f0029db
+UUID v1:
+247e9324-e636-0003-0000-000001800000
+UUID v2:
+307e9324-0003-8002-0000-000000000000
+UUID v3:
+4f366064-c703-af30-9839-02e8cf8006c5
+UUID v4:
+d6032068-dab5-a04c-a47f-9dde41691d00
+UUID v5:
+df633114-5cc5-6953-8ef6-4eed9a804629
  
-❯ nhash uuid --bracket
+❯ nhash uuid --version v4 --bracket
 {898486f4-0447-46ba-9bd1-54e0542069dd}
   
-❯ nhash uuid --no-hyphen
+❯ nhash uuid --version v4 --no-hyphen
 dcb5d66f6b604e27bd8d7da77156d07d
   
-❯ nhash uuid --no-hyphen --bracket
+❯ nhash uuid --version v4 --no-hyphen --bracket
 {ddee757350644a38bb6486cf6846d66e}  
 ```    
 ---
+## Encode
+```
+❯ nhash encode --help
+Description:
+  Encode/Decode features (JWT, Base64, URL, HTML)
+
+Usage:
+  nhash encode [command] [options]
+
+Options:
+  -?, -h, --help  Show help and usage information
+
+Commands:
+  jwt <token>    JWT token decode
+  base64 <text>  Encode/Decode Base64
+  url <text>     URL Encode/Decode
+  html <text>    HTML Encode/Decode
+```
 
 ### URL
 ```
@@ -208,8 +234,57 @@ hello
 hello
 ```    
 ---
-    
 
+## Text
+```
+❯ nhash text --help
+Description:
+  Text utilities (Humanizer)
+
+Usage:
+  nhash text [command] [options]
+
+Options:
+  -?, -h, --help  Show help and usage information
+
+Commands:
+  humanize                                              Humanizer text (Pascal-case, Camel-case, Kebab, 
+  <Camel|Dehumanize|Humanize|Hyphenate|Kebab|Lowercase  Underscore, lowercase, etc)
+  |Pascal|Underscore|Uppercase> <text>
+```
+
+### Humanize
+```
+❯ nhash text humanize --help
+Description:
+  Humanizer text (Pascal-case, Camel-case, Kebab, Underscore, lowercase, etc)
+
+Usage:
+  nhash text humanize <type> <text> [options]
+
+Arguments:
+  <Camel|Dehumanize|Humanize|Hyphenate|Kebab|Lowercase|Pascal|Underscore|Uppercase>  Humanize type
+  <text>                                                                             Text for humanize
+
+Options:
+  -?, -h, --help  Show help and usage information
+```
+#### Sample
+```
+❯ nhash text humanize camel "hello world"
+helloWorld
+
+❯ nhash text humanize kebab "hello world"
+hello-world
+
+❯ nhash text humanize pascal "hello world"
+HelloWorld
+
+❯ nhash text humanize uppercase "hello world"
+HELLO WORLD
+
+```
+---
   
 ## References
 * Humanizer: https://github.com/Humanizr/Humanizer 
