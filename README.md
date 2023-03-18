@@ -1,7 +1,13 @@
 # ![nHash](images/icon_32.png) nHash
-Hash utilities with command-line. like: MD5, SHA1, Base64 etc
+Hash and Text utilities in command-line mode
 
-Download: https://github.com/nRafinia/nHash/releases
+nHash is a console application that provides various hash and text utilities in command-line mode. It supports generating Universally Unique Identifiers (UUID/GUID), encoding/decoding features such as JWT, Base64, URL, and HTML, calculating hash fingerprints, and performing text utilities such as humanization.
+
+The application is compatible with both Windows and Linux operating systems and supports piping in Linux. It provides a simple and efficient way to perform various text and hash-related tasks on the command-line, without the need for complex scripts or tools.
+
+To get started, simply download the latest release from the [releases page](https://github.com/example/nhash/releases/latest) and run the executable file in a terminal or command prompt. For more information on the available commands and options, refer to the documentation provided in the application or use the --help option.
+
+nHash is an open-source project released under the MIT License. Contributions and feedback are welcome, and can be submitted through the GitHub repository.
 
 ```
 > nhash --help
