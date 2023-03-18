@@ -43,9 +43,9 @@ public class JwtTokenDecodeFeature : IFeature
         var decodedPayload = HttpUtility.UrlDecode(Encoding.UTF8.GetString(Convert.FromBase64String(payload)));
 
         //Console.WriteLine("JWT payload: " + decodedPayload);
-        var jsonBeautifier = new JsonBeautifier();
-        var prettyHeader = jsonBeautifier.Set(decodedHeader);
-        var prettyPayload = jsonBeautifier.Set(decodedPayload);
+        var jsonBeautifier = new JsonTools();
+        var prettyHeader = jsonBeautifier.SetBeautiful(decodedHeader);
+        var prettyPayload = jsonBeautifier.SetBeautiful(decodedPayload);
 
         Console.WriteLine();
         Console.WriteLine("Header: (ALGORITHM & TOKEN TYPE)");

@@ -12,6 +12,7 @@ public class TextFeature : IFeature
         var features = new List<IFeature>()
         {
             new HumanizeFeature(),
+            new JsonFeature(),
         };
         
         var command = new Command("text", "Text utilities (Humanizer)");
