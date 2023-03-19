@@ -5,6 +5,8 @@ namespace nHash.Application.Features;
 
 public class GuidFeature : IFeature
 {
+    private readonly IUUIDGenerator _uuidGenerator = new UUIDGenerator();
+    
     public Command Command => GetCommand();
 
     private readonly Option<bool> _withBracket = new(name: "--bracket", description: "Generate with brackets");
@@ -50,7 +52,7 @@ public class GuidFeature : IFeature
         }
     }
 
-    private static void GenerateUuidText(bool withBracket, bool withoutHyphen, UuidVersion version)
+    private void GenerateUuidText(bool withBracket, bool withoutHyphen, UuidVersion version)
     {
         var guid = GenerateUuidByVersion(version);
         var result = withBracket ? guid.ToString("B") : guid.ToString();
@@ -62,16 +64,16 @@ public class GuidFeature : IFeature
         Console.WriteLine(result);
     }
 
-    private static Guid GenerateUuidByVersion(UuidVersion version)
+    private Guid GenerateUuidByVersion(UuidVersion version)
     {
         return version switch
         {
-            UuidVersion.V1 => UUIDGenerator.GenerateUUIDv1(),
-            UuidVersion.V2 => UUIDGenerator.GenerateUUIDv2(),
-            UuidVersion.V3 => UUIDGenerator.GenerateUUIDv3(Guid.NewGuid(), "nHash"),
-            UuidVersion.V4 => UUIDGenerator.GenerateUUIDv4(),
-            UuidVersion.V5 => UUIDGenerator.GenerateUUIDv5(Guid.NewGuid(), "nHash"),
-            _ => UUIDGenerator.GenerateUUIDv4()
+            UuidVersion.V1 => _uuidGenerator.GenerateUUIDv1(),
+            UuidVersion.V2 => _uuidGenerator.GenerateUUIDv2(),
+            UuidVersion.V3 => _uuidGenerator.GenerateUUIDv3(Guid.NewGuid(), "nHash"),
+            UuidVersion.V4 => _uuidGenerator.GenerateUUIDv4(),
+            UuidVersion.V5 => _uuidGenerator.GenerateUUIDv5(Guid.NewGuid(), "nHash"),
+            _ => _uuidGenerator.GenerateUUIDv4()
         };
     }
 }

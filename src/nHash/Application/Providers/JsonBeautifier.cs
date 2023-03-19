@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace nHash.Application.Providers;
 
-public class JsonTools
+public class JsonTools : IJsonTools
 {
     private readonly JsonSerializerOptions _beautifulSerializerOptions;
     private readonly JsonSerializerOptions _compactSerializerOptions;

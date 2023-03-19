@@ -3,9 +3,9 @@ using System.Security.Cryptography;
 
 namespace nHash.Application.Providers;
 
-public static class UUIDGenerator
+public class UUIDGenerator : IUUIDGenerator
 {
-    public static Guid GenerateUUIDv1()
+    public Guid GenerateUUIDv1()
     {
         var currentTime = DateTime.UtcNow;
         var timeBytes = BitConverter.GetBytes(currentTime.Ticks);
@@ -19,27 +19,14 @@ public static class UUIDGenerator
         return new Guid(uuidBytes);
     }
 
-    private static byte[] GetMachineIdentifier()
-    {
-        var macAddress = new byte[6];
-        var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-        if (interfaces.Length > 0)
-        {
-            var address = interfaces[0].GetPhysicalAddress();
-            macAddress = address.GetAddressBytes();
-        }
-        macAddress[0] |= 0b00000001;
-        macAddress[0] |= 0b00000010;
-        return macAddress;
-    }
-
-    public static Guid GenerateUUIDv2()
+    public Guid GenerateUUIDv2()
     {
         var currentTime = DateTime.UtcNow;
         var timeBytes = BitConverter.GetBytes(currentTime.Ticks);
         Array.Reverse(timeBytes);
         var nodeId = GetMachineIdentifier();
         var versionAndVariant = new byte[2] { (byte)0b00000010, (byte)0b10000000 };
+
         var uuidBytes = new byte[16];
         Array.Copy(timeBytes, 2, uuidBytes, 0, 4);
         Array.Copy(nodeId, 0, uuidBytes, 4, 2);
@@ -47,7 +34,7 @@ public static class UUIDGenerator
         return new Guid(uuidBytes);
     }
 
-    public static Guid GenerateUUIDv3(Guid namespaceId, string name)
+    public Guid GenerateUUIDv3(Guid namespaceId, string name)
     {
         var nameBytes = System.Text.Encoding.UTF8.GetBytes(name);
         var namespaceBytes = namespaceId.ToByteArray();
@@ -61,7 +48,7 @@ public static class UUIDGenerator
         return new Guid(uuidBytes);
     }
 
-    public static Guid GenerateUUIDv4()
+    public Guid GenerateUUIDv4()
     {
         var uuidBytes = new byte[16];
         RandomNumberGenerator.Create().GetBytes(uuidBytes);
@@ -71,8 +58,8 @@ public static class UUIDGenerator
         uuidBytes[8] |= 0x80;
         return new Guid(uuidBytes);
     }
-    
-    public static Guid GenerateUUIDv5(Guid namespaceId, string name)
+
+    public Guid GenerateUUIDv5(Guid namespaceId, string name)
     {
         var nameBytes = System.Text.Encoding.UTF8.GetBytes(name);
         var namespaceBytes = namespaceId.ToByteArray();
@@ -85,7 +72,24 @@ public static class UUIDGenerator
         uuidBytes[8] |= 0x80;
         return new Guid(uuidBytes);
     }
-    
+
+    #region private methods
+
+    private static byte[] GetMachineIdentifier()
+    {
+        var macAddress = new byte[6];
+        var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+        if (interfaces.Length > 0)
+        {
+            var address = interfaces[0].GetPhysicalAddress();
+            macAddress = address.GetAddressBytes();
+        }
+
+        macAddress[0] |= 0b00000001;
+        macAddress[0] |= 0b00000010;
+        return macAddress;
+    }
+
     private static T[] ConcatenateArrays<T>(T[] a, T[] b)
     {
         var result = new T[a.Length + b.Length];
@@ -93,4 +97,6 @@ public static class UUIDGenerator
         Array.Copy(b, 0, result, a.Length, b.Length);
         return result;
     }
+
+    #endregion
 }
