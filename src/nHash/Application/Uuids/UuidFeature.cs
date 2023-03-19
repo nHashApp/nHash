@@ -2,7 +2,7 @@ using nHash.Application.Uuids.Models;
 
 namespace nHash.Application.Uuids;
 
-public class UuidFeature : IFeature
+public class UuidFeature : IUuidFeature, IFeature 
 {
     private readonly IUUIDGenerator _uuidGenerator = new UUIDGenerator();
     

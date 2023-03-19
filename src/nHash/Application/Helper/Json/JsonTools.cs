@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace nHash.Application.Json;
+namespace nHash.Application.Helper.Json;
 
 public class JsonTools : IJsonTools
 {

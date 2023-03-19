@@ -1,22 +1,22 @@
 using System.Web;
 
-namespace nHash.Application.SubFeatures.Encodes;
+namespace nHash.Application.Encodes;
 
-public class UrlFeature : IFeature
+public class HtmlFeature : IHtmlFeature, IFeature 
 {
     public Command Command => GetFeatureCommand();
     private readonly Option<bool> _decodeText;
     private readonly Argument<string> _textArgument;
 
-    public UrlFeature()
+    public HtmlFeature()
     {
-        _decodeText = new Option<bool>(name: "--decode", description: "Decode url-encoded text");
-        _textArgument = new Argument<string>("text", "text for url encode/decode");
+        _decodeText = new Option<bool>(name: "--decode", description: "Decode html-encoded text");
+        _textArgument = new Argument<string>("text", "text for html encode/decode");
     }
 
     private Command GetFeatureCommand()
     {
-        var command = new Command("url", "URL Encode/Decode")
+        var command = new Command("html", "HTML Encode/Decode")
         {
             _decodeText
         };
@@ -37,11 +37,11 @@ public class UrlFeature : IFeature
 
     private static string UrlEncode(string plainText)
     {
-        return HttpUtility.UrlEncode(plainText);
+        return HttpUtility.HtmlEncode(plainText);
     }
 
     private static string UrlDecode(string encodedData)
     {
-        return HttpUtility.UrlDecode(encodedData);
+        return HttpUtility.HtmlDecode(encodedData);
     }
 }

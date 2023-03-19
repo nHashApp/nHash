@@ -1,7 +1,8 @@
 using nHash.Application;
-using nHash.Application.Features;
+using nHash.Application.Encodes;
 using nHash.Application.Hashes;
 using nHash.Application.Passwords;
+using nHash.Application.Texts;
 using nHash.Application.Uuids;
 
 namespace nHash;

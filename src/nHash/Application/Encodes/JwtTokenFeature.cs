@@ -1,11 +1,12 @@
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Web;
+using nHash.Application.Helper.Json;
 using nHash.Application.Json;
 
-namespace nHash.Application.SubFeatures.Encodes;
+namespace nHash.Application.Encodes;
 
-public class JwtTokenDecodeFeature : IFeature
+public class JwtTokenFeature : IJwtTokenFeature, IFeature
 {
     public Command Command => GetFeatureCommand();
     private readonly Option<bool> _noWriteInformation;
@@ -13,7 +14,7 @@ public class JwtTokenDecodeFeature : IFeature
 
     private readonly IJsonTools _jsonTools = new JsonTools();
 
-    public JwtTokenDecodeFeature()
+    public JwtTokenFeature()
     {
         _noWriteInformation = new Option<bool>(name: "--no-info", () => false,
             description: "Don't write human readable information");

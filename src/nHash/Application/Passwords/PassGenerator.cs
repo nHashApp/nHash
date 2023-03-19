@@ -3,10 +3,9 @@ using MlkPwgen;
 
 namespace nHash.Application.Passwords;
 
-public class PassGenerator : IFeature
+public class PassGenerator : IPassGenerator, IFeature
 {
     public Command Command => GetFeatureCommand();
-
 
     private readonly Option<bool> _upperCase;
     private readonly Option<bool> _lowerCase;

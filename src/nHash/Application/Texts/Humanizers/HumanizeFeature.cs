@@ -1,7 +1,7 @@
 using Humanizer;
-using nHash.Application.Humanizers.Models;
+using nHash.Application.Texts.Humanizers.Models;
 
-namespace nHash.Application.Humanizers;
+namespace nHash.Application.Texts.Humanizers;
 
 public class HumanizeFeature : IFeature
 {

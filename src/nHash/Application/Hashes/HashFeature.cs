@@ -3,7 +3,7 @@ using nHash.Application.Hashes.Models;
 
 namespace nHash.Application.Hashes;
 
-public class HashFeature : IFeature
+public class HashFeature : IHashFeature, IFeature
 {
     public Command Command => GetFeatureCommand();
     private readonly Argument<string> _textArgument;

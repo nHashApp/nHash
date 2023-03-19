@@ -1,8 +1,6 @@
-using nHash.Application.SubFeatures.Encodes;
+namespace nHash.Application.Encodes;
 
-namespace nHash.Application.Features;
-
-public class EncodeFeature : IFeature
+public class EncodeFeature : IEncodeFeature, IFeature 
 {
     public Command Command => GetCommand();
 
@@ -10,7 +8,7 @@ public class EncodeFeature : IFeature
     {
         var features = new List<IFeature>()
         {
-            new JwtTokenDecodeFeature(),
+            new JwtTokenFeature(),
             new Base64Feature(),
             new UrlFeature(),
             new HtmlFeature(),

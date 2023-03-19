@@ -1,6 +1,6 @@
-namespace nHash.Application.SubFeatures.Encodes;
+namespace nHash.Application.Encodes;
 
-public class Base64Feature : IFeature
+public class Base64Feature : IBase64Feature, IFeature 
 {
     public Command Command => GetFeatureCommand();
     private readonly Option<bool> _decodeText;

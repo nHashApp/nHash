@@ -1,4 +1,4 @@
-namespace nHash.Application.Json;
+namespace nHash.Application.Helper.Json;
 
 public interface IJsonTools
 {

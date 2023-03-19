@@ -67,4 +67,23 @@ public class FileProvider : IFileProvider
         }
         return Task.CompletedTask;
     }
+    
+    public Task Write(byte[] content, string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            Console.WriteLine(content);
+            return Task.CompletedTask;
+        }
+
+        try
+        {
+            return File.WriteAllBytesAsync(fileName, content);
+        }
+        catch
+        {
+            _logger.LogError("Error writing output to '{FileName}'", fileName);
+        }
+        return Task.CompletedTask;
+    }
 }

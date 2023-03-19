@@ -1,9 +1,9 @@
-using nHash.Application.Humanizers;
-using nHash.Application.Json;
+using nHash.Application.Texts.Humanizers;
+using nHash.Application.Texts.Json;
 
-namespace nHash.Application.Features;
+namespace nHash.Application.Texts;
 
-public class TextFeature : IFeature
+public class TextFeature : ITextFeature, IFeature 
 {
     public Command Command => GetCommand();
 

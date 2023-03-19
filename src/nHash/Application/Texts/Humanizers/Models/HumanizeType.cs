@@ -1,4 +1,4 @@
-namespace nHash.Application.Humanizers.Models;
+namespace nHash.Application.Texts.Humanizers.Models;
 
 public enum HumanizeType
 {
