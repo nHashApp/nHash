@@ -54,8 +54,6 @@ public class JwtTokenDecodeFeature : IFeature
         Console.WriteLine("Payload: (DATA)");
         Console.WriteLine(prettyPayload);
 
-        //WritePayload(jwt);
-
         if (noWriteInformation)
         {
             return;
