@@ -3,7 +3,7 @@ using MlkPwgen;
 
 namespace nHash.Application.Passwords;
 
-public class PassGenerator : IPassGenerator, IFeature
+public class PasswordFeature : IPasswordFeature, IFeature
 {
     public Command Command => GetFeatureCommand();
 
@@ -21,7 +21,7 @@ public class PassGenerator : IPassGenerator, IFeature
     private const string CharsNumeric = "0123456789";
     private const string CharsSpecial = "*$-+?_&=!%{}/";
 
-    public PassGenerator()
+    public PasswordFeature()
     {
         _upperCase = new Option<bool>(name: "--no-upper", () => false,
             description: "Include uppercase Characters (A-Z) or not");

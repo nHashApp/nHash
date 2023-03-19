@@ -1,6 +1,6 @@
 namespace nHash.Application.Passwords;
 
-public interface IPassGenerator
+public interface IPasswordFeature
 {
     Command Command { get; }
 }

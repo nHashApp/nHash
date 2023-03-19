@@ -1,6 +1,7 @@
 using nHash.Application.Encodes;
 using nHash.Application.Hashes;
 using nHash.Application.Helper.Json;
+using nHash.Application.Helper.Password;
 using nHash.Application.Passwords;
 using nHash.Application.Texts;
 using nHash.Application.Uuids;
@@ -15,13 +16,15 @@ public static class ConfigureServices
         services.AddSingleton<IEncodeFeature, EncodeFeature>();
         services.AddSingleton<IHashFeature, HashFeature>();
         services.AddSingleton<ITextFeature, TextFeature>();
-        services.AddSingleton<IPassGenerator, PassGenerator>();
+        services.AddSingleton<IPasswordFeature, PasswordFeature>();
         
-        services.AddSingleton<IJsonTools, JsonTools>();
         services.AddSingleton<IUUIDGenerator, UUIDGenerator>();
         services.AddSingleton<IUrlFeature, UrlFeature>();
         services.AddSingleton<IHtmlFeature, HtmlFeature>();
         services.AddSingleton<IBase64Feature, Base64Feature>();
         services.AddSingleton<IJwtTokenFeature, JwtTokenFeature>();
+        
+        services.AddSingleton<IJsonTools, JsonTools>();
+        services.AddSingleton<IPasswordTools, PasswordTools>();
     }
 }

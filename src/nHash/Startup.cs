@@ -23,7 +23,7 @@ public static class Startup
             new EncodeFeature(),
             new HashFeature(),
             new TextFeature(),
-            new PassGenerator(),
+            new PasswordFeature(),
         };
 
         var rootCommand = new RootCommand("Hash and Text utilities in command-line mode");
