@@ -1,22 +1,26 @@
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Web;
-using nHash.Application.Helper.Json;
-using nHash.Application.Json;
+using nHash.Application.Abstraction;
+using nHash.Application.Shared.Json;
 
 namespace nHash.Application.Encodes;
 
-public class JwtTokenFeature : IJwtTokenFeature, IFeature
+public class JwtTokenFeature : IJwtTokenFeature
 {
     public Command Command => GetFeatureCommand();
     private readonly Option<bool> _noWriteInformation;
     private readonly Argument<string> _textArgument;
 
-    private readonly IJsonTools _jsonTools = new JsonTools();
+    private readonly IJsonTools _jsonTools;
+    private readonly IDateTimeProvider _timeProvider;
 
-    public JwtTokenFeature()
+    public JwtTokenFeature(IJsonTools jsonTools, IDateTimeProvider timeProvider)
     {
-        _noWriteInformation = new Option<bool>(name: "--no-info", () => false,
+        _jsonTools = jsonTools;
+        _timeProvider = timeProvider;
+
+        _noWriteInformation = new Option<bool>(name: "--no-summary", () => false,
             description: "Don't write human readable information");
         _textArgument = new Argument<string>("token", "Jwt token for decode");
     }
@@ -47,6 +51,12 @@ public class JwtTokenFeature : IJwtTokenFeature, IFeature
         var prettyHeader = _jsonTools.SetBeautiful(decodedHeader);
         var prettyPayload = _jsonTools.SetBeautiful(decodedPayload);
 
+        WriteJwtInfo(noWriteInformation, prettyHeader, prettyPayload, decodedHeader, decodedPayload);
+    }
+
+    private void WriteJwtInfo(bool noWriteInformation, string prettyHeader, string prettyPayload, string decodedHeader,
+        string decodedPayload)
+    {
         Console.WriteLine();
         Console.WriteLine("Header: (ALGORITHM & TOKEN TYPE)");
         Console.WriteLine(prettyHeader);
@@ -65,20 +75,25 @@ public class JwtTokenFeature : IJwtTokenFeature, IFeature
         WriteSummary(decodedHeader, decodedPayload);
     }
 
-    private static void WriteSummary(string header, string payload)
+    private void WriteSummary(string header, string payload)
+    {
+        WriteSummaryHeader(header);
+        WriteSummaryPayload(payload);
+    }
+
+    private static void WriteSummaryHeader(string header)
     {
         var jwtObjectHeader = JsonNode.Parse(header);
-        if (jwtObjectHeader is null)
-        {
-            return;
-        }
 
-        var algorithm = jwtObjectHeader["alg"];
-        if (algorithm is not null)
+        var algorithm = jwtObjectHeader?["alg"];
+        if (algorithm != null)
         {
             Console.WriteLine("    Algorithm: " + algorithm);
         }
+    }
 
+    private void WriteSummaryPayload(string payload)
+    {
         var jwtObjectPayload = JsonNode.Parse(payload);
         if (jwtObjectPayload is null)
         {
@@ -95,7 +110,7 @@ public class JwtTokenFeature : IJwtTokenFeature, IFeature
         if (issuedAt is not null)
         {
             var issueValue = Convert.ToInt64(issuedAt.ToString());
-            Console.WriteLine("    Issued at: " + DateTimeOffset.FromUnixTimeSeconds(issueValue).DateTime);
+            Console.WriteLine("    Issued at: " + _timeProvider.FromUnixTime(issueValue));
         }
 
         var id = jwtObjectPayload["id"];
@@ -120,7 +135,7 @@ public class JwtTokenFeature : IJwtTokenFeature, IFeature
         if (expirationAt is not null)
         {
             var expirationValue = Convert.ToInt64(expirationAt.ToString());
-            Console.WriteLine("    Expiration: " + DateTimeOffset.FromUnixTimeSeconds(expirationValue).DateTime);
+            Console.WriteLine("    Expiration: " + _timeProvider.FromUnixTime(expirationValue));
         }
     }
 }

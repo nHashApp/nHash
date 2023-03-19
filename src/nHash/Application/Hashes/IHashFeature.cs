@@ -1,6 +1,5 @@
 namespace nHash.Application.Hashes;
 
-public interface IHashFeature
+public interface IHashFeature:IFeature
 {
-    Command Command { get; }
 }

@@ -1,24 +1,28 @@
-using nHash.Application.Helper.Json;
+using nHash.Application.Abstraction;
+using nHash.Application.Shared.Json;
 using nHash.Application.Texts.Json.Models;
 
 namespace nHash.Application.Texts.Json;
 
-public class JsonFeature : IFeature
+public class JsonFeature : IJsonFeature
 {
+    public Command Command => GetFeatureCommand();
+
     private readonly Argument<string> _textArgument;
     private readonly Option<JsonPrintType> _printType;
     private readonly Option<string> _fileName;
     private readonly Option<string> _outputFileName;
 
-    public JsonFeature()
+    private readonly IFileProvider _fileProvider;
+
+    public JsonFeature(IFileProvider fileProvider)
     {
+        _fileProvider = fileProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "JSON text for processing");
         _printType = new Option<JsonPrintType>("--print", "Print pretty/Compact JSON representation");
         _fileName = new Option<string>(name: "--file", description: "File name for read JSON from that");
         _outputFileName = new Option<string>(name: "--output", description: "File name for writing output");
     }
-
-    public Command Command => GetFeatureCommand();
 
     private Command GetFeatureCommand()
     {
@@ -34,7 +38,7 @@ public class JsonFeature : IFeature
         return command;
     }
 
-    private static async Task CalculateText(string text, JsonPrintType printType, string fileName,
+    private async Task CalculateText(string text, JsonPrintType printType, string fileName,
         string outputFileName)
     {
         if (!string.IsNullOrWhiteSpace(text))
@@ -44,21 +48,17 @@ public class JsonFeature : IFeature
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(fileName))
+        var fileContent = await _fileProvider.ReadAsText(fileName);
+        if (string.IsNullOrWhiteSpace(fileContent))
         {
-            if (!File.Exists(fileName))
-            {
-                Console.WriteLine($"File {fileName} does not exists!");
-                return;
-            }
-
-            var fileContent = await File.ReadAllTextAsync(fileName);
-            var jsonText = CalculateJsonText(fileContent, printType);
-            await WriteOutput(jsonText, outputFileName);
+            return;
         }
+
+        var jsonFileText = CalculateJsonText(fileContent, printType);
+        await WriteOutput(jsonFileText, outputFileName);
     }
 
-    private static async Task WriteOutput(string text, string outputFileName)
+    private async Task WriteOutput(string text, string outputFileName)
     {
         if (string.IsNullOrWhiteSpace(outputFileName))
         {
@@ -66,14 +66,7 @@ public class JsonFeature : IFeature
             return;
         }
 
-        try
-        {
-            await File.WriteAllTextAsync(outputFileName, text);
-        }
-        catch
-        {
-            Console.WriteLine($"Error writing output to '{outputFileName}'");
-        }
+        await _fileProvider.Write(outputFileName, text);
     }
 
     private static string CalculateJsonText(string text, JsonPrintType printType)

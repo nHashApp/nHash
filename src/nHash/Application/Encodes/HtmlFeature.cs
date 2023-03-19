@@ -2,7 +2,7 @@ using System.Web;
 
 namespace nHash.Application.Encodes;
 
-public class HtmlFeature : IHtmlFeature, IFeature 
+public class HtmlFeature : IHtmlFeature 
 {
     public Command Command => GetFeatureCommand();
     private readonly Option<bool> _decodeText;

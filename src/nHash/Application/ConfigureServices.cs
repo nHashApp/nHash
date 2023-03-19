@@ -1,9 +1,10 @@
 using nHash.Application.Encodes;
 using nHash.Application.Hashes;
-using nHash.Application.Helper.Json;
-using nHash.Application.Helper.Password;
 using nHash.Application.Passwords;
+using nHash.Application.Shared.Json;
 using nHash.Application.Texts;
+using nHash.Application.Texts.Humanizers;
+using nHash.Application.Texts.Json;
 using nHash.Application.Uuids;
 
 namespace nHash.Application;
@@ -23,6 +24,8 @@ public static class ConfigureServices
         services.AddSingleton<IHtmlFeature, HtmlFeature>();
         services.AddSingleton<IBase64Feature, Base64Feature>();
         services.AddSingleton<IJwtTokenFeature, JwtTokenFeature>();
+        services.AddSingleton<IHumanizeFeature, HumanizeFeature>();
+        services.AddSingleton<IJsonFeature, JsonFeature>();
         
         services.AddSingleton<IJsonTools, JsonTools>();
         services.AddSingleton<IPasswordTools, PasswordTools>();

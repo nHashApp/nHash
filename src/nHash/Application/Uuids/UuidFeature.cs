@@ -2,11 +2,10 @@ using nHash.Application.Uuids.Models;
 
 namespace nHash.Application.Uuids;
 
-public class UuidFeature : IUuidFeature, IFeature 
+public class UuidFeature : IUuidFeature 
 {
-    private readonly IUUIDGenerator _uuidGenerator = new UUIDGenerator();
-    
     public Command Command => GetCommand();
+    
 
     private readonly Option<bool> _withBracket = new(name: "--bracket", description: "Generate with brackets");
     private readonly Option<bool> _withoutHyphen = new(name: "--no-hyphen", description: "Generate without hyphens");
@@ -23,6 +22,7 @@ public class UuidFeature : IUuidFeature, IFeature
         { UuidVersion.V5, "UUID v5" }
     };
 
+    private readonly IUUIDGenerator _uuidGenerator = new UUIDGenerator();
     private Command GetCommand()
     {
         var command = new Command("uuid", "Generate a Universally unique identifier (UUID/GUID) version 1 to 5")

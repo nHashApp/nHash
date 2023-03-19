@@ -1,4 +1,4 @@
-namespace nHash.Infrastructure;
+namespace nHash.Application.Abstraction;
 
 public interface IFileProvider
 {

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using nHash.Application.Abstraction;
 
 namespace nHash.Infrastructure;
 
@@ -49,7 +50,7 @@ public class FileProvider : IFileProvider
         return Task.FromResult(Array.Empty<byte>());
     }
 
-    public Task Write(string text, string fileName)
+    public Task Write(string fileName, string text)
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {

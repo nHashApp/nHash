@@ -14,16 +14,16 @@ public static class Startup
         Application.ConfigureServices.Register(services);
         Infrastructure.ConfigureServices.Register(services);
     }
-    
+
     public static async Task<int> StartAsync(IEnumerable<string> args, IServiceProvider provider)
     {
         var features = new List<IFeature>()
         {
-            new UuidFeature(),
-            new EncodeFeature(),
-            new HashFeature(),
-            new TextFeature(),
-            new PasswordFeature(),
+            Get<IUuidFeature>(provider),
+            Get<IEncodeFeature>(provider),
+            Get<IHashFeature>(provider),
+            Get<ITextFeature>(provider),
+            Get<IPasswordFeature>(provider),
         };
 
         var rootCommand = new RootCommand("Hash and Text utilities in command-line mode");
@@ -58,4 +58,8 @@ public static class Startup
 
         return list.Where(_ => !string.IsNullOrWhiteSpace(_)).ToArray();
     }
+
+    private static T Get<T>(IServiceProvider provider)
+        where T : IFeature
+        => provider.GetService<T>()!;
 }

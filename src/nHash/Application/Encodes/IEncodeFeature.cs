@@ -1,6 +1,5 @@
 namespace nHash.Application.Encodes;
 
-public interface IEncodeFeature
+public interface IEncodeFeature:IFeature
 {
-    Command Command { get; }
 }

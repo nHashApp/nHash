@@ -3,7 +3,7 @@ using nHash.Application.Texts.Humanizers.Models;
 
 namespace nHash.Application.Texts.Humanizers;
 
-public class HumanizeFeature : IFeature
+public class HumanizeFeature : IHumanizeFeature
 {
     public Command Command => GetFeatureCommand();
     private readonly Argument<string> _textArgument;

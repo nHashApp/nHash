@@ -1,6 +1,5 @@
 namespace nHash.Application.Encodes;
 
-public interface IJwtTokenFeature
+public interface IJwtTokenFeature:IFeature
 {
-    Command Command { get; }
 }

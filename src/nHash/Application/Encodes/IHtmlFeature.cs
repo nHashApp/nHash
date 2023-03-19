@@ -1,6 +1,5 @@
 namespace nHash.Application.Encodes;
 
-public interface IHtmlFeature
+public interface IHtmlFeature:IFeature
 {
-    Command Command { get; }
 }

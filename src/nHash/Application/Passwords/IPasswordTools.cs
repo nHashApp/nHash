@@ -1,4 +1,4 @@
-namespace nHash.Application.Helper.Password;
+namespace nHash.Application.Passwords;
 
 public interface IPasswordTools
 {

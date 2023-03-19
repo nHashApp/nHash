@@ -1,7 +1,7 @@
 using System.Text;
 using MlkPwgen;
 
-namespace nHash.Application.Helper.Password;
+namespace nHash.Application.Passwords;
 
 public class PasswordTools : IPasswordTools
 {

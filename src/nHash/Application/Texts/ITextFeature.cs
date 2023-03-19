@@ -1,6 +1,5 @@
 namespace nHash.Application.Texts;
 
-public interface ITextFeature
+public interface ITextFeature:IFeature
 {
-    Command Command { get; }
 }

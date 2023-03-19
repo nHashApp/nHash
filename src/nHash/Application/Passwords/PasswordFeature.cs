@@ -3,7 +3,7 @@ using MlkPwgen;
 
 namespace nHash.Application.Passwords;
 
-public class PasswordFeature : IPasswordFeature, IFeature
+public class PasswordFeature : IPasswordFeature
 {
     public Command Command => GetFeatureCommand();
 
@@ -16,13 +16,11 @@ public class PasswordFeature : IPasswordFeature, IFeature
     private readonly Option<string> _prefix;
     private readonly Option<string> _suffix;
 
-    private const string CharsLCase = "abcdefgijkmnopqrstwxyz";
-    private const string CharsUCase = "ABCDEFGHJKLMNPQRSTWXYZ";
-    private const string CharsNumeric = "0123456789";
-    private const string CharsSpecial = "*$-+?_&=!%{}/";
+    private readonly IPasswordTools _passwordTools;
 
-    public PasswordFeature()
+    public PasswordFeature(IPasswordTools passwordTools)
     {
+        _passwordTools = passwordTools;
         _upperCase = new Option<bool>(name: "--no-upper", () => false,
             description: "Include uppercase Characters (A-Z) or not");
         _lowerCase = new Option<bool>(name: "--no-lower", () => false,
@@ -58,66 +56,11 @@ public class PasswordFeature : IPasswordFeature, IFeature
         return command;
     }
 
-    private static void GeneratePassword(bool noUpperCase, bool noLowerCase, bool noNumeric, bool noSpecialChar,
+    private void GeneratePassword(bool noUpperCase, bool noLowerCase, bool noNumeric, bool noSpecialChar,
         string customChar, int length, string prefix, string suffix)
     {
-        var pass = GetPassword(noUpperCase, noLowerCase, noNumeric, noSpecialChar, customChar, length, prefix, suffix);
+        var pass = _passwordTools.Generate(noUpperCase, noLowerCase, noNumeric, noSpecialChar, customChar, length,
+            prefix, suffix);
         Console.WriteLine(pass);
-    }
-
-    private static string GetPassword(bool noUpperCase, bool noLowerCase, bool noNumeric, bool noSpecialChar,
-        string customChar, int length, string prefix, string suffix)
-    {
-        var pLen = !string.IsNullOrWhiteSpace(prefix) ? prefix.Length : 0;
-        var sLen = !string.IsNullOrWhiteSpace(suffix) ? suffix.Length : 0;
-        if (pLen + sLen > length)
-        {
-            return prefix + suffix;
-        }
-
-        var len = length - pLen - sLen;
-        var passStr = GetRawPasswordString(noUpperCase, noLowerCase, noNumeric, noSpecialChar, customChar);
-
-        if (string.IsNullOrWhiteSpace(passStr))
-        {
-            return string.Empty;
-        }
-
-        var res = PasswordGenerator.Generate(len, passStr);
-        res = $"{prefix}{res}{suffix}";
-        return res;
-    }
-
-    private static string GetRawPasswordString(bool noUpperCase, bool noLowerCase, bool noNumeric, bool noSpecialChar,
-        string customChar)
-    {
-        if (!string.IsNullOrWhiteSpace(customChar))
-        {
-            return customChar;
-        }
-
-        var passStr = new StringBuilder();
-
-        if (!noLowerCase)
-        {
-            passStr.Append(CharsLCase);
-        }
-
-        if (!noUpperCase)
-        {
-            passStr.Append(CharsUCase);
-        }
-
-        if (!noNumeric)
-        {
-            passStr.Append(CharsNumeric);
-        }
-
-        if (!noSpecialChar)
-        {
-            passStr.Append(CharsSpecial);
-        }
-
-        return passStr.ToString();
     }
 }

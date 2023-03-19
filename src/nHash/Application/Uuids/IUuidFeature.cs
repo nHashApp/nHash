@@ -1,6 +1,5 @@
 namespace nHash.Application.Uuids;
 
-public interface IUuidFeature
+public interface IUuidFeature:IFeature
 {
-    Command Command { get; }
 }

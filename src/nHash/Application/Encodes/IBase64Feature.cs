@@ -1,6 +1,5 @@
 namespace nHash.Application.Encodes;
 
-public interface IBase64Feature
+public interface IBase64Feature:IFeature
 {
-    Command Command { get; }
 }

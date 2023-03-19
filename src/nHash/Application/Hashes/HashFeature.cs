@@ -1,15 +1,18 @@
+using nHash.Application.Abstraction;
 using nHash.Application.Hashes.Algorithms;
 using nHash.Application.Hashes.Models;
 
 namespace nHash.Application.Hashes;
 
-public class HashFeature : IHashFeature, IFeature
+public class HashFeature : IHashFeature
 {
     public Command Command => GetFeatureCommand();
     private readonly Argument<string> _textArgument;
     private readonly Option<string> _fileName;
     private readonly Option<bool> _lowerCase;
     private readonly Option<HashType> _hashType;
+
+    private readonly IFileProvider _fileProvider;
 
     private static readonly Dictionary<HashType, string> Algorithms = new()
     {
@@ -22,8 +25,9 @@ public class HashFeature : IHashFeature, IFeature
         { HashType.CRC32, "CRC-32" },
     };
 
-    public HashFeature()
+    public HashFeature(IFileProvider fileProvider)
     {
+        _fileProvider = fileProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "Text for calculate fingerprint");
         _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
         _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
@@ -45,7 +49,7 @@ public class HashFeature : IHashFeature, IFeature
         return command;
     }
 
-    private static async Task CalculateText(string text, bool lowerCase, string fileName, HashType hashType)
+    private async Task CalculateText(string text, bool lowerCase, string fileName, HashType hashType)
     {
         if (!string.IsNullOrWhiteSpace(text))
         {
@@ -56,13 +60,12 @@ public class HashFeature : IHashFeature, IFeature
 
         if (!string.IsNullOrWhiteSpace(fileName))
         {
-            if (!File.Exists(fileName))
+            var fileBytes = await _fileProvider.ReadAsByte(fileName);
+            if (fileBytes == Array.Empty<byte>())
             {
-                Console.WriteLine($"File {fileName} does not exists!");
                 return;
             }
 
-            var fileBytes = await File.ReadAllBytesAsync(fileName);
             CalculateHash(fileBytes, lowerCase, hashType);
         }
     }
@@ -74,7 +77,7 @@ public class HashFeature : IHashFeature, IFeature
             CalculateHashText(inputBytes, lowerCase, hashType);
             return;
         }
-        
+
         foreach (var algorithm in Algorithms)
         {
             Console.WriteLine($"{algorithm.Value}:");
