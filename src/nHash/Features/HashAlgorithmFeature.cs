@@ -45,7 +45,7 @@ public class HashAlgorithmFeature : IFeature
         return command;
     }
 
-    private static void CalculateText(string text, bool lowerCase, string fileName, HashType hashType)
+    private static async Task CalculateText(string text, bool lowerCase, string fileName, HashType hashType)
     {
         if (!string.IsNullOrWhiteSpace(text))
         {
@@ -62,7 +62,7 @@ public class HashAlgorithmFeature : IFeature
                 return;
             }
 
-            var fileBytes = File.ReadAllBytes(fileName);
+            var fileBytes = await File.ReadAllBytesAsync(fileName);
             CalculateHash(fileBytes, lowerCase, hashType);
         }
     }

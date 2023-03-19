@@ -31,7 +31,7 @@ public class JsonFeature: IFeature
         return command;
     }
 
-    private static void CalculateText(string text, JsonPrintType printType, string fileName)
+    private static async Task CalculateText(string text, JsonPrintType printType, string fileName)
     {
         if (!string.IsNullOrWhiteSpace(text))
         {
@@ -48,7 +48,7 @@ public class JsonFeature: IFeature
                 return;
             }
 
-            var fileContent = File.ReadAllText(fileName);
+            var fileContent = await File.ReadAllTextAsync(fileName);
             var jsonText = CalculateJsonText(fileContent, printType);
             Console.WriteLine(jsonText);
         }
