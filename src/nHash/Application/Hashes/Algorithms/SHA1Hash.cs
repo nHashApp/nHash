@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace nHash.Application.Providers.Hashing;
+namespace nHash.Application.Hashes.Algorithms;
 
 public class SHA1Hash : IHash
 {

@@ -1,4 +1,4 @@
-namespace nHash.Application.SubFeatures.Texts.Models;
+namespace nHash.Application.Json.Models;
 
 public enum JsonPrintType
 {

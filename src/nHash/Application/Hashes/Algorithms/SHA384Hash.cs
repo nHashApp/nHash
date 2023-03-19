@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 
-namespace nHash.Application.Providers.Hashing;
+namespace nHash.Application.Hashes.Algorithms;
 
-public class SHA512Hash : IHash
+public class SHA384Hash : IHash
 {
-    private readonly SHA512 _provider = SHA512.Create();
+    private readonly SHA384 _provider = SHA384.Create();
 
     public byte[] ComputeHash(byte[] buffer)
     {

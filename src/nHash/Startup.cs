@@ -1,6 +1,8 @@
 using nHash.Application;
 using nHash.Application.Features;
-using nHash.Application.Providers;
+using nHash.Application.Hashes;
+using nHash.Application.Passwords;
+using nHash.Application.Uuids;
 
 namespace nHash;
 
@@ -16,9 +18,9 @@ public static class Startup
     {
         var features = new List<IFeature>()
         {
-            new GuidFeature(),
+            new UuidFeature(),
             new EncodeFeature(),
-            new HashAlgorithmFeature(),
+            new HashFeature(),
             new TextFeature(),
             new PassGenerator(),
         };

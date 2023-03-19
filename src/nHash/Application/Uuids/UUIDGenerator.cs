@@ -1,7 +1,7 @@
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 
-namespace nHash.Application.Providers;
+namespace nHash.Application.Uuids;
 
 public class UUIDGenerator : IUUIDGenerator
 {

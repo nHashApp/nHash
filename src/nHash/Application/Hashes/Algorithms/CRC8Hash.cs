@@ -1,4 +1,4 @@
-namespace nHash.Application.Providers.Hashing;
+namespace nHash.Application.Hashes.Algorithms;
 
 public class CRC8Hash : IHash
 {

@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Web;
-using nHash.Application.Providers;
+using nHash.Application.Json;
 
 namespace nHash.Application.SubFeatures.Encodes;
 
@@ -10,6 +10,8 @@ public class JwtTokenDecodeFeature : IFeature
     public Command Command => GetFeatureCommand();
     private readonly Option<bool> _noWriteInformation;
     private readonly Argument<string> _textArgument;
+
+    private readonly IJsonTools _jsonTools = new JsonTools();
 
     public JwtTokenDecodeFeature()
     {
@@ -30,31 +32,28 @@ public class JwtTokenDecodeFeature : IFeature
         return command;
     }
 
-    private static void DecodeJwtToken(string text, bool noWriteInformation)
+    private void DecodeJwtToken(string text, bool noWriteInformation)
     {
         var parts = text.Split('.');
         var header = parts[0];
         var payload = parts[1];
         //var signature = parts[2];
 
-
         var decodedHeader = HttpUtility.UrlDecode(Encoding.UTF8.GetString(Convert.FromBase64String(header)));
         payload = payload.PadRight(payload.Length + (payload.Length * 3) % 4, '=');
         var decodedPayload = HttpUtility.UrlDecode(Encoding.UTF8.GetString(Convert.FromBase64String(payload)));
 
-        //Console.WriteLine("JWT payload: " + decodedPayload);
-        var jsonBeautifier = new JsonTools();
-        var prettyHeader = jsonBeautifier.SetBeautiful(decodedHeader);
-        var prettyPayload = jsonBeautifier.SetBeautiful(decodedPayload);
+        var prettyHeader = _jsonTools.SetBeautiful(decodedHeader);
+        var prettyPayload = _jsonTools.SetBeautiful(decodedPayload);
 
         Console.WriteLine();
         Console.WriteLine("Header: (ALGORITHM & TOKEN TYPE)");
         Console.WriteLine(prettyHeader);
-        
+
         Console.WriteLine();
         Console.WriteLine("Payload: (DATA)");
         Console.WriteLine(prettyPayload);
-        
+
         //WritePayload(jwt);
 
         if (noWriteInformation)
@@ -65,25 +64,7 @@ public class JwtTokenDecodeFeature : IFeature
         Console.WriteLine();
         Console.WriteLine("Summary:");
         WriteSummary(decodedHeader, decodedPayload);
-        //Console.WriteLine("JWT algorithm: " + JsonObject.Parse(decodedHeader)["alg"]);
-        //jwtObject.has
     }
-
-    /*private static void WriteHeaders(JwtSecurityToken jwt)
-    {
-        foreach (var header in jwt.Header)
-        {
-            Console.WriteLine("    " + header.Key + ": " + header.Value);
-        }
-    }
-
-    private static void WritePayload(JwtSecurityToken jwt)
-    {
-        foreach (var claim in jwt.Payload)
-        {
-            Console.WriteLine("    " + claim.Key + ": " + claim.Value);
-        }
-    }*/
 
     private static void WriteSummary(string header, string payload)
     {
@@ -106,13 +87,13 @@ public class JwtTokenDecodeFeature : IFeature
         }
 
         var issuer = jwtObjectPayload["iss"];
-        if (issuer is not  null)
+        if (issuer is not null)
         {
             Console.WriteLine("    Issuer: " + issuer);
         }
 
         var issuedAt = jwtObjectPayload["iat"];
-        if (issuedAt is not  null)
+        if (issuedAt is not null)
         {
             var issueValue = Convert.ToInt64(issuedAt.ToString());
             Console.WriteLine("    Issued at: " + DateTimeOffset.FromUnixTimeSeconds(issueValue).DateTime);

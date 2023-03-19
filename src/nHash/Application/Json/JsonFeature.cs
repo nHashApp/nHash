@@ -1,7 +1,6 @@
-using nHash.Application.Providers;
-using nHash.Application.SubFeatures.Texts.Models;
+using nHash.Application.Json.Models;
 
-namespace nHash.Application.SubFeatures.Texts;
+namespace nHash.Application.Json;
 
 public class JsonFeature : IFeature
 {

@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 
-namespace nHash.Application.Providers.Hashing;
+namespace nHash.Application.Hashes.Algorithms;
 
-public class MD5Hash : IHash
+public class SHA256Hash : IHash
 {
-    private readonly MD5 _provider = MD5.Create();
+    private readonly SHA256 _provider = SHA256.Create();
 
     public byte[] ComputeHash(byte[] buffer)
     {

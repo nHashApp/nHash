@@ -1,9 +1,9 @@
-using nHash.Application.Features.Models;
-using nHash.Application.Providers.Hashing;
+using nHash.Application.Hashes.Algorithms;
+using nHash.Application.Hashes.Models;
 
-namespace nHash.Application.Features;
+namespace nHash.Application.Hashes;
 
-public class HashAlgorithmFeature : IFeature
+public class HashFeature : IFeature
 {
     public Command Command => GetFeatureCommand();
     private readonly Argument<string> _textArgument;
@@ -22,7 +22,7 @@ public class HashAlgorithmFeature : IFeature
         { HashType.CRC32, "CRC-32" },
     };
 
-    public HashAlgorithmFeature()
+    public HashFeature()
     {
         _textArgument = new Argument<string>("text", () => string.Empty, "Text for calculate fingerprint");
         _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");

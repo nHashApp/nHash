@@ -1,9 +1,8 @@
-using nHash.Application.Features.Models;
-using nHash.Application.Providers;
+using nHash.Application.Uuids.Models;
 
-namespace nHash.Application.Features;
+namespace nHash.Application.Uuids;
 
-public class GuidFeature : IFeature
+public class UuidFeature : IFeature
 {
     private readonly IUUIDGenerator _uuidGenerator = new UUIDGenerator();
     
