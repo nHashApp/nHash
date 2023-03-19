@@ -1,10 +1,18 @@
-using nHash.Providers;
+using nHash.Application;
+using nHash.Application.Features;
+using nHash.Application.Providers;
 
 namespace nHash;
 
 public static class Startup
 {
-    public static async Task<int> StartAsync(IEnumerable<string> args)
+    public static void RegisterServices(IServiceCollection services)
+    {
+        Application.ConfigureServices.Register(services);
+        Infrastructure.ConfigureServices.Register(services);
+    }
+    
+    public static async Task<int> StartAsync(IEnumerable<string> args, IServiceProvider provider)
     {
         var features = new List<IFeature>()
         {
@@ -16,9 +24,9 @@ public static class Startup
         };
 
         var rootCommand = new RootCommand("Hash and Text utilities in command-line mode");
-        foreach (var command in features)
+        foreach (var feature in features)
         {
-            rootCommand.AddCommand(command.Command);
+            rootCommand.AddCommand(feature.Command);
         }
 
         var parameters = await GetParameters(args);
