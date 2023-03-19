@@ -2,6 +2,7 @@ using nHash.Application.Encodes;
 using nHash.Application.Hashes;
 using nHash.Application.Passwords;
 using nHash.Application.Shared.Json;
+using nHash.Application.Shared.Yaml;
 using nHash.Application.Texts;
 using nHash.Application.Texts.Humanizers;
 using nHash.Application.Texts.Json;
@@ -29,5 +30,6 @@ public static class ConfigureServices
         
         services.AddSingleton<IJsonTools, JsonTools>();
         services.AddSingleton<IPasswordTools, PasswordTools>();
+        services.AddSingleton<IYamlTools, YamlTools>();
     }
 }
