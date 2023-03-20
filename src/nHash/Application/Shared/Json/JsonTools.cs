@@ -1,6 +1,4 @@
 using System.Text.Json;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace nHash.Application.Shared.Json;
 
@@ -38,21 +36,5 @@ public class JsonTools : IJsonTools
         return prettyJson;
     }
     
-    public string FromYaml(string yaml)
-    {
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
 
-        var yamlObject = deserializer.Deserialize<object>(yaml);
-
-        var jsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true
-        };
-
-        var json= JsonSerializer.Serialize(yamlObject, jsonOptions);
-        Console.WriteLine(json);
-        return json;
-    }
 }

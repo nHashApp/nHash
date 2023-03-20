@@ -1,5 +1,5 @@
+using nHash.Application.Shared.Conversions;
 using nHash.Application.Shared.Json;
-using nHash.Application.Shared.Yaml;
 using nHash.Application.Texts.Json.Models;
 
 namespace nHash.Application.Texts.Json;
@@ -14,13 +14,11 @@ public class JsonFeature : IJsonFeature
     private readonly Option<bool> _toYaml;
 
     private readonly IFileProvider _fileProvider;
-    private readonly IYamlTools _yamlTools;
     private readonly IOutputProvider _outputProvider;
 
-    public JsonFeature(IFileProvider fileProvider, IYamlTools yamlTools, IOutputProvider outputProvider)
+    public JsonFeature(IFileProvider fileProvider, IOutputProvider outputProvider)
     {
         _fileProvider = fileProvider;
-        _yamlTools = yamlTools;
         _outputProvider = outputProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "JSON text for processing");
         _printType = new Option<JsonPrintType>("--print", "Print pretty/Compact JSON representation");
@@ -66,7 +64,7 @@ public class JsonFeature : IJsonFeature
     {
         if (toYaml)
         {
-            text = _yamlTools.FromJson(text);
+            text = Conversion.ToYaml(text,ConversionType.Json);
         }
 
         _outputProvider.Append(text);
