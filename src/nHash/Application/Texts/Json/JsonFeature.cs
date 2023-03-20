@@ -2,6 +2,7 @@ using nHash.Application.Abstraction;
 using nHash.Application.Shared.Json;
 using nHash.Application.Shared.Yaml;
 using nHash.Application.Texts.Json.Models;
+using nHash.Domain.Models;
 
 namespace nHash.Application.Texts.Json;
 
@@ -12,21 +13,21 @@ public class JsonFeature : IJsonFeature
     private readonly Argument<string> _textArgument;
     private readonly Option<JsonPrintType> _printType;
     private readonly Option<string> _fileName;
-    private readonly Option<string> _outputFileName;
     private readonly Option<bool> _toYaml;
 
     private readonly IFileProvider _fileProvider;
     private readonly IYamlTools _yamlTools;
+    private readonly IOutputProvider _outputProvider;
 
-    public JsonFeature(IFileProvider fileProvider, IYamlTools yamlTools)
+    public JsonFeature(IFileProvider fileProvider, IYamlTools yamlTools, IOutputProvider outputProvider)
     {
         _fileProvider = fileProvider;
         _yamlTools = yamlTools;
+        _outputProvider = outputProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "JSON text for processing");
         _printType = new Option<JsonPrintType>("--print", "Print pretty/Compact JSON representation");
         _fileName = new Option<string>(name: "--file", description: "File name for read JSON from that");
         _toYaml = new Option<bool>(name: "--to-yml", description: "Convert JSON to YML");
-        _outputFileName = new Option<string>(name: "--output", description: "File name for writing output");
     }
 
     private Command GetFeatureCommand()
@@ -36,21 +37,20 @@ public class JsonFeature : IJsonFeature
             _printType,
             _fileName,
             _toYaml,
-            _outputFileName
         };
         command.AddArgument(_textArgument);
-        command.SetHandler(CalculateText, _textArgument, _printType, _fileName, _toYaml, _outputFileName);
+        command.SetHandler(CalculateText, _textArgument, _printType, _fileName, _toYaml);
 
         return command;
     }
 
     private async Task CalculateText(string text, JsonPrintType printType, string fileName,
-        bool toYaml, string outputFileName)
+        bool toYaml)
     {
         if (!string.IsNullOrWhiteSpace(text))
         {
             var jsonText = CalculateJsonText(text, printType);
-            await WriteOutput(jsonText, toYaml, outputFileName);
+            WriteOutput(jsonText, toYaml);
             return;
         }
 
@@ -61,23 +61,17 @@ public class JsonFeature : IJsonFeature
         }
 
         var jsonFileText = CalculateJsonText(fileContent, printType);
-        await WriteOutput(jsonFileText, toYaml, outputFileName);
+        WriteOutput(jsonFileText, toYaml);
     }
 
-    private async Task WriteOutput(string text, bool toYaml, string outputFileName)
+    private void WriteOutput(string text, bool toYaml)
     {
         if (toYaml)
         {
             text = _yamlTools.FromJson(text);
         }
-        
-        if (string.IsNullOrWhiteSpace(outputFileName))
-        {
-            Console.WriteLine(text);
-            return;
-        }
 
-        await _fileProvider.Write(outputFileName, text);
+        _outputProvider.Append(text);
     }
 
     private static string CalculateJsonText(string text, JsonPrintType printType)

@@ -10,5 +10,6 @@ public static class ConfigureServices
         services.AddLoggingExt();
         services.AddSingleton<IFileProvider, FileProvider>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        services.AddSingleton<IOutputProvider, OutputProvider>();
     }
 }

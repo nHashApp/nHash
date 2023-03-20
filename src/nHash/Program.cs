@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using nHash;
+﻿using nHash.App;
 
 
 var services = new ServiceCollection();
