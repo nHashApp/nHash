@@ -1,16 +1,7 @@
-using Microsoft.Extensions.Logging;
-
 namespace nHash.Infrastructure;
 
 public class FileProvider : IFileProvider
 {
-    private readonly ILogger<FileProvider> _logger;
-
-    public FileProvider(ILogger<FileProvider> logger)
-    {
-        _logger = logger;
-    }
-
     public Task<string> ReadAsText(string fileName)
     {
         if (!File.Exists(fileName))
@@ -25,7 +16,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            _logger.LogError("Error reading from '{FileName}'", fileName);
+            Console.WriteLine("Error reading from '{FileName}'", fileName);
         }
         return Task.FromResult(string.Empty);
     }    
@@ -44,7 +35,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            _logger.LogError("Error reading from '{FileName}'", fileName);
+            Console.WriteLine("Error reading from '{FileName}'", fileName);
         }
         return Task.FromResult(Array.Empty<byte>());
     }
@@ -63,7 +54,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            _logger.LogError("Error writing output to '{FileName}'", fileName);
+            Console.WriteLine("Error writing output to '{FileName}'", fileName);
         }
         return Task.CompletedTask;
     }
@@ -82,7 +73,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            _logger.LogError("Error writing output to '{FileName}'", fileName);
+            Console.WriteLine("Error writing output to '{FileName}'", fileName);
         }
         return Task.CompletedTask;
     }
