@@ -4,9 +4,9 @@ namespace nHash.Application.Uuids;
 
 public class UuidFeature : IUuidFeature 
 {
+
     public Command Command => GetCommand();
     
-
     private readonly Option<bool> _withBracket = new(name: "--bracket", description: "Generate with brackets");
     private readonly Option<bool> _withoutHyphen = new(name: "--no-hyphen", description: "Generate without hyphens");
 
@@ -22,7 +22,13 @@ public class UuidFeature : IUuidFeature
         { UuidVersion.V5, "UUID v5" }
     };
 
-    private readonly IUUIDGenerator _uuidGenerator = new UUIDGenerator();
+    private readonly IUUIDGenerator _uuidGenerator;
+    private readonly IOutputProvider _outputProvider;
+    public UuidFeature(IUUIDGenerator uuidGenerator, IOutputProvider outputProvider)
+    {
+        _uuidGenerator = uuidGenerator;
+        _outputProvider = outputProvider;
+    }
     private Command GetCommand()
     {
         var command = new Command("uuid", "Generate a Universally unique identifier (UUID/GUID) version 1 to 5")
@@ -46,7 +52,7 @@ public class UuidFeature : IUuidFeature
 
         foreach (var uuidLabel in _uuidLabels)
         {
-            Console.WriteLine(uuidLabel.Value + ":");
+            _outputProvider.AppendLine(uuidLabel.Value + ":");
             GenerateUuidText(withBracket, withoutHyphen, uuidLabel.Key);
         }
     }
@@ -60,7 +66,7 @@ public class UuidFeature : IUuidFeature
             result = result.Replace("-", "");
         }
 
-        Console.WriteLine(result);
+        _outputProvider.AppendLine(result);
     }
 
     private Guid GenerateUuidByVersion(UuidVersion version)

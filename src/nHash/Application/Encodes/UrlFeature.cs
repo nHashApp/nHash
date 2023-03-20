@@ -8,8 +8,11 @@ public class UrlFeature : IUrlFeature
     private readonly Option<bool> _decodeText;
     private readonly Argument<string> _textArgument;
 
-    public UrlFeature()
+    private readonly IOutputProvider _outputProvider;
+
+    public UrlFeature(IOutputProvider outputProvider)
     {
+        _outputProvider = outputProvider;
         _decodeText = new Option<bool>(name: "--decode", description: "Decode url-encoded text");
         _textArgument = new Argument<string>("text", "text for url encode/decode");
     }
@@ -26,13 +29,13 @@ public class UrlFeature : IUrlFeature
         return command;
     }
 
-    private static void CalculateTextHash(string text, bool decode)
+    private void CalculateTextHash(string text, bool decode)
     {
         var resultText = !decode
             ? UrlEncode(text)
             : UrlDecode(text);
 
-        Console.WriteLine(resultText);
+        _outputProvider.Append(resultText);
     }
 
     private static string UrlEncode(string plainText)

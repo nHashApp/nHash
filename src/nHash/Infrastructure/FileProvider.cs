@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using nHash.Application.Abstraction;
 
 namespace nHash.Infrastructure;
 

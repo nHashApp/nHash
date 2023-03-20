@@ -7,9 +7,11 @@ public class HtmlFeature : IHtmlFeature
     public Command Command => GetFeatureCommand();
     private readonly Option<bool> _decodeText;
     private readonly Argument<string> _textArgument;
-
-    public HtmlFeature()
+    private readonly IOutputProvider _outputProvider;
+    
+    public HtmlFeature(IOutputProvider outputProvider)
     {
+        _outputProvider = outputProvider;
         _decodeText = new Option<bool>(name: "--decode", description: "Decode html-encoded text");
         _textArgument = new Argument<string>("text", "text for html encode/decode");
     }
@@ -26,13 +28,13 @@ public class HtmlFeature : IHtmlFeature
         return command;
     }
 
-    private static void CalculateTextHash(string text, bool decode)
+    private void CalculateTextHash(string text, bool decode)
     {
         var resultText = !decode
             ? UrlEncode(text)
             : UrlDecode(text);
 
-        Console.WriteLine(resultText);
+        _outputProvider.Append(resultText);
     }
 
     private static string UrlEncode(string plainText)

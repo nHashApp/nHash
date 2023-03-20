@@ -1,7 +1,6 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using nHash.Application.Abstraction;
 using nHash.Application.Encodes;
 using nHash.Application.Hashes;
 using nHash.Application.Passwords;

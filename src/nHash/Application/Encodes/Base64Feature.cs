@@ -5,9 +5,12 @@ public class Base64Feature : IBase64Feature
     public Command Command => GetFeatureCommand();
     private readonly Option<bool> _decodeText;
     private readonly Argument<string> _textArgument;
+    
+    private readonly IOutputProvider _outputProvider;
 
-    public Base64Feature()
+    public Base64Feature(IOutputProvider outputProvider)
     {
+        _outputProvider = outputProvider;
         _decodeText = new Option<bool>(name: "--decode", description: "Decode Base64 text");
         _textArgument = new Argument<string>("text", "text for encode/decode Base64");
     }
@@ -24,14 +27,14 @@ public class Base64Feature : IBase64Feature
         return command;
     }
 
-    private static void CalculateTextHash(string text, bool decode)
+    private void CalculateTextHash(string text, bool decode)
     {
         var resultText = !decode
             ? Base64Encode(text)
             : Base64Decode(text);
 
 
-        Console.WriteLine(resultText);
+        _outputProvider.Append(resultText);
     }
 
     private static string Base64Encode(string plainText)

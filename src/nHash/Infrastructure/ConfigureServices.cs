@@ -1,4 +1,3 @@
-using nHash.Application.Abstraction;
 using nHash.Infrastructure.Helper.Logging;
 
 namespace nHash.Infrastructure;

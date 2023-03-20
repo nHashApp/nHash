@@ -1,4 +1,3 @@
-using nHash.Application.Abstraction;
 using nHash.Application.Hashes.Algorithms;
 using nHash.Application.Hashes.Models;
 
@@ -13,6 +12,7 @@ public class HashFeature : IHashFeature
     private readonly Option<HashType> _hashType;
 
     private readonly IFileProvider _fileProvider;
+    private readonly IOutputProvider _outputProvider;
 
     private static readonly Dictionary<HashType, string> Algorithms = new()
     {
@@ -25,9 +25,10 @@ public class HashFeature : IHashFeature
         { HashType.CRC32, "CRC-32" },
     };
 
-    public HashFeature(IFileProvider fileProvider)
+    public HashFeature(IFileProvider fileProvider, IOutputProvider outputProvider)
     {
         _fileProvider = fileProvider;
+        _outputProvider = outputProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "Text for calculate fingerprint");
         _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
         _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
@@ -70,7 +71,7 @@ public class HashFeature : IHashFeature
         }
     }
 
-    private static void CalculateHash(byte[] inputBytes, bool lowerCase, HashType hashType)
+    private void CalculateHash(byte[] inputBytes, bool lowerCase, HashType hashType)
     {
         if (hashType != HashType.All)
         {
@@ -80,12 +81,12 @@ public class HashFeature : IHashFeature
 
         foreach (var algorithm in Algorithms)
         {
-            Console.WriteLine($"{algorithm.Value}:");
+            _outputProvider.AppendLine($"{algorithm.Value}:");
             CalculateHashText(inputBytes, lowerCase, algorithm.Key);
         }
     }
 
-    private static void CalculateHashText(byte[] inputBytes, bool lowerCase, HashType hashType)
+    private void CalculateHashText(byte[] inputBytes, bool lowerCase, HashType hashType)
     {
         var hashedText = CalculateHashType(inputBytes, hashType);
 
@@ -94,7 +95,7 @@ public class HashFeature : IHashFeature
             hashedText = hashedText.ToLower();
         }
 
-        Console.WriteLine(hashedText);
+        _outputProvider.AppendLine(hashedText);
     }
 
     private static string CalculateHashType(byte[] inputBytes, HashType hashType)

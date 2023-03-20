@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Web;
-using nHash.Application.Abstraction;
 using nHash.Application.Shared.Json;
 
 namespace nHash.Application.Encodes;
@@ -14,11 +13,13 @@ public class JwtTokenFeature : IJwtTokenFeature
 
     private readonly IJsonTools _jsonTools;
     private readonly IDateTimeProvider _timeProvider;
+    private readonly IOutputProvider _outputProvider;
 
-    public JwtTokenFeature(IJsonTools jsonTools, IDateTimeProvider timeProvider)
+    public JwtTokenFeature(IJsonTools jsonTools, IDateTimeProvider timeProvider, IOutputProvider outputProvider)
     {
         _jsonTools = jsonTools;
         _timeProvider = timeProvider;
+        _outputProvider = outputProvider;
 
         _noWriteInformation = new Option<bool>(name: "--no-summary", () => false,
             description: "Don't write human readable information");
@@ -57,21 +58,21 @@ public class JwtTokenFeature : IJwtTokenFeature
     private void WriteJwtInfo(bool noWriteInformation, string prettyHeader, string prettyPayload, string decodedHeader,
         string decodedPayload)
     {
-        Console.WriteLine();
-        Console.WriteLine("Header: (ALGORITHM & TOKEN TYPE)");
-        Console.WriteLine(prettyHeader);
+        _outputProvider.AppendLine();
+        _outputProvider.AppendLine("Header: (ALGORITHM & TOKEN TYPE)");
+        _outputProvider.AppendLine(prettyHeader);
 
-        Console.WriteLine();
-        Console.WriteLine("Payload: (DATA)");
-        Console.WriteLine(prettyPayload);
+        _outputProvider.AppendLine();
+        _outputProvider.AppendLine("Payload: (DATA)");
+        _outputProvider.AppendLine(prettyPayload);
 
         if (noWriteInformation)
         {
             return;
         }
 
-        Console.WriteLine();
-        Console.WriteLine("Summary:");
+        _outputProvider.AppendLine();
+        _outputProvider.AppendLine("Summary:");
         WriteSummary(decodedHeader, decodedPayload);
     }
 
@@ -81,14 +82,14 @@ public class JwtTokenFeature : IJwtTokenFeature
         WriteSummaryPayload(payload);
     }
 
-    private static void WriteSummaryHeader(string header)
+    private void WriteSummaryHeader(string header)
     {
         var jwtObjectHeader = JsonNode.Parse(header);
 
         var algorithm = jwtObjectHeader?["alg"];
         if (algorithm != null)
         {
-            Console.WriteLine("    Algorithm: " + algorithm);
+            _outputProvider.AppendLine("    Algorithm: " + algorithm);
         }
     }
 
@@ -103,39 +104,39 @@ public class JwtTokenFeature : IJwtTokenFeature
         var issuer = jwtObjectPayload["iss"];
         if (issuer is not null)
         {
-            Console.WriteLine("    Issuer: " + issuer);
+            _outputProvider.AppendLine("    Issuer: " + issuer);
         }
 
         var issuedAt = jwtObjectPayload["iat"];
         if (issuedAt is not null)
         {
             var issueValue = Convert.ToInt64(issuedAt.ToString());
-            Console.WriteLine("    Issued at: " + _timeProvider.FromUnixTime(issueValue));
+            _outputProvider.AppendLine("    Issued at: " + _timeProvider.FromUnixTime(issueValue));
         }
 
         var id = jwtObjectPayload["id"];
         if (id is not null)
         {
-            Console.WriteLine("    Id: " + id);
+            _outputProvider.AppendLine("    Id: " + id);
         }
 
         var audience = jwtObjectPayload["aud"];
         if (audience is not null)
         {
-            Console.WriteLine("    Audience: " + audience);
+            _outputProvider.AppendLine("    Audience: " + audience);
         }
 
         var subject = jwtObjectPayload["sub"];
         if (subject is not null)
         {
-            Console.WriteLine("    Subject: " + subject);
+            _outputProvider.AppendLine("    Subject: " + subject);
         }
 
         var expirationAt = jwtObjectPayload["exp"];
         if (expirationAt is not null)
         {
             var expirationValue = Convert.ToInt64(expirationAt.ToString());
-            Console.WriteLine("    Expiration: " + _timeProvider.FromUnixTime(expirationValue));
+            _outputProvider.AppendLine("    Expiration: " + _timeProvider.FromUnixTime(expirationValue));
         }
     }
 }

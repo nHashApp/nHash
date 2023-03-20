@@ -1,5 +1,4 @@
 using System.Text;
-using nHash.Application.Abstraction;
 using nHash.Domain.Models;
 
 namespace nHash.Infrastructure;
@@ -25,6 +24,11 @@ public class OutputProvider : IOutputProvider
     public void AppendLine(string text)
     {
         _texts.AppendLine(text);
+    }    
+    
+    public void AppendLine()
+    {
+        AppendLine(string.Empty);
     }
 
     public Task WriteOutput()

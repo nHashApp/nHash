@@ -1,6 +1,3 @@
-using System.Text;
-using MlkPwgen;
-
 namespace nHash.Application.Passwords;
 
 public class PasswordFeature : IPasswordFeature
@@ -17,10 +14,12 @@ public class PasswordFeature : IPasswordFeature
     private readonly Option<string> _suffix;
 
     private readonly IPasswordTools _passwordTools;
+    private readonly IOutputProvider _outputProvider;
 
-    public PasswordFeature(IPasswordTools passwordTools)
+    public PasswordFeature(IPasswordTools passwordTools, IOutputProvider outputProvider)
     {
         _passwordTools = passwordTools;
+        _outputProvider = outputProvider;
         _upperCase = new Option<bool>(name: "--no-upper", () => false,
             description: "Include uppercase Characters (A-Z) or not");
         _lowerCase = new Option<bool>(name: "--no-lower", () => false,
@@ -61,6 +60,6 @@ public class PasswordFeature : IPasswordFeature
     {
         var pass = _passwordTools.Generate(noUpperCase, noLowerCase, noNumeric, noSpecialChar, customChar, length,
             prefix, suffix);
-        Console.WriteLine(pass);
+        _outputProvider.Append(pass);
     }
 }

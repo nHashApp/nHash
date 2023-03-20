@@ -8,7 +8,7 @@ public class EncodeFeature : IEncodeFeature
     private readonly IBase64Feature _base64Feature;
     private readonly IUrlFeature _urlFeature;
     private readonly IHtmlFeature _htmlFeature;
-
+    
     public EncodeFeature(IJwtTokenFeature jwtTokenFeature, IBase64Feature base64Feature, IUrlFeature urlFeature,
         IHtmlFeature htmlFeature)
     {

@@ -9,8 +9,11 @@ public class HumanizeFeature : IHumanizeFeature
     private readonly Argument<string> _textArgument;
     private readonly Argument<HumanizeType> _humanizeType;
 
-    public HumanizeFeature()
+    private readonly IOutputProvider _outputProvider;
+
+    public HumanizeFeature(IOutputProvider outputProvider)
     {
+        _outputProvider = outputProvider;
         _humanizeType = new Argument<HumanizeType>("type", "Humanize type");
         _textArgument = new Argument<string>("text", "Text for humanize");
     }
@@ -26,7 +29,7 @@ public class HumanizeFeature : IHumanizeFeature
         return command;
     }
 
-    private static void CalculateText(string text, HumanizeType humanizeType)
+    private void CalculateText(string text, HumanizeType humanizeType)
     {
         var resultText = humanizeType switch
         {
@@ -42,6 +45,6 @@ public class HumanizeFeature : IHumanizeFeature
             _ => text
         };
 
-        Console.WriteLine(resultText);
+        _outputProvider.Append(resultText);
     }
 }
