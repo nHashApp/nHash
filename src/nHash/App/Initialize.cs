@@ -1,4 +1,5 @@
 using System.CommandLine.Builder;
+using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using nHash.Application.Encodes;
@@ -7,6 +8,7 @@ using nHash.Application.Passwords;
 using nHash.Application.Texts;
 using nHash.Application.Uuids;
 using nHash.Domain.Models;
+using Spectre.Console;
 
 namespace nHash.App;
 
@@ -31,14 +33,24 @@ public static class Initialize
             rootCommand.AddCommand(feature.Command);
         }
 
-        var outputFileName = new Option<string>(name: "--"+OutputOption, description: "File name for writing output");
+        var outputFileName = new Option<string>(name: "--" + OutputOption, description: "File name for writing output");
         rootCommand.AddGlobalOption(outputFileName);
 
-        var commandLineBuilder = new CommandLineBuilder(rootCommand);
-
-        commandLineBuilder.AddMiddleware((context, next) => OutputMiddleware(provider, context, next));
-
-        commandLineBuilder.UseDefaults();
+        var commandLineBuilder = new CommandLineBuilder(rootCommand)
+            .AddMiddleware((context, next) => OutputMiddleware(provider, context, next))
+            .UseDefaults() //.UseVersionOption(new []{"--help"});
+            .UseHelp(ctx =>
+            {
+                ctx.HelpBuilder.CustomizeLayout(
+                    _ =>
+                        HelpBuilder.Default
+                            .GetLayout()
+                            .Skip(1) // Skip the default command description section.
+                            .Prepend(
+                                _ => Spectre.Console.AnsiConsole.Write(
+                                    new FigletText("nHash"))
+                            ));
+            });
         var parser = commandLineBuilder.Build();
         return await parser.InvokeAsync(args.ToArray());
         //return await rootCommand.InvokeAsync(parameters);
@@ -54,7 +66,7 @@ public static class Initialize
         SetOutputOptions(provider, context);
 
         await next(context);
-        
+
         await WriteOutput(provider);
     }
 
@@ -71,11 +83,10 @@ public static class Initialize
             outputParameter.OutputTypeValue = outputOption.Tokens[0].ToString();
         }
     }
-    
+
     private static async Task WriteOutput(IServiceProvider provider)
     {
         var outputProvider = provider.GetService<IOutputProvider>()!;
         await outputProvider.WriteOutput();
     }
-    
 }
