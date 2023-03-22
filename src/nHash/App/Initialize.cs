@@ -47,8 +47,9 @@ public static class Initialize
                             .GetLayout()
                             .Skip(1) // Skip the default command description section.
                             .Prepend(
-                                _ => Spectre.Console.AnsiConsole.Write(
-                                    new FigletText("nHash"))
+                                _ => AnsiConsole.Write(
+                                    new FigletText("nHash")
+                                        .Centered())
                             ));
             });
         var parser = commandLineBuilder.Build();
