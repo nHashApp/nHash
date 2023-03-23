@@ -96,7 +96,99 @@ Commands:
   url <text>     URL Encode/Decode
   html <text>    HTML Encode/Decode
 ```
+### JWT
+```
+❯ nhash encode jwt --help
+Description:
+  JWT token decode (Comply with GDPR rules)
 
+Usage:
+  nhash encode jwt <token> [options]
+
+Arguments:
+  <token>  Jwt token for decode
+
+Options:
+  --no-summary       Don't write human readable information [default: False]
+  --output <output>  File name for writing output
+  -?, -h, --help     Show help and usage information
+
+```  
+#### Sample
+```
+❯ nhash encode jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+Header: (ALGORITHM & TOKEN TYPE)
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+
+Payload: (DATA)
+{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "iat": 1516239022
+}
+
+Summary:
+    Algorithm: HS256
+    Issued at: 1/18/2018 1:30:22 AM
+    Subject: 1234567890
+```
+```
+❯ nhash encode jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c --no-summary
+
+Header: (ALGORITHM & TOKEN TYPE)
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+
+Payload: (DATA)
+{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "iat": 1516239022
+}
+```
+```
+❯ nhash encode jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c --output jwt.txt
+```    
+---
+    
+### Base64
+```
+❯ nhash base64 --help
+Description:
+  Encode/Decode Base64
+
+Usage:
+  nhash base64 <text> [options]
+
+Arguments:
+  <text>  text for encode/decode Base64
+
+Options:
+  --decode           Decode Base64 text
+  --output <output>  File name for writing output
+  -?, -h, --help     Show help and usage information
+```  
+#### Sample
+```
+❯ nhash base64 hello
+aGVsbG8=
+ 
+❯ nhash base64 aGVsbG8= --decode
+hello
+
+❯ nhash base64 hello | nhash base64 --decode
+hello
+
+❯ nhash base64 --file sample.txt --output encoded.txt
+```    
+---
+    
 ### URL
 ```
 ❯ nhash url --help
@@ -233,51 +325,27 @@ B1946AC92492D2347C6235B4D2611184
 ```
 ---
 
-### Base64
-```
-❯ nhash base64 --help
-Description:
-  Encode/Decode Base64
-
-Usage:
-  nhash base64 <text> [options]
-
-Arguments:
-  <text>  text for encode/decode Base64
-
-Options:
-  --decode        Decode Base64 text
-  -?, -h, --help  Show help and usage information
-```  
-#### Sample
-```
-❯ nhash base64 hello
-aGVsbG8=
- 
-❯ nhash base64 aGVsbG8= --decode
-hello
-
-❯ nhash base64 hello | nhash base64 --decode
-hello
-```    
----
-
 ## Text
 ```
-❯ nhash text --help
+❯ nhash text  --help
 Description:
-  Text utilities (Humanizer)
+  Text utilities (Humanizer, JSON, YAML, XML)
 
 Usage:
   nhash text [command] [options]
 
 Options:
-  -?, -h, --help  Show help and usage information
+  --output <output>  File name for writing output
+  -?, -h, --help     Show help and usage information
 
 Commands:
-  humanize                                              Humanizer text (Pascal-case, Camel-case, Kebab, 
-  <Camel|Dehumanize|Humanize|Hyphenate|Kebab|Lowercase  Underscore, lowercase, etc)
-  |Pascal|Underscore|Uppercase> <text>
+  humanize                                                          Humanizer text (Pascal-case, Camel-case, Kebab, Underscore, 
+  <Camel|Dehumanize|Humanize|Hyphenate|Kebab|Lowercase|Pascal|Unde  lowercase, etc)
+  rscore|Uppercase> <text>
+  json <text>                                                       JSON tools []
+  yaml <text>                                                       YAML tools []
+  xml <text>                                                        XML tools []
+
 ```
 
 ### Humanize
@@ -294,7 +362,8 @@ Arguments:
   <text>                                                                             Text for humanize
 
 Options:
-  -?, -h, --help  Show help and usage information
+  --output <output>  File name for writing output
+  -?, -h, --help     Show help and usage information
 ```
 #### Sample
 ```
@@ -312,6 +381,38 @@ HELLO WORLD
 
 ```
 ---
+### JSON
+```
+❯ nhash text json --help
+Description:
+  JSON tools
+
+Usage:
+  nhash text json [<text>] [options]
+
+Arguments:
+  <text>  JSON text for processing []
+
+Options:
+  --print <Compact|Pretty>   Print pretty/Compact JSON representation
+  --file <file>              File name for read JSON from that
+  --convert <JSON|XML|YAML>  Convert JSON to other format (YAML, XML)
+  --output <output>          File name for writing output
+  -?, -h, --help             Show help and usage information
+
+```
+#### Sample
+```
+❯ nhash text json --print pretty "{\"name\":\"test\",\"age\":10}"
+{
+  "name": "test",
+  "age": 10
+}
+    
+
+```
+---
+        
   
 ## References
 * Humanizer: https://github.com/Humanizr/Humanizer 
