@@ -10,8 +10,8 @@ public class YamlConversion : IConversion
     {
         return sourceType switch
         {
-            ConversionType.Yaml => value,
-            ConversionType.Json => FromJson(value),
+            ConversionType.YAML => value,
+            ConversionType.JSON => FromJson(value),
             ConversionType.XML => FromXml(value),
             _ => value
         };

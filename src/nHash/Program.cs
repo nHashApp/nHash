@@ -1,5 +1,4 @@
 ﻿using nHash.App;
-using nHash.Application.Shared.Conversions;
 
 var services = new ServiceCollection();
 Startup.RegisterServices(services);
