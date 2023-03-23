@@ -45,7 +45,6 @@ public class OutputProvider : IOutputProvider
 
     private void WriteToConsole()
     {
-        //Console.WriteLine(_texts.ToString());
         AnsiConsole.Write(new Text(_texts.ToString()));
     }
 

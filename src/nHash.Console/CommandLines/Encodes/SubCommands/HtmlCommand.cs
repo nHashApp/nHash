@@ -9,10 +9,12 @@ public class HtmlCommand : IHtmlCommand
     private readonly Argument<string> _textArgument;
 
     private readonly IHtmlService _htmlService;
-    
-    public HtmlCommand(IHtmlService htmlService)
+    private readonly IOutputProvider _outputProvider;
+
+    public HtmlCommand(IHtmlService htmlService, IOutputProvider outputProvider)
     {
         _htmlService = htmlService;
+        _outputProvider = outputProvider;
         _decodeText = new Option<bool>(name: "--decode", description: "Decode html-encoded text");
         _textArgument = new Argument<string>("text", "text for html encode/decode");
     }
@@ -31,7 +33,8 @@ public class HtmlCommand : IHtmlCommand
 
     private void CalculateTextHash(string text, bool decode)
     {
-        _htmlService.CalculateTextHash(text, decode);
+        var returnText= _htmlService.CalculateTextHash(text, decode);
+        _outputProvider.Append(returnText);
     }
 
     

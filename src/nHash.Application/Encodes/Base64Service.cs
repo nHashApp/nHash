@@ -1,23 +1,14 @@
-using nHash.Application.Abstraction;
-
 namespace nHash.Application.Encodes;
 
 public class Base64Service : IBase64Service 
 {
-    private readonly IOutputProvider _outputProvider;
-
-    public Base64Service(IOutputProvider outputProvider)
-    {
-        _outputProvider = outputProvider;
-    }
-
-    public void CalculateTextHash(string text, bool decode)
+    public string CalculateTextHash(string text, bool decode)
     {
         var resultText = !decode
             ? Base64Encode(text)
             : Base64Decode(text);
 
-        _outputProvider.Append(resultText);
+        return resultText;
     }
 
     private static string Base64Encode(string plainText)

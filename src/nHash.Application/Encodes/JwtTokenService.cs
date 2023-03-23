@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using System.Web;
 using nHash.Application.Abstraction;
+using nHash.Application.Encodes.Models;
 using nHash.Application.Shared.Json;
 
 namespace nHash.Application.Encodes;
@@ -10,16 +11,15 @@ public class JwtTokenService : IJwtTokenService
 {
     private readonly IJsonTools _jsonTools;
     private readonly IDateTimeProvider _timeProvider;
-    private readonly IOutputProvider _outputProvider;
 
-    public JwtTokenService(IJsonTools jsonTools, IDateTimeProvider timeProvider, IOutputProvider outputProvider)
+
+    public JwtTokenService(IJsonTools jsonTools, IDateTimeProvider timeProvider)
     {
         _jsonTools = jsonTools;
         _timeProvider = timeProvider;
-        _outputProvider = outputProvider;
     }
 
-    public void DecodeJwtToken(string text, bool noWriteInformation)
+    public JwtTokenResponse DecodeJwtToken(string text, bool noWriteInformation)
     {
         var parts = text.Split('.');
         var header = parts[0];
@@ -33,91 +33,86 @@ public class JwtTokenService : IJwtTokenService
         var prettyHeader = _jsonTools.SetBeautiful(decodedHeader);
         var prettyPayload = _jsonTools.SetBeautiful(decodedPayload);
 
-        WriteJwtInfo(noWriteInformation, prettyHeader, prettyPayload, decodedHeader, decodedPayload);
-    }
-
-    private void WriteJwtInfo(bool noWriteInformation, string prettyHeader, string prettyPayload, string decodedHeader,
-        string decodedPayload)
-    {
-        _outputProvider.AppendLine();
-        _outputProvider.AppendLine("Header: (ALGORITHM & TOKEN TYPE)");
-        _outputProvider.AppendLine(prettyHeader);
-
-        _outputProvider.AppendLine();
-        _outputProvider.AppendLine("Payload: (DATA)");
-        _outputProvider.AppendLine(prettyPayload);
-
-        if (noWriteInformation)
+        var summary = string.Empty;
+        if (!noWriteInformation)
         {
-            return;
+            summary = WriteSummary(decodedHeader, decodedPayload);
         }
 
-        _outputProvider.AppendLine();
-        _outputProvider.AppendLine("Summary:");
-        WriteSummary(decodedHeader, decodedPayload);
+        return new JwtTokenResponse(prettyHeader, prettyPayload, summary);
     }
 
-    private void WriteSummary(string header, string payload)
+    private string WriteSummary(string header, string payload)
     {
-        WriteSummaryHeader(header);
-        WriteSummaryPayload(payload);
+        var result = new StringBuilder();
+        result.AppendLine(WriteSummaryHeader(header));
+        result.AppendLine(WriteSummaryPayload(payload));
+
+        return result.ToString();
     }
 
-    private void WriteSummaryHeader(string header)
+    private static string WriteSummaryHeader(string header)
     {
+        var result = string.Empty;
         var jwtObjectHeader = JsonNode.Parse(header);
 
         var algorithm = jwtObjectHeader?["alg"];
         if (algorithm != null)
         {
-            _outputProvider.AppendLine("    Algorithm: " + algorithm);
+            result = "    Algorithm: " + algorithm;
         }
+
+        return result;
     }
 
-    private void WriteSummaryPayload(string payload)
+    private string WriteSummaryPayload(string payload)
     {
+        var result = new StringBuilder();
+
         var jwtObjectPayload = JsonNode.Parse(payload);
         if (jwtObjectPayload is null)
         {
-            return;
+            return result.ToString();
         }
 
         var issuer = jwtObjectPayload["iss"];
         if (issuer is not null)
         {
-            _outputProvider.AppendLine("    Issuer: " + issuer);
+            result.AppendLine("    Issuer: " + issuer);
         }
 
         var issuedAt = jwtObjectPayload["iat"];
         if (issuedAt is not null)
         {
             var issueValue = Convert.ToInt64(issuedAt.ToString());
-            _outputProvider.AppendLine("    Issued at: " + _timeProvider.FromUnixTime(issueValue));
+            result.AppendLine("    Issued at: " + _timeProvider.FromUnixTime(issueValue));
         }
 
         var id = jwtObjectPayload["id"];
         if (id is not null)
         {
-            _outputProvider.AppendLine("    Id: " + id);
+            result.AppendLine("    Id: " + id);
         }
 
         var audience = jwtObjectPayload["aud"];
         if (audience is not null)
         {
-            _outputProvider.AppendLine("    Audience: " + audience);
+            result.AppendLine("    Audience: " + audience);
         }
 
         var subject = jwtObjectPayload["sub"];
         if (subject is not null)
         {
-            _outputProvider.AppendLine("    Subject: " + subject);
+            result.AppendLine("    Subject: " + subject);
         }
 
         var expirationAt = jwtObjectPayload["exp"];
         if (expirationAt is not null)
         {
             var expirationValue = Convert.ToInt64(expirationAt.ToString());
-            _outputProvider.AppendLine("    Expiration: " + _timeProvider.FromUnixTime(expirationValue));
+            result.AppendLine("    Expiration: " + _timeProvider.FromUnixTime(expirationValue));
         }
+
+        return result.ToString();
     }
 }
