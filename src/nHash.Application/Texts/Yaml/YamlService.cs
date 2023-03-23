@@ -5,12 +5,10 @@ namespace nHash.Application.Texts.Yaml;
 
 public class YamlService : IYamlService
 {
-    private readonly IFileProvider _fileProvider;
     private readonly IOutputProvider _outputProvider;
 
-    public YamlService(IFileProvider fileProvider, IOutputProvider outputProvider)
+    public YamlService(IOutputProvider outputProvider)
     {
-        _fileProvider = fileProvider;
         _outputProvider = outputProvider;
     }
 

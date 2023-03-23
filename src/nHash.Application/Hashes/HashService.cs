@@ -6,7 +6,6 @@ namespace nHash.Application.Hashes;
 
 public class HashService : IHashService
 {
-    private readonly IFileProvider _fileProvider;
     private readonly IOutputProvider _outputProvider;
 
     private static readonly Dictionary<HashType, string> Algorithms = new()
@@ -20,9 +19,8 @@ public class HashService : IHashService
         { HashType.CRC32, "CRC-32" },
     };
 
-    public HashService(IFileProvider fileProvider, IOutputProvider outputProvider)
+    public HashService(IOutputProvider outputProvider)
     {
-        _fileProvider = fileProvider;
         _outputProvider = outputProvider;
     }
 
