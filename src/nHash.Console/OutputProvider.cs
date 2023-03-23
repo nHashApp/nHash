@@ -2,7 +2,7 @@ using System.Text;
 using nHash.Domain.Models;
 using Spectre.Console;
 
-namespace nHash.Infrastructure;
+namespace nHash.Console;
 
 public class OutputProvider : IOutputProvider
 {

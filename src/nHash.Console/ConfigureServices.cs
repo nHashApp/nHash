@@ -1,4 +1,3 @@
-using nHash.Application.Encodes;
 using nHash.Console.CommandLines.Encodes;
 using nHash.Console.CommandLines.Encodes.SubCommands;
 using nHash.Console.CommandLines.Hashes;
@@ -18,6 +17,8 @@ public static class ConfigureServices
         RegisterPasswordServices(services);
         RegisterTextServices(services);
         RegisterUuidServices(services);
+        
+        services.AddSingleton<IOutputProvider, OutputProvider>();
 
         return services;
     }

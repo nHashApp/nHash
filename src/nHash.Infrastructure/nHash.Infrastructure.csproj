@@ -13,11 +13,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Spectre.Console" Version="0.46.0" />
-        <PackageReference Include="Spectre.Console.Json" Version="0.46.0" />
-    </ItemGroup>
-    
-    <ItemGroup>
       <ProjectReference Include="..\nHash.Application\nHash.Application.csproj" />
       <ProjectReference Include="..\nHash.Domain\nHash.Domain.csproj" />
     </ItemGroup>

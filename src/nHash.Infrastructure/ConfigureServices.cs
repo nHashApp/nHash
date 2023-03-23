@@ -8,7 +8,6 @@ public static class ConfigureServices
     {
         services.AddSingleton<IFileProvider, FileProvider>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-        services.AddSingleton<IOutputProvider, OutputProvider>();
         
         return services;
     }

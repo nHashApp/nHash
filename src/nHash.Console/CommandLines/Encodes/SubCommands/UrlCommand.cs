@@ -1,4 +1,3 @@
-using System.Web;
 using nHash.Application.Encodes;
 using nHash.Console.CommandLines.Encodes.SubCommands;
 

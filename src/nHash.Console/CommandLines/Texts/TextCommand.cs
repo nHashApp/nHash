@@ -1,7 +1,3 @@
-using nHash.Application.Texts.Humanizers;
-using nHash.Application.Texts.Json;
-using nHash.Application.Texts.Xml;
-using nHash.Application.Texts.Yaml;
 using nHash.Console.CommandLines.Texts.SubCommands;
 
 namespace nHash.Console.CommandLines.Texts;
