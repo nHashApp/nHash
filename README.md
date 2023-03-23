@@ -18,20 +18,22 @@ Usage:
   nhash [command] [options]
 
 Options:
-  --version       Show version information
-  -?, -h, --help  Show help and usage information
+  --output <output>  File name for writing output
+  --version          Show version information
+  -?, -h, --help     Show help and usage information
 
 ```
+## Features
 
 | Commands               |                                                                                       |
 |------------------------|---------------------------------------------------------------------------------------|
 | [uuid](#uuid)          | Generate a Universally unique identifier (UUID/GUID) version 1 to 5                   |
 | [encode](#encode)      | Encode/Decode features (JWT, Base64, URL, HTML)                                       |
-| [hash](#hash) <text>   | Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32)             |
-| [text](#text)          | Encode/Decode Base64                                                                  |
+| [hash](#hash) <text>   | Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8)       |
+| [text](#text)          | Text utilities (Humanizer, JSON, YAML, XML)                                           |
 | password               | Generate a random password with custom length, prefix, suffix, character, etc options |
  
-## Commands
+## Usage
 
 ## UUID
 ```
@@ -46,6 +48,7 @@ Options:
   --bracket                       Generate with brackets
   --no-hyphen                     Generate without hyphens
   --version <All|V1|V2|V3|V4|V5>  Select UUID version [default: All]
+  --output <output>               File name for writing output
   -?, -h, --help                  Show help and usage information
 ```  
 #### Sample
@@ -70,6 +73,8 @@ dcb5d66f6b604e27bd8d7da77156d07d
   
 ❯ nhash uuid --version v4 --no-hyphen --bracket
 {ddee757350644a38bb6486cf6846d66e}  
+
+❯ nhash uuid --version v4 --no-hyphen --bracket --output uuid.txt
 ```    
 ---
 ## Encode
@@ -82,10 +87,11 @@ Usage:
   nhash encode [command] [options]
 
 Options:
-  -?, -h, --help  Show help and usage information
+  --output <output>  File name for writing output
+  -?, -h, --help     Show help and usage information
 
 Commands:
-  jwt <token>    JWT token decode
+  jwt <token>    JWT token decode (Comply with GDPR rules)
   base64 <text>  Encode/Decode Base64
   url <text>     URL Encode/Decode
   html <text>    HTML Encode/Decode
@@ -104,13 +110,16 @@ Arguments:
   <text>  text for url encode/decode
 
 Options:
-  --decode        Decode url-encoded text
-  -?, -h, --help  Show help and usage information
+  --decode           Decode url-encoded text
+  --output <output>  File name for writing output
+  -?, -h, --help     Show help and usage information
 ```  
 #### Sample
 ```
 ❯ nhash url https://google.com
 https%3a%2f%2fgoogle.com
+
+❯ nhash url https://google.com --output sample.txt
  
 ❯ nhash url https%3a%2f%2fgoogle.com --decode
 https://google.com 
@@ -130,8 +139,9 @@ Arguments:
   <text>  text for html encode/decode
 
 Options:
-  --decode        Decode html-encoded text
-  -?, -h, --help  Show help and usage information
+  --decode           Decode html-encoded text
+  --output <output>  File name for writing output
+  -?, -h, --help     Show help and usage information
 ```  
 #### Sample
 ```
@@ -140,6 +150,8 @@ Options:
  
 ❯ nhash html '&lt;html&gt;&lt;body&gt;&lt;h1&gt;hello&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;' --decode
 <html><body><h1>hello</h1></body></html>
+
+❯ nhash html '&lt;html&gt;&lt;body&gt;&lt;h1&gt;hello&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;' --decode --output sample.html
 ```    
 ---
 
@@ -147,7 +159,7 @@ Options:
 ```
 ❯ nhash hash --help
 Description:
-  Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32)
+  Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)
 
 Usage:
   nhash hash [<text>] [options]
@@ -156,9 +168,12 @@ Arguments:
   <text>  Text for calculate fingerprint []
 
 Options:
-  --file <file>   File name for calculate hash
-  --lower         Generate lower case
-  -?, -h, --help  Show help and usage information
+  --file <file>                                          File name for calculate hash
+  --lower                                                Generate lower case
+  --type <All|CRC32|CRC8|MD5|SHA1|SHA256|SHA384|SHA512>  Hash type (MD5, SHA-1, SHA-256,...) [default: All]
+  --output <output>                                      File name for writing output
+  -?, -h, --help                                         Show help and usage information
+
 
 ```  
 #### Sample
@@ -208,6 +223,12 @@ SHA-512:
 E7C22B994C59D9CF2B48E549B1E24666636045930D3DA7C1ACB299D1C3B7F931F94AAE41EDDA2C2B207A36E10F8BCB8D45223E54878F5B316E7CE3B6BC019629
 CRC32:
 363A3020
+```
+```
+❯ nhash hash --file sample.txt --type md5
+B1946AC92492D2347C6235B4D2611184
+
+❯ nhash hash --file sample.txt --type sha1 --output crc.txt
 
 ```
 ---
