@@ -1,7 +1,9 @@
+using nHash.Application.Encodes;
 using nHash.Console.CommandLines.Encodes;
 using nHash.Console.CommandLines.Encodes.SubCommands;
 using nHash.Console.CommandLines.Hashes;
 using nHash.Console.CommandLines.Passwords;
+using nHash.Console.CommandLines.Texts;
 using nHash.Console.CommandLines.Texts.SubCommands;
 using nHash.Console.CommandLines.Uuids;
 
@@ -22,6 +24,7 @@ public static class ConfigureServices
 
     private static void RegisterEncodeServices(IServiceCollection services)
     {
+        services.AddSingleton<IEncodeCommand, EncodeCommand>();
         services.AddSingleton<IBase64Command, Base64Command>();
         services.AddSingleton<IHtmlCommand, HtmlCommand>();
         services.AddSingleton<IJwtTokenCommand, JwtTokenCommand>();
@@ -41,6 +44,7 @@ public static class ConfigureServices
 
     private static void RegisterTextServices(IServiceCollection services)
     {
+        services.AddSingleton<ITextCommand, TextCommand>();
         services.AddSingleton<IHumanizeCommand, HumanizeCommand>();
         services.AddSingleton<IJsonCommand, JsonCommand>();
         services.AddSingleton<IYamlCommand, YamlCommand>();

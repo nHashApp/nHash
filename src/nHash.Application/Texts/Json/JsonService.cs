@@ -8,33 +8,17 @@ namespace nHash.Application.Texts.Json;
 public class JsonService : IJsonService
 {
 
-    private readonly IFileProvider _fileProvider;
     private readonly IOutputProvider _outputProvider;
 
-    public JsonService(IFileProvider fileProvider, IOutputProvider outputProvider)
+    public JsonService(IOutputProvider outputProvider)
     {
-        _fileProvider = fileProvider;
         _outputProvider = outputProvider;
     }
 
 
-    public async Task CalculateText(string text, JsonPrintType printType, string fileName,
-        ConversionType conversion)
+    public void CalculateText(string text, JsonPrintType printType, ConversionType conversion)
     {
-        if (!string.IsNullOrWhiteSpace(text))
-        {
-            var jsonText = CalculateJsonText(text, printType);
-            WriteOutput(jsonText, conversion);
-            return;
-        }
-
-        var fileContent = await _fileProvider.ReadAsText(fileName);
-        if (string.IsNullOrWhiteSpace(fileContent))
-        {
-            return;
-        }
-
-        var jsonFileText = CalculateJsonText(fileContent, printType);
+        var jsonFileText = CalculateJsonText(text, printType);
         WriteOutput(jsonFileText, conversion);
     }
 

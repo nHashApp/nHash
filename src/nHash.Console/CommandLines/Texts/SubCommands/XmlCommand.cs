@@ -12,13 +12,11 @@ public class XmlCommand : IXmlCommand
     private readonly Option<ConversionType> _conversion;
 
     private readonly IFileProvider _fileProvider;
-    private readonly IOutputProvider _outputProvider;
     private readonly IXmlService _xmlService;
 
-    public XmlCommand(IFileProvider fileProvider, IOutputProvider outputProvider, IXmlService xmlService)
+    public XmlCommand(IFileProvider fileProvider, IXmlService xmlService)
     {
         _fileProvider = fileProvider;
-        _outputProvider = outputProvider;
         _xmlService = xmlService;
         _textArgument = new Argument<string>("text", () => string.Empty, "XML text for processing");
         _fileName = new Option<string>(name: "--file", description: "File name for read XML from that");
@@ -41,6 +39,17 @@ public class XmlCommand : IXmlCommand
 
     private async Task CalculateText(string text, string fileName, ConversionType conversion)
     {
-        await _xmlService.CalculateText(text, fileName, conversion);
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            _xmlService.CalculateText(text, conversion);
+            return;
+        }
+
+        var fileContent = await _fileProvider.ReadAsText(fileName);
+        if (string.IsNullOrWhiteSpace(fileContent))
+        {
+            return;
+        }
+        _xmlService.CalculateText(fileContent, conversion);
     }
 }

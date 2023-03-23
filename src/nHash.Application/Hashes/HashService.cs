@@ -26,25 +26,9 @@ public class HashService : IHashService
         _outputProvider = outputProvider;
     }
 
-    public async Task CalculateText(string text, bool lowerCase, string fileName, HashType hashType)
+    public void CalculateText(byte[] inputBytes, bool lowerCase, HashType hashType)
     {
-        if (!string.IsNullOrWhiteSpace(text))
-        {
-            var inputBytes = System.Text.Encoding.UTF8.GetBytes(text);
-            CalculateHash(inputBytes, lowerCase, hashType);
-            return;
-        }
-
-        if (!string.IsNullOrWhiteSpace(fileName))
-        {
-            var fileBytes = await _fileProvider.ReadAsByte(fileName);
-            if (fileBytes == Array.Empty<byte>())
-            {
-                return;
-            }
-
-            CalculateHash(fileBytes, lowerCase, hashType);
-        }
+        CalculateHash(inputBytes, lowerCase, hashType);
     }
 
     private void CalculateHash(byte[] inputBytes, bool lowerCase, HashType hashType)

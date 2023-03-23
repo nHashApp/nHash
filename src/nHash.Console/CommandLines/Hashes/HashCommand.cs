@@ -14,17 +14,6 @@ public class HashCommand : IHashCommand
     private readonly IFileProvider _fileProvider;
     private readonly IHashService _hashService;
 
-    private static readonly Dictionary<HashType, string> Algorithms = new()
-    {
-        { HashType.MD5, "MD5" },
-        { HashType.SHA1, "SHA-1" },
-        { HashType.SHA256, "SHA-256" },
-        { HashType.SHA384, "SHA-384" },
-        { HashType.SHA512, "SHA-512" },
-        { HashType.CRC8, "CRC-8" },
-        { HashType.CRC32, "CRC-32" },
-    };
-
     public HashCommand(IFileProvider fileProvider, IHashService hashService)
     {
         _fileProvider = fileProvider;
@@ -52,7 +41,23 @@ public class HashCommand : IHashCommand
 
     private async Task CalculateText(string text, bool lowerCase, string fileName, HashType hashType)
     {
-        await _hashService.CalculateText(text, lowerCase, fileName, hashType);
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            var inputBytes = System.Text.Encoding.UTF8.GetBytes(text);
+            _hashService.CalculateText(inputBytes, lowerCase, hashType);
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(fileName))
+        {
+            var fileBytes = await _fileProvider.ReadAsByte(fileName);
+            if (fileBytes == Array.Empty<byte>())
+            {
+                return;
+            }
+
+            _hashService.CalculateText(fileBytes, lowerCase, hashType);
+        }
     }
 
     

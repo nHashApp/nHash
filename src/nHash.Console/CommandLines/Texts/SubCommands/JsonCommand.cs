@@ -14,13 +14,11 @@ public class JsonCommand : IJsonCommand
     private readonly Option<ConversionType> _conversion;
 
     private readonly IFileProvider _fileProvider;
-    private readonly IOutputProvider _outputProvider;
     private readonly IJsonService _jsonService;
 
-    public JsonCommand(IFileProvider fileProvider, IOutputProvider outputProvider, IJsonService jsonService)
+    public JsonCommand(IFileProvider fileProvider, IJsonService jsonService)
     {
         _fileProvider = fileProvider;
-        _outputProvider = outputProvider;
         _jsonService = jsonService;
         _textArgument = new Argument<string>("text", () => string.Empty, "JSON text for processing");
         _printType = new Option<JsonPrintType>("--print", "Print pretty/Compact JSON representation");
@@ -46,6 +44,17 @@ public class JsonCommand : IJsonCommand
     private async Task CalculateText(string text, JsonPrintType printType, string fileName,
         ConversionType conversion)
     {
-        await _jsonService.CalculateText(text, printType, fileName, conversion);
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            _jsonService.CalculateText(text, printType, conversion);
+            return;
+        }
+
+        var fileContent = await _fileProvider.ReadAsText(fileName);
+        if (string.IsNullOrWhiteSpace(fileContent))
+        {
+            return;
+        }
+        _jsonService.CalculateText(fileContent, printType, conversion);
     }
 }

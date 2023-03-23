@@ -3,7 +3,7 @@ using nHash.Console.CommandLines.Encodes.SubCommands;
 
 namespace nHash.Console.CommandLines.Encodes;
 
-public class EncodeCommand : IEncodeFeature
+public class EncodeCommand : IEncodeCommand
 {
     public Command Command => GetCommand();
 

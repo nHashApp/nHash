@@ -7,6 +7,7 @@ using nHash.Application.Passwords;
 using nHash.Application.Texts;
 using nHash.Application.Uuids;
 using nHash.Console.Base;
+using nHash.Console.CommandLines.Encodes;
 using nHash.Console.CommandLines.Hashes;
 using nHash.Console.CommandLines.Passwords;
 using nHash.Console.CommandLines.Texts;
@@ -24,7 +25,7 @@ public static class Initialize
         var features = new List<IFeature>()
         {
             Get<IUuidCommand>(provider),
-            Get<IEncodeFeature>(provider),
+            Get<IEncodeCommand>(provider),
             Get<IHashCommand>(provider),
             Get<ITextCommand>(provider),
             Get<IPasswordCommand>(provider),

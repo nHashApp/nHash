@@ -5,30 +5,16 @@ namespace nHash.Application.Texts.Xml;
 
 public class XmlService : IXmlService
 {
-    private readonly IFileProvider _fileProvider;
     private readonly IOutputProvider _outputProvider;
 
-    public XmlService(IFileProvider fileProvider, IOutputProvider outputProvider)
+    public XmlService(IOutputProvider outputProvider)
     {
-        _fileProvider = fileProvider;
         _outputProvider = outputProvider;
     }
 
-    public async Task CalculateText(string text, string fileName, ConversionType conversion)
+    public void CalculateText(string text, ConversionType conversion)
     {
-        if (!string.IsNullOrWhiteSpace(text))
-        {
-            WriteOutput(text, conversion);
-            return;
-        }
-
-        var fileContent = await _fileProvider.ReadAsText(fileName);
-        if (string.IsNullOrWhiteSpace(fileContent))
-        {
-            return;
-        }
-
-        WriteOutput(fileContent, conversion);
+        WriteOutput(text, conversion);
     }
 
     private void WriteOutput(string text, ConversionType conversion)

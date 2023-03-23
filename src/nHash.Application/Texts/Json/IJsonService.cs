@@ -3,8 +3,7 @@ using nHash.Application.Texts.Json.Models;
 
 namespace nHash.Application.Texts.Json;
 
-public interface IJsonService 
+public interface IJsonService
 {
-    Task CalculateText(string text, JsonPrintType printType, string fileName,
-        ConversionType conversion);
+    void CalculateText(string text, JsonPrintType printType, ConversionType conversion);
 }
