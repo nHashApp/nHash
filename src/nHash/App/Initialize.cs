@@ -39,7 +39,7 @@ public static class Initialize
         var commandLineBuilder = new CommandLineBuilder(rootCommand)
             .AddMiddleware((context, next) => OutputMiddleware(provider, context, next))
             .UseDefaults() //.UseVersionOption(new []{"--help"});
-            .UseHelp(ctx =>
+            /*.UseHelp(ctx =>
             {
                 ctx.HelpBuilder.CustomizeLayout(
                     _ =>
@@ -51,7 +51,7 @@ public static class Initialize
                                     new FigletText("nHash")
                                         .Centered())
                             ));
-            });
+            })*/;
         var parser = commandLineBuilder.Build();
         return await parser.InvokeAsync(args.ToArray());
         //return await rootCommand.InvokeAsync(parameters);

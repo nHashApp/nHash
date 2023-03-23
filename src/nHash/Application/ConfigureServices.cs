@@ -6,6 +6,7 @@ using nHash.Application.Shared.Yaml;
 using nHash.Application.Texts;
 using nHash.Application.Texts.Humanizers;
 using nHash.Application.Texts.Json;
+using nHash.Application.Texts.Xml;
 using nHash.Application.Texts.Yaml;
 using nHash.Application.Uuids;
 
@@ -26,9 +27,11 @@ public static class ConfigureServices
         services.AddSingleton<IHtmlFeature, HtmlFeature>();
         services.AddSingleton<IBase64Feature, Base64Feature>();
         services.AddSingleton<IJwtTokenFeature, JwtTokenFeature>();
+        
         services.AddSingleton<IHumanizeFeature, HumanizeFeature>();
         services.AddSingleton<IJsonFeature, JsonFeature>();
         services.AddSingleton<IYamlFeature, YamlFeature>();
+        services.AddSingleton<IXmlFeature, XmlFeature>();
         
         services.AddSingleton<IJsonTools, JsonTools>();
         services.AddSingleton<IPasswordTools, PasswordTools>();
