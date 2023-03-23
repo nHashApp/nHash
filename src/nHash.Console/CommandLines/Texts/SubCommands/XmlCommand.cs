@@ -1,9 +1,9 @@
 using nHash.Application.Shared.Conversions;
-using nHash.Application.Texts.Yaml;
+using nHash.Application.Texts.Xml;
 
-namespace nHash.Console.CommandLines.Texts.Yaml;
+namespace nHash.Console.CommandLines.Texts.SubCommands;
 
-public class YamlCommand : IYamlCommand
+public class XmlCommand : IXmlCommand
 {
     public Command Command => GetFeatureCommand();
 
@@ -13,22 +13,22 @@ public class YamlCommand : IYamlCommand
 
     private readonly IFileProvider _fileProvider;
     private readonly IOutputProvider _outputProvider;
-    private readonly IYamlService _yamlService;
+    private readonly IXmlService _xmlService;
 
-    public YamlCommand(IFileProvider fileProvider, IOutputProvider outputProvider, IYamlService yamlService)
+    public XmlCommand(IFileProvider fileProvider, IOutputProvider outputProvider, IXmlService xmlService)
     {
         _fileProvider = fileProvider;
         _outputProvider = outputProvider;
-        _yamlService = yamlService;
-        _textArgument = new Argument<string>("text", () => string.Empty, "YAML text for processing");
-        _fileName = new Option<string>(name: "--file", description: "File name for read YAML from that");
+        _xmlService = xmlService;
+        _textArgument = new Argument<string>("text", () => string.Empty, "XML text for processing");
+        _fileName = new Option<string>(name: "--file", description: "File name for read XML from that");
         _conversion =
-            new Option<ConversionType>(name: "--convert", description: "Convert YAML to other format (JSON, XML)");
+            new Option<ConversionType>(name: "--convert", description: "Convert XML to other format (JSON, YAML)");
     }
 
     private Command GetFeatureCommand()
     {
-        var command = new Command("yaml", "YAML tools")
+        var command = new Command("xml", "XML tools")
         {
             _fileName,
             _conversion,
@@ -41,8 +41,6 @@ public class YamlCommand : IYamlCommand
 
     private async Task CalculateText(string text, string fileName, ConversionType conversion)
     {
-        await _yamlService.CalculateText(text, fileName, conversion);
+        await _xmlService.CalculateText(text, fileName, conversion);
     }
-
-
 }

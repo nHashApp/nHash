@@ -1,6 +1,6 @@
 using nHash.Application.Encodes;
 
-namespace nHash.Console.CommandLines.Encodes;
+namespace nHash.Console.CommandLines.Encodes.SubCommands;
 
 public class Base64Command : IBase64Command 
 {

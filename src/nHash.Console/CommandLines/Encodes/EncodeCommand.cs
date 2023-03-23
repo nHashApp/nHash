@@ -1,4 +1,5 @@
 using nHash.Application.Encodes;
+using nHash.Console.CommandLines.Encodes.SubCommands;
 
 namespace nHash.Console.CommandLines.Encodes;
 

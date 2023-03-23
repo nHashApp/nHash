@@ -1,9 +1,8 @@
 using nHash.Application.Shared.Conversions;
-using nHash.Application.Shared.Json;
 using nHash.Application.Texts.Json;
 using nHash.Application.Texts.Json.Models;
 
-namespace nHash.Console.CommandLines.Texts.Json;
+namespace nHash.Console.CommandLines.Texts.SubCommands;
 
 public class JsonCommand : IJsonCommand
 {

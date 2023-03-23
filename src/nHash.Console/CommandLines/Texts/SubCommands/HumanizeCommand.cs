@@ -1,8 +1,7 @@
-using Humanizer;
 using nHash.Application.Texts.Humanizers;
 using nHash.Application.Texts.Humanizers.Models;
 
-namespace nHash.Console.CommandLines.Texts.Humanizers;
+namespace nHash.Console.CommandLines.Texts.SubCommands;
 
 public class HumanizeCommand : IHumanizeCommand
 {

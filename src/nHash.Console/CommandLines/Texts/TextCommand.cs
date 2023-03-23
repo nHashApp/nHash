@@ -2,10 +2,7 @@ using nHash.Application.Texts.Humanizers;
 using nHash.Application.Texts.Json;
 using nHash.Application.Texts.Xml;
 using nHash.Application.Texts.Yaml;
-using nHash.Console.CommandLines.Texts.Humanizers;
-using nHash.Console.CommandLines.Texts.Json;
-using nHash.Console.CommandLines.Texts.Xml;
-using nHash.Console.CommandLines.Texts.Yaml;
+using nHash.Console.CommandLines.Texts.SubCommands;
 
 namespace nHash.Console.CommandLines.Texts;
 

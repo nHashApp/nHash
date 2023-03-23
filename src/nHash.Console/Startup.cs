@@ -11,7 +11,8 @@ public static class Startup
         services
             .RegisterDomainServices()
             .RegisterApplicationServices()
-            .RegisterInfrastructureServices();
+            .RegisterInfrastructureServices()
+            .RegisterUiServices();
     }
 
     public static async Task<int> StartAsync(IEnumerable<string> args, IServiceProvider provider)
