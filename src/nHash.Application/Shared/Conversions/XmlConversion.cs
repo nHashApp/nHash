@@ -24,7 +24,8 @@ public class XmlConversion : IConversion
         var root = new XElement("root");
         xmlDoc.Add(root);
 
-        using (var jsonReader = JsonReaderWriterFactory.CreateJsonReader(Encoding.UTF8.GetBytes(json), new XmlDictionaryReaderQuotas()))
+        using (var jsonReader =
+               JsonReaderWriterFactory.CreateJsonReader(Encoding.UTF8.GetBytes(json), new XmlDictionaryReaderQuotas()))
         {
             while (jsonReader.Read())
             {
@@ -33,7 +34,7 @@ public class XmlConversion : IConversion
                     case XmlNodeType.Element:
                         var elementName = jsonReader.LocalName;
                         var element = new XElement(elementName);
-                        root.Add(element);
+                        root!.Add(element);
                         if (!jsonReader.IsEmptyElement)
                         {
                             jsonReader.Read();
@@ -42,9 +43,10 @@ public class XmlConversion : IConversion
                                 element.Add(XNode.ReadFrom(jsonReader));
                             }
                         }
+
                         break;
                     case XmlNodeType.EndElement:
-                        root = root.Parent;
+                        root = root!.Parent;
                         break;
                     default:
                         break;
@@ -65,17 +67,14 @@ public class XmlConversion : IConversion
                 xmlDoc.WriteTo(xmlWriter);
                 xmlWriter.Flush();
             }
+
             return Encoding.UTF8.GetString(memoryStream.ToArray());
         }
     }
 
     private static string FromYaml(string yaml)
     {
-        var json=Conversion.ToJson(yaml, ConversionType.YAML);
+        var json = Conversion.ToJson(yaml, ConversionType.YAML);
         return FromJson(json);
     }
-    
-    
-
-
 }

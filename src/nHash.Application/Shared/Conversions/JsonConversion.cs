@@ -39,6 +39,10 @@ public class JsonConversion : IConversion
     {
         var doc = XDocument.Parse(xml);
         var result = new Dictionary<string, object>();
+        if (doc?.Root is null)
+        {
+            return string.Empty;
+        }
         ConvertNode(result, doc.Root);
         return JsonSerializer.Serialize(result);
     }
