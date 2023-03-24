@@ -2,12 +2,8 @@ using System.Security.Cryptography;
 
 namespace nHash.Application.Hashes.Algorithms;
 
-public class SHA1Hash : IHash
+internal class SHA1Hash : IHash
 {
-    private readonly SHA1 _provider = SHA1.Create();
-
     public byte[] ComputeHash(byte[] buffer)
-    {
-        return _provider.ComputeHash(buffer);
-    }
+        => SHA1.HashData(buffer);
 }

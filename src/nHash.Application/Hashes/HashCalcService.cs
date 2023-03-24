@@ -3,7 +3,7 @@ using nHash.Application.Hashes.Models;
 
 namespace nHash.Application.Hashes;
 
-public class HashService : IHashService
+public class HashCalcService : IHashCalcService
 {
     public Dictionary<HashType, string> CalculateText(byte[] inputBytes, bool lowerCase, HashType hashType)
     {
@@ -26,6 +26,7 @@ public class HashService : IHashService
             {
                 continue;
             }
+
             var returnedHash = CalculateHashText(inputBytes, lowerCase, algorithm);
             result.Add(algorithm, returnedHash);
         }
@@ -54,8 +55,8 @@ public class HashService : IHashService
             HashType.SHA256 => new SHA256Hash(),
             HashType.SHA384 => new SHA384Hash(),
             HashType.SHA512 => new SHA512Hash(),
-            HashType.CRC8 => new CRC8Hash(),
-            HashType.CRC32 => new CRC32Hash(),
+            HashType.BLAKE2b => new BLAKE2bHash(),
+            HashType.BLAKE2s => new BLAKE2sHash(),
             _ => new MD5Hash()
         };
 

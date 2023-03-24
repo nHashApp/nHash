@@ -8,6 +8,9 @@ public enum HashType
     SHA256,
     SHA384,
     SHA512,
-    CRC8,
-    CRC32
+    //SHA3,
+    BLAKE2b,
+    BLAKE2s,
+    //Whirlpool,
+    //Keccak
 }

@@ -1,92 +1,30 @@
-using nHash.Application.Hashes;
-using nHash.Application.Hashes.Models;
+using nHash.Console.CommandLines.Hashes.SubCommands;
 
 namespace nHash.Console.CommandLines.Hashes;
 
 public class HashCommand : IHashCommand
 {
-    public Command Command => GetFeatureCommand();
-    private readonly Argument<string> _textArgument;
-    private readonly Option<string> _fileName;
-    private readonly Option<bool> _lowerCase;
-    private readonly Option<HashType> _hashType;
+    public Command Command => GetCommand();
 
-    private static readonly Dictionary<HashType, string> Algorithms = new()
+    private readonly ICalcCommand _calcCommand;
+    public HashCommand(ICalcCommand calcCommand)
     {
-        { HashType.MD5, "MD5" },
-        { HashType.SHA1, "SHA-1" },
-        { HashType.SHA256, "SHA-256" },
-        { HashType.SHA384, "SHA-384" },
-        { HashType.SHA512, "SHA-512" },
-        { HashType.CRC8, "CRC-8" },
-        { HashType.CRC32, "CRC-32" },
-    };
-
-    private readonly IFileProvider _fileProvider;
-    private readonly IHashService _hashService;
-    private readonly IOutputProvider _outputProvider;
-
-    public HashCommand(IFileProvider fileProvider, IHashService hashService, IOutputProvider outputProvider)
-    {
-        _fileProvider = fileProvider;
-        _hashService = hashService;
-        _outputProvider = outputProvider;
-        _textArgument = new Argument<string>("text", () => string.Empty, "Text for calculate fingerprint");
-        _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
-        _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
-        _hashType = new Option<HashType>(name: "--type", () => HashType.All, "Hash type (MD5, SHA-1, SHA-256,...)");
+        _calcCommand = calcCommand;
     }
-
-    private Command GetFeatureCommand()
+    
+    private Command GetCommand()
     {
-        var command = new Command("hash",
-            "Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)")
+        var features = new List<IFeature>()
         {
-            _fileName,
-            _lowerCase,
-            _hashType
+            _calcCommand
         };
-        command.AddArgument(_textArgument);
-        command.SetHandler(CalculateText, _textArgument, _lowerCase, _fileName, _hashType);
+
+        var command = new Command("hash", "Calculate hash and checksum fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)");
+        foreach (var feature in features)
+        {
+            command.AddCommand(feature.Command);
+        }
 
         return command;
-    }
-
-    private async Task CalculateText(string text, bool lowerCase, string fileName, HashType hashType)
-    {
-        if (!string.IsNullOrWhiteSpace(text))
-        {
-            var inputBytes = System.Text.Encoding.UTF8.GetBytes(text);
-            var hashResults = _hashService.CalculateText(inputBytes, lowerCase, hashType);
-            WriteOutput(hashType, hashResults);
-            return;
-        }
-
-        if (!string.IsNullOrWhiteSpace(fileName))
-        {
-            var fileBytes = await _fileProvider.ReadAsByte(fileName);
-            if (fileBytes == Array.Empty<byte>())
-            {
-                return;
-            }
-
-            var hashResults = _hashService.CalculateText(fileBytes, lowerCase, hashType);
-            WriteOutput(hashType, hashResults);
-        }
-    }
-
-    private void WriteOutput(HashType hashType, Dictionary<HashType, string> hashResult)
-    {
-        if (hashType != HashType.All)
-        {
-            _outputProvider.AppendLine(hashResult.First().Value);
-            return;
-        }
-
-        foreach (var algorithm in hashResult)
-        {
-            _outputProvider.AppendLine($"{Algorithms[algorithm.Key]}:");
-            _outputProvider.AppendLine($"{algorithm.Value}:");
-        }
     }
 }

@@ -1,6 +1,6 @@
 namespace nHash.Application.Hashes.Algorithms;
 
-public class CRC32Hash : IHash
+internal class CRC32Hash : IHash
 {
     private readonly uint[] _checksumTable;
     private const uint Polynomial = 0xEDB88320;
