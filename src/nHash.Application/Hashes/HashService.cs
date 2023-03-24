@@ -1,4 +1,3 @@
-using nHash.Application.Abstraction;
 using nHash.Application.Hashes.Algorithms;
 using nHash.Application.Hashes.Models;
 
@@ -6,45 +5,34 @@ namespace nHash.Application.Hashes;
 
 public class HashService : IHashService
 {
-    private readonly IOutputProvider _outputProvider;
-
-    private static readonly Dictionary<HashType, string> Algorithms = new()
+    public Dictionary<HashType, string> CalculateText(byte[] inputBytes, bool lowerCase, HashType hashType)
     {
-        { HashType.MD5, "MD5" },
-        { HashType.SHA1, "SHA-1" },
-        { HashType.SHA256, "SHA-256" },
-        { HashType.SHA384, "SHA-384" },
-        { HashType.SHA512, "SHA-512" },
-        { HashType.CRC8, "CRC-8" },
-        { HashType.CRC32, "CRC-32" },
-    };
-
-    public HashService(IOutputProvider outputProvider)
-    {
-        _outputProvider = outputProvider;
+        return CalculateHash(inputBytes, lowerCase, hashType);
     }
 
-    public void CalculateText(byte[] inputBytes, bool lowerCase, HashType hashType)
+    private static Dictionary<HashType, string> CalculateHash(byte[] inputBytes, bool lowerCase, HashType hashType)
     {
-        CalculateHash(inputBytes, lowerCase, hashType);
-    }
-
-    private void CalculateHash(byte[] inputBytes, bool lowerCase, HashType hashType)
-    {
+        var result = new Dictionary<HashType, string>();
         if (hashType != HashType.All)
         {
-            CalculateHashText(inputBytes, lowerCase, hashType);
-            return;
+            var returnedHash = CalculateHashText(inputBytes, lowerCase, hashType);
+            result.Add(hashType, returnedHash);
         }
 
-        foreach (var algorithm in Algorithms)
+        foreach (var algorithm in Enum.GetValues<HashType>())
         {
-            _outputProvider.AppendLine($"{algorithm.Value}:");
-            CalculateHashText(inputBytes, lowerCase, algorithm.Key);
+            if (algorithm == HashType.All)
+            {
+                continue;
+            }
+            var returnedHash = CalculateHashText(inputBytes, lowerCase, algorithm);
+            result.Add(algorithm, returnedHash);
         }
+
+        return result;
     }
 
-    private void CalculateHashText(byte[] inputBytes, bool lowerCase, HashType hashType)
+    private static string CalculateHashText(byte[] inputBytes, bool lowerCase, HashType hashType)
     {
         var hashedText = CalculateHashType(inputBytes, hashType);
 
@@ -53,7 +41,7 @@ public class HashService : IHashService
             hashedText = hashedText.ToLower();
         }
 
-        _outputProvider.AppendLine(hashedText);
+        return hashedText;
     }
 
     private static string CalculateHashType(byte[] inputBytes, HashType hashType)

@@ -11,13 +11,26 @@ public class HashCommand : IHashCommand
     private readonly Option<bool> _lowerCase;
     private readonly Option<HashType> _hashType;
 
+    private static readonly Dictionary<HashType, string> Algorithms = new()
+    {
+        { HashType.MD5, "MD5" },
+        { HashType.SHA1, "SHA-1" },
+        { HashType.SHA256, "SHA-256" },
+        { HashType.SHA384, "SHA-384" },
+        { HashType.SHA512, "SHA-512" },
+        { HashType.CRC8, "CRC-8" },
+        { HashType.CRC32, "CRC-32" },
+    };
+
     private readonly IFileProvider _fileProvider;
     private readonly IHashService _hashService;
+    private readonly IOutputProvider _outputProvider;
 
-    public HashCommand(IFileProvider fileProvider, IHashService hashService)
+    public HashCommand(IFileProvider fileProvider, IHashService hashService, IOutputProvider outputProvider)
     {
         _fileProvider = fileProvider;
         _hashService = hashService;
+        _outputProvider = outputProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "Text for calculate fingerprint");
         _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
         _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
@@ -44,7 +57,8 @@ public class HashCommand : IHashCommand
         if (!string.IsNullOrWhiteSpace(text))
         {
             var inputBytes = System.Text.Encoding.UTF8.GetBytes(text);
-            _hashService.CalculateText(inputBytes, lowerCase, hashType);
+            var hashResults = _hashService.CalculateText(inputBytes, lowerCase, hashType);
+            WriteOutput(hashType, hashResults);
             return;
         }
 
@@ -56,9 +70,23 @@ public class HashCommand : IHashCommand
                 return;
             }
 
-            _hashService.CalculateText(fileBytes, lowerCase, hashType);
+            var hashResults = _hashService.CalculateText(fileBytes, lowerCase, hashType);
+            WriteOutput(hashType, hashResults);
         }
     }
 
-    
+    private void WriteOutput(HashType hashType, Dictionary<HashType, string> hashResult)
+    {
+        if (hashType != HashType.All)
+        {
+            _outputProvider.AppendLine(hashResult.First().Value);
+            return;
+        }
+
+        foreach (var algorithm in hashResult)
+        {
+            _outputProvider.AppendLine($"{Algorithms[algorithm.Key]}:");
+            _outputProvider.AppendLine($"{algorithm.Value}:");
+        }
+    }
 }
