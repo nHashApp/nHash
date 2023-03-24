@@ -1,4 +1,3 @@
-using nHash.Application.Abstraction;
 using nHash.Application.Shared.Conversions;
 
 namespace nHash.Application.Texts.Xml;

@@ -1,23 +1,15 @@
-using nHash.Application.Abstraction;
 using nHash.Application.Shared.Conversions;
 
 namespace nHash.Application.Texts.Yaml;
 
 public class YamlService : IYamlService
 {
-    private readonly IOutputProvider _outputProvider;
-
-    public YamlService(IOutputProvider outputProvider)
+    public string CalculateText(string text, ConversionType conversion)
     {
-        _outputProvider = outputProvider;
+        return WriteOutput(text, conversion);
     }
 
-    public void CalculateText(string text, ConversionType conversion)
-    {
-        WriteOutput(text, conversion);
-    }
-
-    private void WriteOutput(string text, ConversionType conversion)
+    private static string WriteOutput(string text, ConversionType conversion)
     {
         if (conversion != ConversionType.YAML)
         {
@@ -29,7 +21,6 @@ public class YamlService : IYamlService
             };
         }
 
-        _outputProvider.Append(text);
+        return text;
     }
-
 }

@@ -1,6 +1,5 @@
 using System.Text;
 using MlkPwgen;
-using nHash.Application.Abstraction;
 
 namespace nHash.Application.Passwords;
 

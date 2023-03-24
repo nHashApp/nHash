@@ -1,4 +1,3 @@
-using nHash.Application.Abstraction;
 using nHash.Application.Shared.Conversions;
 using nHash.Application.Shared.Json;
 using nHash.Application.Texts.Json.Models;
