@@ -10,10 +10,12 @@ public class HumanizeCommand : IHumanizeCommand
     private readonly Argument<HumanizeType> _humanizeType;
 
     private readonly IHumanizeService _humanizeService;
+    private readonly IOutputProvider _outputProvider;
 
-    public HumanizeCommand(IHumanizeService humanizeService)
+    public HumanizeCommand(IHumanizeService humanizeService, IOutputProvider outputProvider)
     {
         _humanizeService = humanizeService;
+        _outputProvider = outputProvider;
         _humanizeType = new Argument<HumanizeType>("type", "Humanize type");
         _textArgument = new Argument<string>("text", "Text for humanize");
     }
@@ -31,6 +33,7 @@ public class HumanizeCommand : IHumanizeCommand
 
     private void CalculateText(string text, HumanizeType humanizeType)
     {
-        _humanizeService.CalculateText(text, humanizeType);
+        var resultText = _humanizeService.CalculateText(text, humanizeType);
+        _outputProvider.AppendLine(resultText);
     }
 }

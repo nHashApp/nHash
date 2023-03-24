@@ -6,15 +6,7 @@ namespace nHash.Application.Texts.Humanizers;
 
 public class HumanizeService : IHumanizeService
 {
-
-    private readonly IOutputProvider _outputProvider;
-
-    public HumanizeService(IOutputProvider outputProvider)
-    {
-        _outputProvider = outputProvider;
-    }
-
-    public void CalculateText(string text, HumanizeType humanizeType)
+    public string CalculateText(string text, HumanizeType humanizeType)
     {
         var resultText = humanizeType switch
         {
@@ -30,6 +22,6 @@ public class HumanizeService : IHumanizeService
             _ => text
         };
 
-        _outputProvider.Append(resultText);
+        return resultText;
     }
 }
