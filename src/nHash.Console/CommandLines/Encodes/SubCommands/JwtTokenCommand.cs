@@ -1,4 +1,5 @@
 using nHash.Application.Encodes;
+using nHash.Application.Encodes.Models;
 
 namespace nHash.Console.CommandLines.Encodes.SubCommands;
 
@@ -45,13 +46,62 @@ public class JwtTokenCommand : IJwtTokenCommand
         _outputProvider.AppendLine("Payload: (DATA)");
         _outputProvider.AppendLine(jwtResult.Payload);
 
-        if (!string.IsNullOrWhiteSpace(jwtResult.Summary))
+        if (jwtResult.Summary is null)
         {
             return;
         }
 
         _outputProvider.AppendLine();
         _outputProvider.AppendLine("Summary:");
-        _outputProvider.AppendLine(jwtResult.Summary!);
+        WriteSummary(jwtResult.Summary!);
+    }
+
+    private void WriteSummary(JwtTokenSummary summary)
+    {
+        WriteSummaryHeader(summary);
+        WriteSummaryPayload(summary);
+    }
+    
+    private void WriteSummaryHeader(JwtTokenSummary summary)
+    {
+        if (!string.IsNullOrWhiteSpace(summary.Algorithm))
+        {
+            _outputProvider.AppendLine("    Algorithm: " + summary.Algorithm);
+        }
+
+    }
+
+    private void WriteSummaryPayload(JwtTokenSummary summary)
+    {
+        if (!string.IsNullOrWhiteSpace(summary.Issuer))
+        {
+            _outputProvider.AppendLine("    Issuer: " + summary.Issuer);
+        }
+
+        if (summary.IssuedAt is not null)
+        {
+            _outputProvider.AppendLine("    Issued at: " + summary.IssuedAt);
+        }
+
+        if (!string.IsNullOrWhiteSpace(summary.Id))
+        {
+            _outputProvider.AppendLine("    Id: " + summary.Id);
+        }
+
+        if (!string.IsNullOrWhiteSpace(summary.Audience))
+        {
+            _outputProvider.AppendLine("    Audience: " + summary.Audience);
+        }
+
+        if (!string.IsNullOrWhiteSpace(summary.Subject))
+        {
+            _outputProvider.AppendLine("    Subject: " + summary.Subject);
+        }
+
+        if (summary.Expiration is not null)
+        {
+            _outputProvider.AppendLine("    Expiration: " + summary.Expiration);
+        }
+
     }
 }
