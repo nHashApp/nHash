@@ -10,6 +10,16 @@ public class ChecksumService : IChecksumService
         return CalculateHash(inputBytes, lowerCase, hashType);
     }
 
+    public (string NewChecksum, bool IsMatch) VerifyChecksum(byte[] inputBytes, string checksum, ChecksumType hashType)
+    {
+        var newChecksumList = CalculateHash(inputBytes, false, hashType);
+
+        var newChecksum = newChecksumList.First().Value;
+        var targetChecksum = checksum.Replace("-", "").Replace(".", "");
+        var isMatch = string.Equals(newChecksum, targetChecksum, StringComparison.CurrentCultureIgnoreCase);
+        return (newChecksum, isMatch);
+    }
+
     private static Dictionary<ChecksumType, string> CalculateHash(byte[] inputBytes, bool lowerCase,
         ChecksumType hashType)
     {

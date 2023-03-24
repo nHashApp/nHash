@@ -9,6 +9,7 @@ public class ChecksumCommand : IChecksumCommand
     private readonly Argument<string> _textArgument;
     private readonly Option<string> _fileName;
     private readonly Option<bool> _lowerCase;
+    private readonly Option<string> _verify;
     private readonly Option<ChecksumType> _hashType;
 
     private static readonly Dictionary<ChecksumType, string> Algorithms = new()
@@ -34,7 +35,10 @@ public class ChecksumCommand : IChecksumCommand
         _textArgument = new Argument<string>("text", () => string.Empty, "Text for calculate fingerprint");
         _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
         _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
-        _hashType = new Option<ChecksumType>(name: "--type", () => ChecksumType.All, "Hash type (MD5, SHA-1, CRC-8, CRC-32, Adler-32,...)");
+        _hashType = new Option<ChecksumType>(name: "--type", () => ChecksumType.All,
+            "Hash type (MD5, SHA-1, CRC-8, CRC-32, Adler-32,...)");
+        _verify = new Option<string>(name: "--verify",
+            description: "Use the checksum type provided to verify your checksum");
     }
 
     private Command GetFeatureCommand()
@@ -44,38 +48,54 @@ public class ChecksumCommand : IChecksumCommand
         {
             _fileName,
             _lowerCase,
-            _hashType
+            _hashType,
+            _verify
         };
         command.AddArgument(_textArgument);
-        command.SetHandler(CalculateText, _textArgument, _lowerCase, _fileName, _hashType);
+        command.SetHandler(CalculateText, _textArgument, _lowerCase, _fileName, _hashType, _verify);
 
         return command;
     }
 
-    private async Task CalculateText(string text, bool lowerCase, string fileName, ChecksumType hashType)
+    private async Task CalculateText(string text, bool lowerCase, string fileName, ChecksumType hashType,
+        string targetChecksum)
     {
+        if (!string.IsNullOrWhiteSpace(targetChecksum) && hashType == ChecksumType.All)
+        {
+            System.Console.WriteLine(
+                "The hash type must be selected and can't be All. The --type option must be used to select the type");
+            return;
+        }
+
+        var inputBytes = Array.Empty<byte>();
         if (!string.IsNullOrWhiteSpace(text))
         {
-            var inputBytes = System.Text.Encoding.UTF8.GetBytes(text);
-            var hashResults = _hashService.CalculateText(inputBytes, lowerCase, hashType);
-            WriteOutput(hashType, hashResults);
-            return;
+            inputBytes = System.Text.Encoding.UTF8.GetBytes(text);
         }
 
         if (!string.IsNullOrWhiteSpace(fileName))
         {
-            var fileBytes = await _fileProvider.ReadAsByte(fileName);
-            if (fileBytes == Array.Empty<byte>())
-            {
-                return;
-            }
+            inputBytes = await _fileProvider.ReadAsByte(fileName);
+        }
 
-            var hashResults = _hashService.CalculateText(fileBytes, lowerCase, hashType);
-            WriteOutput(hashType, hashResults);
+        if (inputBytes == Array.Empty<byte>())
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(targetChecksum))
+        {
+            var hashResults = _hashService.CalculateText(inputBytes, lowerCase, hashType);
+            WriteHashOutput(hashType, hashResults);
+        }
+        else
+        {
+            var verifyResult = _hashService.VerifyChecksum(inputBytes, targetChecksum, hashType);
+            WriteVerifyOutput(targetChecksum, verifyResult.NewChecksum, verifyResult.IsMatch);
         }
     }
 
-    private void WriteOutput(ChecksumType hashType, Dictionary<ChecksumType, string> hashResult)
+    private void WriteHashOutput(ChecksumType hashType, Dictionary<ChecksumType, string> hashResult)
     {
         if (hashType != ChecksumType.All)
         {
@@ -89,5 +109,12 @@ public class ChecksumCommand : IChecksumCommand
             _outputProvider.AppendLine(algorithm.Value);
             _outputProvider.AppendLine();
         }
+    }
+
+    private void WriteVerifyOutput(string targetChecksum, string newChecksum, bool isMatch)
+    {
+        _outputProvider.AppendLine($"Your checksum= {targetChecksum}");
+        _outputProvider.AppendLine($"Data checksum= {newChecksum}");
+        _outputProvider.AppendLine($"Result is: {(isMatch ? "Match" : "Not Match")}");
     }
 }
