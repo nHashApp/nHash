@@ -5,19 +5,12 @@ namespace nHash.Application.Texts.Xml;
 
 public class XmlService : IXmlService
 {
-    private readonly IOutputProvider _outputProvider;
-
-    public XmlService(IOutputProvider outputProvider)
+    public string CalculateText(string text, ConversionType conversion)
     {
-        _outputProvider = outputProvider;
+        return WriteOutput(text, conversion);
     }
 
-    public void CalculateText(string text, ConversionType conversion)
-    {
-        WriteOutput(text, conversion);
-    }
-
-    private void WriteOutput(string text, ConversionType conversion)
+    private static string WriteOutput(string text, ConversionType conversion)
     {
         if (conversion != ConversionType.XML)
         {
@@ -29,7 +22,7 @@ public class XmlService : IXmlService
             };
         }
 
-        _outputProvider.Append(text);
+        return text;
     }
 
 }
