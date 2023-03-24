@@ -8,5 +8,6 @@ public enum ChecksumType
     CRC8,
     CRC32,
     Adler32,
-    Fletcher
+    Fletcher16,
+    Fletcher32,
 }

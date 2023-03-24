@@ -3,30 +3,30 @@ using nHash.Application.Hashes.Models;
 
 namespace nHash.Console.CommandLines.Hashes.SubCommands;
 
-public class CalcCommand : ICalcCommand
+public class ChecksumCommand : IChecksumCommand
 {
     public Command Command => GetFeatureCommand();
     private readonly Argument<string> _textArgument;
     private readonly Option<string> _fileName;
     private readonly Option<bool> _lowerCase;
-    private readonly Option<HashType> _hashType;
+    private readonly Option<ChecksumType> _hashType;
 
-    private static readonly Dictionary<HashType, string> Algorithms = new()
+    private static readonly Dictionary<ChecksumType, string> Algorithms = new()
     {
-        { HashType.MD5, "MD5" },
-        { HashType.SHA1, "SHA-1" },
-        { HashType.SHA256, "SHA-256" },
-        { HashType.SHA384, "SHA-384" },
-        { HashType.SHA512, "SHA-512" },
-        { HashType.BLAKE2b, "Blake2b " },
-        { HashType.BLAKE2s, "Blake2s " }
+        { ChecksumType.MD5, "MD5" },
+        { ChecksumType.SHA1, "SHA-1" },
+        { ChecksumType.CRC8, "CRC-8" },
+        { ChecksumType.CRC32, "CRC-32" },
+        { ChecksumType.Adler32, "Adler-32" },
+        { ChecksumType.Fletcher16, "Fletcher-16" },
+        { ChecksumType.Fletcher32, "Fletcher-32" }
     };
 
     private readonly IFileProvider _fileProvider;
-    private readonly IHashCalcService _hashService;
+    private readonly IChecksumService _hashService;
     private readonly IOutputProvider _outputProvider;
 
-    public CalcCommand(IFileProvider fileProvider, IHashCalcService hashService, IOutputProvider outputProvider)
+    public ChecksumCommand(IFileProvider fileProvider, IChecksumService hashService, IOutputProvider outputProvider)
     {
         _fileProvider = fileProvider;
         _hashService = hashService;
@@ -34,13 +34,13 @@ public class CalcCommand : ICalcCommand
         _textArgument = new Argument<string>("text", () => string.Empty, "Text for calculate fingerprint");
         _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
         _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
-        _hashType = new Option<HashType>(name: "--type", () => HashType.All, "Hash type (MD5, SHA-1, SHA-256,...)");
+        _hashType = new Option<ChecksumType>(name: "--type", () => ChecksumType.All, "Hash type (MD5, SHA-1, CRC-8, CRC-32, Adler-32,...)");
     }
 
     private Command GetFeatureCommand()
     {
-        var command = new Command("calc",
-            "Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)")
+        var command = new Command("checksum",
+            "Calculate checksum fingerprint (MD5, SHA-1, CRC32, CRC8, Adler-32,...)")
         {
             _fileName,
             _lowerCase,
@@ -52,7 +52,7 @@ public class CalcCommand : ICalcCommand
         return command;
     }
 
-    private async Task CalculateText(string text, bool lowerCase, string fileName, HashType hashType)
+    private async Task CalculateText(string text, bool lowerCase, string fileName, ChecksumType hashType)
     {
         if (!string.IsNullOrWhiteSpace(text))
         {
@@ -75,9 +75,9 @@ public class CalcCommand : ICalcCommand
         }
     }
 
-    private void WriteOutput(HashType hashType, Dictionary<HashType, string> hashResult)
+    private void WriteOutput(ChecksumType hashType, Dictionary<ChecksumType, string> hashResult)
     {
-        if (hashType != HashType.All)
+        if (hashType != ChecksumType.All)
         {
             _outputProvider.AppendLine(hashResult.First().Value);
             return;
@@ -87,6 +87,7 @@ public class CalcCommand : ICalcCommand
         {
             _outputProvider.AppendLine($"{Algorithms[algorithm.Key]}:");
             _outputProvider.AppendLine(algorithm.Value);
+            _outputProvider.AppendLine();
         }
     }
 }
