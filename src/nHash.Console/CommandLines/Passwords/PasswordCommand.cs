@@ -60,7 +60,8 @@ public class PasswordCommand : IPasswordCommand
     private void GeneratePassword(bool noUpperCase, bool noLowerCase, bool noNumeric, bool noSpecialChar,
         string customChar, int length, string prefix, string suffix)
     {
-        _passwordService.GeneratePassword(noUpperCase, noLowerCase, noNumeric, noSpecialChar, customChar, length,
-            prefix, suffix);
+        var returnText = _passwordService.GeneratePassword(noUpperCase, noLowerCase, noNumeric, noSpecialChar,
+            customChar, length, prefix, suffix);
+        _outputProvider.AppendLine(returnText);
     }
 }
