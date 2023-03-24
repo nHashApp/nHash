@@ -17,6 +17,7 @@ public class HashService : IHashService
         {
             var returnedHash = CalculateHashText(inputBytes, lowerCase, hashType);
             result.Add(hashType, returnedHash);
+            return result;
         }
 
         foreach (var algorithm in Enum.GetValues<HashType>())

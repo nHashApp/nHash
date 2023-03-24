@@ -13,7 +13,7 @@ public class UuidCommand : IUuidCommand
     private readonly Option<UuidVersion> _version = new(name: "--version", () => UuidVersion.All,
         description: "Select UUID version");
 
-    private readonly IDictionary<UuidVersion, string> _uuidLabels = new Dictionary<UuidVersion, string>()
+    private readonly Dictionary<UuidVersion, string> _uuidLabels = new()
     {
         { UuidVersion.V1, "UUID v1" },
         { UuidVersion.V2, "UUID v2" },
@@ -22,13 +22,11 @@ public class UuidCommand : IUuidCommand
         { UuidVersion.V5, "UUID v5" }
     };
 
-    private readonly IUUIDGenerator _uuidGenerator;
     private readonly IOutputProvider _outputProvider;
     private readonly IUuidService _uuidService;
 
-    public UuidCommand(IUUIDGenerator uuidGenerator, IOutputProvider outputProvider, IUuidService uuidService)
+    public UuidCommand(IOutputProvider outputProvider, IUuidService uuidService)
     {
-        _uuidGenerator = uuidGenerator;
         _outputProvider = outputProvider;
         _uuidService = uuidService;
     }
@@ -48,6 +46,22 @@ public class UuidCommand : IUuidCommand
 
     private void GenerateUuid(bool withBracket, bool withoutHyphen, UuidVersion version)
     {
-        _uuidService.GenerateUuid(withBracket, withBracket, version);
+        var uuidResult = _uuidService.GenerateUuid(withBracket, withBracket, version);
+        WriteOutput(version, uuidResult);
+    }
+
+    private void WriteOutput(UuidVersion version, Dictionary<UuidVersion, string> uuidResult)
+    {
+        if (version != UuidVersion.All)
+        {
+            _outputProvider.AppendLine(uuidResult.First().Value);
+            return;
+        }
+
+        foreach (var uuid in uuidResult)
+        {
+            _outputProvider.AppendLine($"{_uuidLabels[uuid.Key]}:");
+            _outputProvider.AppendLine($"{uuid.Value}:");
+        }
     }
 }
