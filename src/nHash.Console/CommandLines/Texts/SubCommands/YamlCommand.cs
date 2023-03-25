@@ -13,11 +13,13 @@ public class YamlCommand : IYamlCommand
 
     private readonly IFileProvider _fileProvider;
     private readonly IYamlService _yamlService;
+    private readonly IOutputProvider _outputProvider;
 
-    public YamlCommand(IFileProvider fileProvider, IYamlService yamlService)
+    public YamlCommand(IFileProvider fileProvider, IYamlService yamlService, IOutputProvider outputProvider)
     {
         _fileProvider = fileProvider;
         _yamlService = yamlService;
+        _outputProvider = outputProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "YAML text for processing");
         _fileName = new Option<string>(name: "--file", description: "File name for read YAML from that");
         _conversion =
@@ -41,7 +43,8 @@ public class YamlCommand : IYamlCommand
     {
         if (!string.IsNullOrWhiteSpace(text))
         {
-            _yamlService.CalculateText(text, conversion);
+            var resultText =_yamlService.CalculateText(text, conversion);
+            WriteOutput(resultText);
             return;
         }
 
@@ -51,6 +54,12 @@ public class YamlCommand : IYamlCommand
             return;
         }
 
-        _yamlService.CalculateText(fileContent, conversion);
+        var fileResultText =_yamlService.CalculateText(fileContent, conversion);
+        WriteOutput(fileResultText);
+    }
+    
+    private void WriteOutput(string text)
+    {
+        _outputProvider.AppendLine(text);
     }
 }

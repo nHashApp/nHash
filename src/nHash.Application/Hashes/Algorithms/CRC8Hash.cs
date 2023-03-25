@@ -1,6 +1,6 @@
 namespace nHash.Application.Hashes.Algorithms;
 
-public class CRC8Hash : IHash
+internal class CRC8Hash : IHash
 {
     public byte[] ComputeHash(byte[] buffer)
     {

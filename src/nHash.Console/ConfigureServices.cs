@@ -1,6 +1,8 @@
+using nHash.Application.Hashes.Models;
 using nHash.Console.CommandLines.Encodes;
 using nHash.Console.CommandLines.Encodes.SubCommands;
 using nHash.Console.CommandLines.Hashes;
+using nHash.Console.CommandLines.Hashes.SubCommands;
 using nHash.Console.CommandLines.Passwords;
 using nHash.Console.CommandLines.Texts;
 using nHash.Console.CommandLines.Texts.SubCommands;
@@ -35,6 +37,8 @@ public static class ConfigureServices
     private static void RegisterHashServices(IServiceCollection services)
     {
         services.AddSingleton<IHashCommand, HashCommand>();
+        services.AddSingleton<ICalcCommand, CalcCommand>();
+        services.AddSingleton<IChecksumCommand, ChecksumCommand>();
     }
 
     private static void RegisterPasswordServices(IServiceCollection services)

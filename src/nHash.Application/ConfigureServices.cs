@@ -36,7 +36,8 @@ public static class ConfigureServices
 
     private static void RegisterHashServices(IServiceCollection services)
     {
-        services.AddSingleton<IHashService, HashService>();
+        services.AddSingleton<IHashCalcService, HashCalcService>();
+        services.AddSingleton<IChecksumService, ChecksumService>();
     }
 
     private static void RegisterPasswordServices(IServiceCollection services)

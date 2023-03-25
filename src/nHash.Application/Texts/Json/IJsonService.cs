@@ -5,5 +5,5 @@ namespace nHash.Application.Texts.Json;
 
 public interface IJsonService
 {
-    void CalculateText(string text, JsonPrintType printType, ConversionType conversion);
+    string CalculateText(string text, JsonPrintType printType, ConversionType conversion);
 }

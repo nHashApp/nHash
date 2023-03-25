@@ -1,44 +1,40 @@
-using nHash.Application.Abstraction;
 using nHash.Application.Uuids.Models;
 
 namespace nHash.Application.Uuids;
 
 public class UuidService : IUuidService 
 {
-
-    private readonly IDictionary<UuidVersion, string> _uuidLabels = new Dictionary<UuidVersion, string>()
-    {
-        { UuidVersion.V1, "UUID v1" },
-        { UuidVersion.V2, "UUID v2" },
-        { UuidVersion.V3, "UUID v3" },
-        { UuidVersion.V4, "UUID v4" },
-        { UuidVersion.V5, "UUID v5" }
-    };
-
     private readonly IUUIDGenerator _uuidGenerator;
-    private readonly IOutputProvider _outputProvider;
-    public UuidService(IUUIDGenerator uuidGenerator, IOutputProvider outputProvider)
+    public UuidService(IUUIDGenerator uuidGenerator)
     {
         _uuidGenerator = uuidGenerator;
-        _outputProvider = outputProvider;
     }
 
-    public void GenerateUuid(bool withBracket, bool withoutHyphen, UuidVersion version)
+    public Dictionary<UuidVersion,string> GenerateUuid(bool withBracket, bool withoutHyphen, UuidVersion version)
     {
+        var result = new Dictionary<UuidVersion, string>();
         if (version != UuidVersion.All)
         {
-            GenerateUuidText(withBracket, withoutHyphen, version);
-            return;
+            var returnedUuid =GenerateUuidText(withBracket, withoutHyphen, version);
+            result.Add(version, returnedUuid);
+            return result;
         }
 
-        foreach (var uuidLabel in _uuidLabels)
+        foreach (var uuid in Enum.GetValues<UuidVersion>())
         {
-            _outputProvider.AppendLine(uuidLabel.Value + ":");
-            GenerateUuidText(withBracket, withoutHyphen, uuidLabel.Key);
+            if (uuid == UuidVersion.All)
+            {
+                continue;
+            }
+            
+            var returnedUuid =GenerateUuidText(withBracket, withoutHyphen, uuid);
+            result.Add(uuid, returnedUuid);
         }
+
+        return result;
     }
 
-    private void GenerateUuidText(bool withBracket, bool withoutHyphen, UuidVersion version)
+    private string GenerateUuidText(bool withBracket, bool withoutHyphen, UuidVersion version)
     {
         var guid = GenerateUuidByVersion(version);
         var result = withBracket ? guid.ToString("B") : guid.ToString();
@@ -47,7 +43,7 @@ public class UuidService : IUuidService
             result = result.Replace("-", "");
         }
 
-        _outputProvider.AppendLine(result);
+        return result;
     }
 
     private Guid GenerateUuidByVersion(UuidVersion version)

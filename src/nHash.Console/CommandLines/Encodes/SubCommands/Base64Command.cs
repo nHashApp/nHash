@@ -9,9 +9,11 @@ public class Base64Command : IBase64Command
     private readonly Argument<string> _textArgument;
 
     private readonly IBase64Service _base64Service;
-    public Base64Command(IBase64Service base64Service)
+    private readonly IOutputProvider _outputProvider;
+    public Base64Command(IBase64Service base64Service, IOutputProvider outputProvider)
     {
         _base64Service = base64Service;
+        _outputProvider = outputProvider;
         _decodeText = new Option<bool>(name: "--decode", description: "Decode Base64 text");
         _textArgument = new Argument<string>("text", "text for encode/decode Base64");
     }
@@ -30,7 +32,8 @@ public class Base64Command : IBase64Command
 
     private void CalculateTextHash(string text, bool decode)
     {
-        _base64Service.CalculateTextHash(text, decode);
+        var returnText=_base64Service.CalculateTextHash(text, decode);
+        _outputProvider.Append(returnText);
     }
 
 }

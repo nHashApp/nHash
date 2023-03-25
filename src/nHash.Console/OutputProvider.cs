@@ -1,6 +1,5 @@
 using System.Text;
 using nHash.Domain.Models;
-using Spectre.Console;
 
 namespace nHash.Console;
 
@@ -45,8 +44,8 @@ public class OutputProvider : IOutputProvider
 
     private void WriteToConsole()
     {
-        //Console.WriteLine(_texts.ToString());
-        AnsiConsole.Write(new Text(_texts.ToString()));
+        //AnsiConsole.Write(new Text(_texts.ToString()));
+        System.Console.WriteLine(_texts.ToString());
     }
 
     private Task WriteToFile()

@@ -10,10 +10,12 @@ public class UrlCommand : IUrlCommand
     private readonly Argument<string> _textArgument;
 
     private readonly IUrlService _urlService;
+    private readonly IOutputProvider _outputProvider;
 
-    public UrlCommand(IUrlService urlService)
+    public UrlCommand(IUrlService urlService, IOutputProvider outputProvider)
     {
         _urlService = urlService;
+        _outputProvider = outputProvider;
         _decodeText = new Option<bool>(name: "--decode", description: "Decode url-encoded text");
         _textArgument = new Argument<string>("text", "text for url encode/decode");
     }
@@ -32,6 +34,8 @@ public class UrlCommand : IUrlCommand
 
     private void CalculateTextHash(string text, bool decode)
     {
-        _urlService.CalculateTextHash(text, decode);
+        var returnText= _urlService.CalculateTextHash(text, decode);
+        _outputProvider.Append(returnText);
+
     }
 }

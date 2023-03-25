@@ -13,11 +13,13 @@ public class XmlCommand : IXmlCommand
 
     private readonly IFileProvider _fileProvider;
     private readonly IXmlService _xmlService;
+    private readonly IOutputProvider _outputProvider;
 
-    public XmlCommand(IFileProvider fileProvider, IXmlService xmlService)
+    public XmlCommand(IFileProvider fileProvider, IXmlService xmlService, IOutputProvider outputProvider)
     {
         _fileProvider = fileProvider;
         _xmlService = xmlService;
+        _outputProvider = outputProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "XML text for processing");
         _fileName = new Option<string>(name: "--file", description: "File name for read XML from that");
         _conversion =
@@ -41,7 +43,8 @@ public class XmlCommand : IXmlCommand
     {
         if (!string.IsNullOrWhiteSpace(text))
         {
-            _xmlService.CalculateText(text, conversion);
+            var resultText = _xmlService.CalculateText(text, conversion);
+            WriteOutput(resultText);
             return;
         }
 
@@ -50,6 +53,13 @@ public class XmlCommand : IXmlCommand
         {
             return;
         }
-        _xmlService.CalculateText(fileContent, conversion);
+
+        var fileResultText = _xmlService.CalculateText(fileContent, conversion);
+        WriteOutput(fileResultText);
+    }
+
+    private void WriteOutput(string text)
+    {
+        _outputProvider.AppendLine(text);
     }
 }

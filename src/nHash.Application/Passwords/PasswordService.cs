@@ -1,32 +1,25 @@
 using System.Text;
 using MlkPwgen;
-using nHash.Application.Abstraction;
 
 namespace nHash.Application.Passwords;
 
 public class PasswordService : IPasswordService
 {
-    private readonly IOutputProvider _outputProvider;
 
     private const string CharsLCase = "abcdefgijkmnopqrstwxyz";
     private const string CharsUCase = "ABCDEFGHJKLMNPQRSTWXYZ";
     private const string CharsNumeric = "0123456789";
     private const string CharsSpecial = "*$-+?_&=!%{}/";
     
-    public PasswordService(IOutputProvider outputProvider)
-    {
-        _outputProvider = outputProvider;
-    }
-
-    public void GeneratePassword(bool noUpperCase, bool noLowerCase, bool noNumeric, bool noSpecialChar,
+    public string GeneratePassword(bool noUpperCase, bool noLowerCase, bool noNumeric, bool noSpecialChar,
         string customChar, int length, string prefix, string suffix)
     {
         var pass = Generate(noUpperCase, noLowerCase, noNumeric, noSpecialChar, customChar, length,
             prefix, suffix);
-        _outputProvider.Append(pass);
+        return pass;
     }
     
-    private string Generate(bool noUpperCase, bool noLowerCase, bool noNumeric, bool noSpecialChar,
+    private static string Generate(bool noUpperCase, bool noLowerCase, bool noNumeric, bool noSpecialChar,
         string customChar, int length, string prefix, string suffix)
     {
         var pLen = !string.IsNullOrWhiteSpace(prefix) ? prefix.Length : 0;
