@@ -17,6 +17,7 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
         <PackageReference Include="MlkPwgen" Version="0.3.0" />
         <PackageReference Include="SauceControl.Blake2Fast" Version="2.0.0" />
+        <PackageReference Include="SHA3.Net" Version="2.0.0" />
         <PackageReference Include="YamlDotNet" Version="13.0.2" />
     </ItemGroup>
     <ItemGroup>

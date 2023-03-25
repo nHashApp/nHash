@@ -18,6 +18,10 @@ public class CalcCommand : ICalcCommand
         { HashType.SHA256, "SHA-256" },
         { HashType.SHA384, "SHA-384" },
         { HashType.SHA512, "SHA-512" },
+        { HashType.SHA3_224, "SHA-3 (224)" },
+        { HashType.SHA3_256, "SHA-3 (256)" },
+        { HashType.SHA3_384, "SHA-3 (384)" },
+        { HashType.SHA3_512, "SHA-3 (512)" },
         { HashType.BLAKE2b, "Blake2b " },
         { HashType.BLAKE2s, "Blake2s " }
     };
@@ -40,7 +44,7 @@ public class CalcCommand : ICalcCommand
     private Command GetFeatureCommand()
     {
         var command = new Command("calc",
-            "Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)")
+            "Calculate hash fingerprint (MD5, SHA-1, SHA-2, SHA-3, Blake, ...)")
         {
             _fileName,
             _lowerCase,

@@ -55,6 +55,10 @@ public class HashCalcService : IHashCalcService
             HashType.SHA256 => new SHA256Hash(),
             HashType.SHA384 => new SHA384Hash(),
             HashType.SHA512 => new SHA512Hash(),
+            HashType.SHA3_224 => new Sha3224Hash(),
+            HashType.SHA3_256 => new Sha3256Hash(),
+            HashType.SHA3_384 => new Sha3384Hash(),
+            HashType.SHA3_512 => new Sha3512Hash(),
             HashType.BLAKE2b => new BLAKE2bHash(),
             HashType.BLAKE2s => new BLAKE2sHash(),
             _ => new MD5Hash()
