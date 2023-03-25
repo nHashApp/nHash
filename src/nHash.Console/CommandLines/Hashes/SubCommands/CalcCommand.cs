@@ -44,7 +44,7 @@ public class CalcCommand : ICalcCommand
     private Command GetFeatureCommand()
     {
         var command = new Command("calc",
-            "Calculate hash fingerprint (MD5, SHA-1, SHA-2, SHA-3, Blake, ...)")
+            "Calculate hash fingerprint (MD5, SHA-1, SHA-2 (SHA-256, SHA-384, SHA512), SHA-3, Blake, ...)")
         {
             _fileName,
             _lowerCase,
