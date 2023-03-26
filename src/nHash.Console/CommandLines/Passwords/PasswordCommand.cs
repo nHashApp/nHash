@@ -33,6 +33,7 @@ public class PasswordCommand : IPasswordCommand
         _customChar = new Option<string>(name: "--custom", () => string.Empty,
             description: "Custom characters. If select the custom character other options was removed");
         _length = new Option<int>(name: "--length", () => 16, description: "Password length");
+        _length.AddAlias("-l");
         _prefix = new Option<string>(name: "--prefix", () => string.Empty, description: "Prefix");
         _suffix = new Option<string>(name: "--suffix", () => string.Empty, description: "Suffix");
     }

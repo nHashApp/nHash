@@ -32,6 +32,7 @@ public static class Initialize
         }
 
         var outputFileName = new Option<string>(name: "--" + OutputOption, description: "File name for writing output");
+        outputFileName.AddAlias("-o");
         rootCommand.AddGlobalOption(outputFileName);
 
         var commandLineBuilder = new CommandLineBuilder(rootCommand)

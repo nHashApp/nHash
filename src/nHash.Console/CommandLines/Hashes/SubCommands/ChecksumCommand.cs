@@ -34,11 +34,14 @@ public class ChecksumCommand : IChecksumCommand
         _outputProvider = outputProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "Text for calculate fingerprint");
         _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
+        _fileName.AddAlias("-f");
         _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
         _hashType = new Option<ChecksumType>(name: "--type", () => ChecksumType.All,
             "Hash type (MD5, SHA-1, CRC-8, CRC-32, Adler-32,...)");
+        _hashType.AddAlias("-t");
         _verify = new Option<string>(name: "--verify",
             description: "Use the checksum type provided to verify your checksum");
+        _verify.AddAlias("-v");
     }
 
     private Command GetFeatureCommand()

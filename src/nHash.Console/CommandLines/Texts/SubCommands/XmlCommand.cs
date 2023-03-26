@@ -22,8 +22,10 @@ public class XmlCommand : IXmlCommand
         _outputProvider = outputProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "XML text for processing");
         _fileName = new Option<string>(name: "--file", description: "File name for read XML from that");
+        _fileName.AddAlias("-f");
         _conversion =
             new Option<ConversionType>(name: "--convert", description: "Convert XML to other format (JSON, YAML)");
+        _conversion.AddAlias("-c");
     }
 
     private Command GetFeatureCommand()

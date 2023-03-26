@@ -16,6 +16,7 @@ public class HtmlCommand : IHtmlCommand
         _htmlService = htmlService;
         _outputProvider = outputProvider;
         _decodeText = new Option<bool>(name: "--decode", description: "Decode html-encoded text");
+        _decodeText.AddAlias("-d");
         _textArgument = new Argument<string>("text", "text for html encode/decode");
     }
 

@@ -22,8 +22,10 @@ public class YamlCommand : IYamlCommand
         _outputProvider = outputProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "YAML text for processing");
         _fileName = new Option<string>(name: "--file", description: "File name for read YAML from that");
+        _fileName.AddAlias("-f");
         _conversion =
             new Option<ConversionType>(name: "--convert", description: "Convert YAML to other format (JSON, XML)");
+        _conversion.AddAlias("-c");
     }
 
     private Command GetFeatureCommand()
