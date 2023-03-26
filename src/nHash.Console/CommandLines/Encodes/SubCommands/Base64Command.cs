@@ -15,6 +15,7 @@ public class Base64Command : IBase64Command
         _base64Service = base64Service;
         _outputProvider = outputProvider;
         _decodeText = new Option<bool>(name: "--decode", description: "Decode Base64 text");
+        _decodeText.AddAlias("-d");
         _textArgument = new Argument<string>("text", "text for encode/decode Base64");
     }
 

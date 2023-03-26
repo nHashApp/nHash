@@ -37,8 +37,10 @@ public class CalcCommand : ICalcCommand
         _outputProvider = outputProvider;
         _textArgument = new Argument<string>("text", () => string.Empty, "Text for calculate fingerprint");
         _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
+        _fileName.AddAlias("-f");
         _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
         _hashType = new Option<HashType>(name: "--type", () => HashType.All, "Hash type (MD5, SHA-1, SHA-256,...)");
+        _hashType.AddAlias("-t");
     }
 
     private Command GetFeatureCommand()

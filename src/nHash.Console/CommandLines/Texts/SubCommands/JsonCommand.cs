@@ -25,8 +25,10 @@ public class JsonCommand : IJsonCommand
         _textArgument = new Argument<string>("text", () => string.Empty, "JSON text for processing");
         _printType = new Option<JsonPrintType>("--print", "Print pretty/Compact JSON representation");
         _fileName = new Option<string>(name: "--file", description: "File name for read JSON from that");
+        _fileName.AddAlias("-f");
         _conversion =
             new Option<ConversionType>(name: "--convert", description: "Convert JSON to other format (YAML, XML)");
+        _conversion.AddAlias("-c");
     }
 
     private Command GetFeatureCommand()

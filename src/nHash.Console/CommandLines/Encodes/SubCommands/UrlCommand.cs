@@ -17,6 +17,7 @@ public class UrlCommand : IUrlCommand
         _urlService = urlService;
         _outputProvider = outputProvider;
         _decodeText = new Option<bool>(name: "--decode", description: "Decode url-encoded text");
+        _decodeText.AddAlias("-d");
         _textArgument = new Argument<string>("text", "text for url encode/decode");
     }
 

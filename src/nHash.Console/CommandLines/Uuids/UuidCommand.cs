@@ -7,11 +7,9 @@ public class UuidCommand : IUuidCommand
 {
     public Command Command => GetCommand();
 
-    private readonly Option<bool> _withBracket = new(name: "--bracket", description: "Generate with brackets");
-    private readonly Option<bool> _withoutHyphen = new(name: "--no-hyphen", description: "Generate without hyphens");
-
-    private readonly Option<UuidVersion> _version = new(name: "--version", () => UuidVersion.All,
-        description: "Select UUID version");
+    private readonly Option<bool> _withBracket;
+    private readonly Option<bool> _withoutHyphen;
+    private readonly Option<UuidVersion> _version;
 
     private readonly Dictionary<UuidVersion, string> _uuidLabels = new()
     {
@@ -29,6 +27,13 @@ public class UuidCommand : IUuidCommand
     {
         _outputProvider = outputProvider;
         _uuidService = uuidService;
+
+        _withBracket = new Option<bool>(name: "--bracket", description: "Generate with brackets");
+        _withoutHyphen = new Option<bool>(name: "--no-hyphen", description: "Generate without hyphens");
+        _version = new Option<UuidVersion>(name: "--version", () => UuidVersion.All,
+            description: "Select UUID version");
+
+        _version.AddAlias("-v");
     }
 
     private Command GetCommand()
