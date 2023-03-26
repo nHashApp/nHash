@@ -34,3 +34,8 @@ If you would like to contribute to nHash, please fork the repository and submit 
 ## License
 
 nHash is licensed under the [MIT License](https://github.com/nhash/nhash/blob/master/LICENSE).
+
+## References
+* Humanizer: https://github.com/Humanizr/Humanizer 
+* MlkPwgen: https://github.com/mkropat/MlkPwgen
+* SHA3.Net: https://github.com/dariogriffo/sha3.net
