@@ -25,7 +25,29 @@ nHash is a lightweight and easy-to-use hashing tool for Windows and Linux that a
 1. Download and install nHash from the [releases page](https://github.com/nHashApp/nHash/releases/latest) on your Windows or Linux machine.
 2. You can view the options by running the nHash application with the `--help`.
 3. Use nHash with your desired parameters and command.
-4. For more information on sub-command parameters or options, run a command with the --help option. For example, `nhash password --help`.
+4. For more information on sub-command parameters or options, run a command with the `--help` option. For example, `nhash password --help`.
+
+```
+❯ nhash --help
+Description:
+  Hash and Text utilities in command-line mode
+
+Usage:
+  nhash [command] [options]
+
+Options:
+  --output <output>  File name for writing output
+  --version          Show version information
+  -?, -h, --help     Show help and usage information
+
+Commands:
+  uuid      Generate a Universally unique identifier (UUID/GUID) version 1 to 5
+  encode    Encode/Decode features (JWT, Base64, URL, HTML)
+  hash      Calculate hash and checksum fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)
+  text      Text utilities (Humanizer, JSON, YAML, XML)
+  password  Generate a random password with custom length, prefix, suffix, character, etc options
+
+```
 
 ## Contributing
 
