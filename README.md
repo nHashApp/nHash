@@ -1,16 +1,36 @@
-# ![nHash](images/icon_32.png) nHash
-Hash and Text utilities in command-line mode
+# nHash
 
-nHash is a console application that provides various hash and text utilities in command-line mode. It supports generating Universally Unique Identifiers (UUID/GUID), encoding/decoding features such as JWT, Base64, URL, and HTML, calculating hash fingerprints, and performing text utilities such as humanization.
+nHash is a lightweight and easy-to-use hashing tool for Windows and Linux that allows users to quickly and securely generate cryptographic hash values for files and text. It supports a variety of popular hash algorithms, including MD5, SHA-1, SHA-256, and more, making it an essential tool for verifying file integrity and ensuring data privacy.
 
-The application is compatible with both Windows and Linux operating systems and supports piping in Linux. It provides a simple and efficient way to perform various text and hash-related tasks on the command-line, without the need for complex scripts or tools.
+## Features
 
-To get started, simply download the latest release from the [releases page](https://github.com/nHashApp/nHash/releases/latest) and run the executable file in a terminal or command prompt. For more information on the available commands and options, refer to the documentation provided in the application or use the --help option.
+- [UUID](https://github.com/nHashApp/nHash/wiki/UUID): Generate a Universally unique identifier (UUID/GUID) version 1 to 5
+- [Encode](https://github.com/nHashApp/nHash/wiki/Encode)
+    - [JWT](https://github.com/nHashApp/nHash/wiki/Encode-JWT): JWT token decode
+    - [Base64](https://github.com/nHashApp/nHash/wiki/Encode-Base64): Encode/Decode Base64
+    - [URL](https://github.com/nHashApp/nHash/wiki/Encode-URL): URL Encode/Decode
+    - [HTML](https://github.com/nHashApp/nHash/wiki/Encode-HTML): HTML Encode/Decode
+- [Hash](https://github.com/nHashApp/nHash/wiki/Hash)
+    - [Calc](https://github.com/nHashApp/nHash/wiki/Hash-Calc): Calculate hash fingerprint (MD5, SHA-1, SHA-2 (SHA-256, SHA-384, SHA512), SHA-3, Blake, ...)
+    - [Checksum](https://github.com/nHashApp/nHash/wiki/Hash-Checksum): Calculate checksum fingerprint (MD5, SHA-1, CRC32, CRC8, Adler-32,...)
+- [Text](https://github.com/nHashApp/nHash/wiki/Text)
+    - [Humanize](https://github.com/nHashApp/nHash/wiki/Text-Humanize): Humanizer text (Pascal-case, Camel-case, Kebab, Underscore, lowercase, etc)
+    - [JSON](https://github.com/nHashApp/nHash/wiki/Text-JSON): JSON tools
+    - [YAML](https://github.com/nHashApp/nHash/wiki/Text-YAML): YAML tools
+    - [XML](https://github.com/nHashApp/nHash/wiki/Text-XML): XML tools
+- [Password](https://github.com/nHashApp/nHash/wiki/Password): Generate a random password with custom length, prefix, suffix, character, etc options
 
-nHash is an open-source project released under the MIT License. Contributions and feedback are welcome, and can be submitted through the GitHub repository.
+For more information about nHash and its various commands and options, please visit the [nHash wiki page](https://github.com/nHashApp/nHash/wiki/Getting-Started)
+
+## Usage
+
+1. Download and install nHash from the [releases page](https://github.com/nHashApp/nHash/releases/latest) on your Windows or Linux machine.
+2. You can view the options by running the nHash application with the `--help`.
+3. Use nHash with your desired parameters and command.
+4. For more information on sub-command parameters or options, run a command with the `--help` option. For example, `nhash password --help`.
 
 ```
-> nhash --help
+❯ nhash --help
 Description:
   Hash and Text utilities in command-line mode
 
@@ -22,398 +42,24 @@ Options:
   --version          Show version information
   -?, -h, --help     Show help and usage information
 
-```
-## Features
-
-| Commands               |                                                                                       |
-|------------------------|---------------------------------------------------------------------------------------|
-| [uuid](#uuid)          | Generate a Universally unique identifier (UUID/GUID) version 1 to 5                   |
-| [encode](#encode)      | Encode/Decode features (JWT, Base64, URL, HTML)                                       |
-| [hash](#hash) <text>   | Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8)       |
-| [text](#text)          | Text utilities (Humanizer, JSON, YAML, XML)                                           |
-| password               | Generate a random password with custom length, prefix, suffix, character, etc options |
- 
-## Usage
-
-## UUID
-```
-❯ nhash uuid --help
-Description:
-  Generate a Universally unique identifier (UUID/GUID) version 1 to 5
-
-Usage:
-  nhash uuid [options]
-
-Options:
-  --bracket                       Generate with brackets
-  --no-hyphen                     Generate without hyphens
-  --version <All|V1|V2|V3|V4|V5>  Select UUID version [default: All]
-  --output <output>               File name for writing output
-  -?, -h, --help                  Show help and usage information
-```  
-#### Sample
-```
-❯ nhash uuid
-UUID v1:
-247e9324-e636-0003-0000-000001800000
-UUID v2:
-307e9324-0003-8002-0000-000000000000
-UUID v3:
-4f366064-c703-af30-9839-02e8cf8006c5
-UUID v4:
-d6032068-dab5-a04c-a47f-9dde41691d00
-UUID v5:
-df633114-5cc5-6953-8ef6-4eed9a804629
- 
-❯ nhash uuid --version v4 --bracket
-{898486f4-0447-46ba-9bd1-54e0542069dd}
-  
-❯ nhash uuid --version v4 --no-hyphen
-dcb5d66f6b604e27bd8d7da77156d07d
-  
-❯ nhash uuid --version v4 --no-hyphen --bracket
-{ddee757350644a38bb6486cf6846d66e}  
-
-❯ nhash uuid --version v4 --no-hyphen --bracket --output uuid.txt
-```    
----
-## Encode
-```
-❯ nhash encode --help
-Description:
-  Encode/Decode features (JWT, Base64, URL, HTML)
-
-Usage:
-  nhash encode [command] [options]
-
-Options:
-  --output <output>  File name for writing output
-  -?, -h, --help     Show help and usage information
-
 Commands:
-  jwt <token>    JWT token decode (Comply with GDPR rules)
-  base64 <text>  Encode/Decode Base64
-  url <text>     URL Encode/Decode
-  html <text>    HTML Encode/Decode
-```
-### JWT
-```
-❯ nhash encode jwt --help
-Description:
-  JWT token decode (Comply with GDPR rules)
-
-Usage:
-  nhash encode jwt <token> [options]
-
-Arguments:
-  <token>  Jwt token for decode
-
-Options:
-  --no-summary       Don't write human readable information [default: False]
-  --output <output>  File name for writing output
-  -?, -h, --help     Show help and usage information
-
-```  
-#### Sample
-```
-❯ nhash encode jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-
-Header: (ALGORITHM & TOKEN TYPE)
-{
-  "alg": "HS256",
-  "typ": "JWT"
-}
-
-Payload: (DATA)
-{
-  "sub": "1234567890",
-  "name": "John Doe",
-  "iat": 1516239022
-}
-
-Summary:
-    Algorithm: HS256
-    Issued at: 1/18/2018 1:30:22 AM
-    Subject: 1234567890
-```
-```
-❯ nhash encode jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c --no-summary
-
-Header: (ALGORITHM & TOKEN TYPE)
-{
-  "alg": "HS256",
-  "typ": "JWT"
-}
-
-Payload: (DATA)
-{
-  "sub": "1234567890",
-  "name": "John Doe",
-  "iat": 1516239022
-}
-```
-```
-❯ nhash encode jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c --output jwt.txt
-```    
----
-    
-### Base64
-```
-❯ nhash base64 --help
-Description:
-  Encode/Decode Base64
-
-Usage:
-  nhash base64 <text> [options]
-
-Arguments:
-  <text>  text for encode/decode Base64
-
-Options:
-  --decode           Decode Base64 text
-  --output <output>  File name for writing output
-  -?, -h, --help     Show help and usage information
-```  
-#### Sample
-```
-❯ nhash base64 hello
-aGVsbG8=
- 
-❯ nhash base64 aGVsbG8= --decode
-hello
-
-❯ nhash base64 hello | nhash base64 --decode
-hello
-
-❯ nhash base64 --file sample.txt --output encoded.txt
-```    
----
-    
-### URL
-```
-❯ nhash url --help
-Description:
-  URL Encode/Decode
-
-Usage:
-  nhash url <text> [options]
-
-Arguments:
-  <text>  text for url encode/decode
-
-Options:
-  --decode           Decode url-encoded text
-  --output <output>  File name for writing output
-  -?, -h, --help     Show help and usage information
-```  
-#### Sample
-```
-❯ nhash url https://google.com
-https%3a%2f%2fgoogle.com
-
-❯ nhash url https://google.com --output sample.txt
- 
-❯ nhash url https%3a%2f%2fgoogle.com --decode
-https://google.com 
-```    
----
-
-### HTML
-```
-❯ nhash html --help
-Description:
-  HTML Encode/Decode
-
-Usage:
-  nhash html <text> [options]
-
-Arguments:
-  <text>  text for html encode/decode
-
-Options:
-  --decode           Decode html-encoded text
-  --output <output>  File name for writing output
-  -?, -h, --help     Show help and usage information
-```  
-#### Sample
-```
-❯ nhash html '<html><body><h1>hello</h1></body></html>'
-&lt;html&gt;&lt;body&gt;&lt;h1&gt;hello&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;
- 
-❯ nhash html '&lt;html&gt;&lt;body&gt;&lt;h1&gt;hello&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;' --decode
-<html><body><h1>hello</h1></body></html>
-
-❯ nhash html '&lt;html&gt;&lt;body&gt;&lt;h1&gt;hello&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;' --decode --output sample.html
-```    
----
-
-### Hash
-```
-❯ nhash hash --help
-Description:
-  Calculate hash fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)
-
-Usage:
-  nhash hash [<text>] [options]
-
-Arguments:
-  <text>  Text for calculate fingerprint []
-
-Options:
-  --file <file>                                          File name for calculate hash
-  --lower                                                Generate lower case
-  --type <All|CRC32|CRC8|MD5|SHA1|SHA256|SHA384|SHA512>  Hash type (MD5, SHA-1, SHA-256,...) [default: All]
-  --output <output>                                      File name for writing output
-  -?, -h, --help                                         Show help and usage information
-
-
-```  
-#### Sample
-```
-❯ nhash hash hello
-MD5:
-5D41402ABC4B2A76B9719D911017C592
-SHA-1:
-AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D
-SHA-256:
-2CF24DBA5FB0A30E26E83B2AC5B9E29E1B161E5C1FA7425E73043362938B9824
-SHA-384:
-59E1748777448C69DE6B800D7A33BBFB9FF1B463E44354C3553BCDB9C666FA90125A3C79F90397BDF5F6A13DE828684F
-SHA-512:
-9B71D224BD62F3785D96D46AD3EA3D73319BFBC2890CAADAE2DFF72519673CA72323C3D99BA5C11D7C7ACC6E14B8C5DA0C4663475C2E5C3ADEF46F73BCDEC043
-CRC32:
-3610A686
-  
-```    
-```
-❯ nhash hash --file sample.txt
-MD5:
-B1946AC92492D2347C6235B4D2611184
-SHA-1:
-F572D396FAE9206628714FB2CE00F72E94F2258F
-SHA-256:
-5891B5B522D5DF086D0FF0B110FBD9D21BB4FC7163AF34D08286A2E846F6BE03
-SHA-384:
-1D0F284EFE3EDEA4B9CA3BD514FA134B17EAE361CCC7A1EEFEFF801B9BD6604E01F21F6BF249EF030599F0C218F2BA8C
-SHA-512:
-E7C22B994C59D9CF2B48E549B1E24666636045930D3DA7C1ACB299D1C3B7F931F94AAE41EDDA2C2B207A36E10F8BCB8D45223E54878F5B316E7CE3B6BC019629
-CRC32:
-363A3020
-    
-```    
-```
-❯ cat sample.txt | nhash hash
-MD5:
-B1946AC92492D2347C6235B4D2611184
-SHA-1:
-F572D396FAE9206628714FB2CE00F72E94F2258F
-SHA-256:
-5891B5B522D5DF086D0FF0B110FBD9D21BB4FC7163AF34D08286A2E846F6BE03
-SHA-384:
-1D0F284EFE3EDEA4B9CA3BD514FA134B17EAE361CCC7A1EEFEFF801B9BD6604E01F21F6BF249EF030599F0C218F2BA8C
-SHA-512:
-E7C22B994C59D9CF2B48E549B1E24666636045930D3DA7C1ACB299D1C3B7F931F94AAE41EDDA2C2B207A36E10F8BCB8D45223E54878F5B316E7CE3B6BC019629
-CRC32:
-363A3020
-```
-```
-❯ nhash hash --file sample.txt --type md5
-B1946AC92492D2347C6235B4D2611184
-
-❯ nhash hash --file sample.txt --type sha1 --output crc.txt
-
-```
----
-
-## Text
-```
-❯ nhash text  --help
-Description:
-  Text utilities (Humanizer, JSON, YAML, XML)
-
-Usage:
-  nhash text [command] [options]
-
-Options:
-  --output <output>  File name for writing output
-  -?, -h, --help     Show help and usage information
-
-Commands:
-  humanize                                                          Humanizer text (Pascal-case, Camel-case, Kebab, Underscore, 
-  <Camel|Dehumanize|Humanize|Hyphenate|Kebab|Lowercase|Pascal|Unde  lowercase, etc)
-  rscore|Uppercase> <text>
-  json <text>                                                       JSON tools []
-  yaml <text>                                                       YAML tools []
-  xml <text>                                                        XML tools []
+  uuid      Generate a Universally unique identifier (UUID/GUID) version 1 to 5
+  encode    Encode/Decode features (JWT, Base64, URL, HTML)
+  hash      Calculate hash and checksum fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)
+  text      Text utilities (Humanizer, JSON, YAML, XML)
+  password  Generate a random password with custom length, prefix, suffix, character, etc options
 
 ```
 
-### Humanize
-```
-❯ nhash text humanize --help
-Description:
-  Humanizer text (Pascal-case, Camel-case, Kebab, Underscore, lowercase, etc)
+## Contributing
 
-Usage:
-  nhash text humanize <type> <text> [options]
+If you would like to contribute to nHash, please fork the repository and submit a pull request. We welcome all contributions, including bug fixes, new features, and documentation improvements.
 
-Arguments:
-  <Camel|Dehumanize|Humanize|Hyphenate|Kebab|Lowercase|Pascal|Underscore|Uppercase>  Humanize type
-  <text>                                                                             Text for humanize
+## License
 
-Options:
-  --output <output>  File name for writing output
-  -?, -h, --help     Show help and usage information
-```
-#### Sample
-```
-❯ nhash text humanize camel "hello world"
-helloWorld
+nHash is licensed under the [MIT License](https://github.com/nhash/nhash/blob/master/LICENSE).
 
-❯ nhash text humanize kebab "hello world"
-hello-world
-
-❯ nhash text humanize pascal "hello world"
-HelloWorld
-
-❯ nhash text humanize uppercase "hello world"
-HELLO WORLD
-
-```
----
-### JSON
-```
-❯ nhash text json --help
-Description:
-  JSON tools
-
-Usage:
-  nhash text json [<text>] [options]
-
-Arguments:
-  <text>  JSON text for processing []
-
-Options:
-  --print <Compact|Pretty>   Print pretty/Compact JSON representation
-  --file <file>              File name for read JSON from that
-  --convert <JSON|XML|YAML>  Convert JSON to other format (YAML, XML)
-  --output <output>          File name for writing output
-  -?, -h, --help             Show help and usage information
-
-```
-#### Sample
-```
-❯ nhash text json --print pretty "{\"name\":\"test\",\"age\":10}"
-{
-  "name": "test",
-  "age": 10
-}
-    
-
-```
----
-        
-  
 ## References
 * Humanizer: https://github.com/Humanizr/Humanizer 
 * MlkPwgen: https://github.com/mkropat/MlkPwgen
+* SHA3.Net: https://github.com/dariogriffo/sha3.net
