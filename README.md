@@ -20,6 +20,8 @@ nHash is a lightweight and easy-to-use hashing tool for Windows and Linux that a
     - **XML:** XML tools
 - **Password:** Generate a random password with custom length, prefix, suffix, character, etc options
 
+For more information about nHash and its various commands and options, please visit the [nHash wiki page](https://github.com/nHashApp/nHash/wiki/Getting-Started)
+
 ## Usage
 
 1. Download and install nHash from the [releases page](https://github.com/nHashApp/nHash/releases/latest) on your Windows or Linux machine.
