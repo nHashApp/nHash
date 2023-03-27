@@ -78,7 +78,8 @@ public static class Initialize
 
     private static void UnhandledExceptionMiddleware(Exception exception, InvocationContext context)
     {
-        System.Console.WriteLine($"Internal exception has occurred, {exception.Message}");
+        System.Console.WriteLine("Internal exception has occurred");
+        System.Console.WriteLine($"Detail: {exception.Message}");
     }
 
     private static void WriteExampleSection(HelpContext context)
