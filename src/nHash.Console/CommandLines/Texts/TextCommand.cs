@@ -39,4 +39,6 @@ public class TextCommand : ITextCommand
 
         return command;
     }
+    
+    
 }
