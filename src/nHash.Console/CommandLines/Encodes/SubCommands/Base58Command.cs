@@ -2,26 +2,26 @@ using nHash.Application.Encodes;
 
 namespace nHash.Console.CommandLines.Encodes.SubCommands;
 
-public class Base64Command : IBase64Command 
+public class Base58Command : IBase58Command
 {
     public Command Command => GetFeatureCommand();
     private readonly Option<bool> _decodeText;
     private readonly Argument<string> _textArgument;
 
-    private readonly IBase64Service _base64Service;
+    private readonly IBase58Service _base58Service;
     private readonly IOutputProvider _outputProvider;
-    public Base64Command(IBase64Service base64Service, IOutputProvider outputProvider)
+    public Base58Command(IBase58Service base58Service, IOutputProvider outputProvider)
     {
-        _base64Service = base64Service;
+        _base58Service = base58Service;
         _outputProvider = outputProvider;
-        _decodeText = new Option<bool>(name: "--decode", description: "Decode Base64 text");
+        _decodeText = new Option<bool>(name: "--decode", description: "Decode Base58 text");
         _decodeText.AddAlias("-d");
-        _textArgument = new Argument<string>("text", "text for encode/decode Base64");
+        _textArgument = new Argument<string>("text", "text for encode/decode Base58");
     }
 
     private Command GetFeatureCommand()
     {
-        var command = new Command("base64", "Encode/Decode Base64")
+        var command = new Command("base58", "Encode/Decode Base64")
         {
             _decodeText
         };
@@ -33,7 +33,7 @@ public class Base64Command : IBase64Command
 
     private void CalculateTextHash(string text, bool decode)
     {
-        var returnText=_base64Service.Calculate(text, decode);
+        var returnText=_base58Service.Calculate(text, decode);
         _outputProvider.Append(returnText);
     }
 

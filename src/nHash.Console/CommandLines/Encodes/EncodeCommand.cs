@@ -8,16 +8,18 @@ public class EncodeCommand : IEncodeCommand
 
     private readonly IJwtTokenCommand _jwtTokenFeature;
     private readonly IBase64Command _base64Feature;
+    private readonly IBase58Command _base58Feature;
     private readonly IUrlCommand _urlFeature;
     private readonly IHtmlCommand _htmlFeature;
     
     public EncodeCommand(IJwtTokenCommand jwtTokenFeature, IBase64Command base64Feature, IUrlCommand urlFeature,
-        IHtmlCommand htmlFeature)
+        IHtmlCommand htmlFeature, IBase58Command base58Feature)
     {
         _jwtTokenFeature = jwtTokenFeature;
         _base64Feature = base64Feature;
         _urlFeature = urlFeature;
         _htmlFeature = htmlFeature;
+        _base58Feature = base58Feature;
     }
 
     private Command GetCommand()
@@ -26,6 +28,7 @@ public class EncodeCommand : IEncodeCommand
         {
             _jwtTokenFeature,
             _base64Feature,
+            _base58Feature,
             _urlFeature,
             _htmlFeature,
         };

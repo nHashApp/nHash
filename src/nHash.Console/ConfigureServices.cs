@@ -29,6 +29,7 @@ public static class ConfigureServices
     {
         services.AddSingleton<IEncodeCommand, EncodeCommand>();
         services.AddSingleton<IBase64Command, Base64Command>();
+        services.AddSingleton<IBase58Command, Base58Command>();
         services.AddSingleton<IHtmlCommand, HtmlCommand>();
         services.AddSingleton<IJwtTokenCommand, JwtTokenCommand>();
         services.AddSingleton<IUrlCommand, UrlCommand>();

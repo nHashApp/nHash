@@ -28,10 +28,10 @@ public static class ConfigureServices
     private static void RegisterEncodeServices(IServiceCollection services)
     {
         services.AddSingleton<IBase64Service, Base64Service>();
+        services.AddSingleton<IBase58Service, Base58Service>();
         services.AddSingleton<IHtmlService, HtmlService>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<IUrlService, UrlService>();
-
     }
 
     private static void RegisterHashServices(IServiceCollection services)
@@ -43,7 +43,6 @@ public static class ConfigureServices
     private static void RegisterPasswordServices(IServiceCollection services)
     {
         services.AddSingleton<IPasswordService, PasswordService>();
-
     }
 
     private static void RegisterTextServices(IServiceCollection services)
@@ -61,6 +60,5 @@ public static class ConfigureServices
     {
         services.AddSingleton<IUuidService, UuidService>();
         services.AddSingleton<IUUIDGenerator, UUIDGenerator>();
-
     }
 }
