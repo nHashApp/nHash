@@ -76,12 +76,14 @@ public static class Initialize
         outputParameter.Type = OutputType.Console;
 
         var outputOption = context.ParseResult.CommandResult.Children.Where(_ => _.GetType() == typeof(OptionResult))
-            .FirstOrDefault(_ => ((OptionResult)_).Option.Name == OutputOption);
-        if (outputOption is not null)
+            .FirstOrDefault(_ => ((OptionResult)_).Option.Name is OutputOption or "o");
+        if (outputOption is null)
         {
-            outputParameter.Type = OutputType.File;
-            outputParameter.OutputTypeValue = outputOption.Tokens[0].ToString();
+            return;
         }
+        
+        outputParameter.Type = OutputType.File;
+        outputParameter.OutputTypeValue = outputOption.Tokens[0].ToString();
     }
 
     private static async Task WriteOutput(IServiceProvider provider)
