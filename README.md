@@ -43,12 +43,11 @@ Options:
   -?, -h, --help         Show help and usage information
 
 Commands:
-  uuid      Generate a Universally unique identifier (UUID/GUID) version 1 to 5
-  encode    Encode/Decode features (JWT, Base64, URL, HTML)
-  hash      Calculate hash and checksum fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)
-  text      Text utilities (Humanizer, JSON, YAML, XML)
-  password  Generate a random password with custom length, prefix, suffix, character, etc options
-
+  u, uuid      Generate a Universally unique identifier (UUID/GUID) version 1 to 5
+  e, encode    Encode/Decode features (JWT, Base64, URL, HTML)
+  h, hash      Calculate hash and checksum fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)
+  t, text      Text utilities (Humanizer, JSON, YAML, XML)
+  p, password  Generate a random password with custom length, prefix, suffix, character, etc options
 ```
 
 ## Contributing
