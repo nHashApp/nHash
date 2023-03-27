@@ -29,7 +29,7 @@ For more information about nHash and its various commands and options, please vi
 3. Use nHash with your desired parameters and command.
 4. For more information on sub-command parameters or options, run a command with the `--help` option. For example, `nhash password --help`.
 
-```bash
+```
 $ nhash --help
 Description:
   Hash and Text utilities in command-line mode
