@@ -2,27 +2,27 @@ using System.CommandLine.Builder;
 using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using nHash.Console.CommandLines;
 using nHash.Console.CommandLines.Base;
 using nHash.Console.CommandLines.Encodes;
 using nHash.Console.CommandLines.Hashes;
 using nHash.Console.CommandLines.Passwords;
 using nHash.Console.CommandLines.Texts;
 using nHash.Console.CommandLines.Uuids;
+using nHash.Console.Helper;
 using nHash.Domain.Models;
 
 namespace nHash.Console;
 
 public static class Initialize
 {
-    private static Option<string> _outputFileName;
+    private static readonly Option<string> OutputFileName;
 
     static Initialize()
     {
-        _outputFileName = new Option<string>(name: "--output", description: "File name for writing output");
-        _outputFileName.AddAlias("-o");
+        OutputFileName = new Option<string>(name: "--output", description: "File name for writing output");
+        OutputFileName.AddAlias("-o");
     }
-    
+
     public static async Task<int> InitializeCommandLine(IEnumerable<string> args, IServiceProvider provider)
     {
         var features = new List<IFeature>()
@@ -40,12 +40,13 @@ public static class Initialize
             rootCommand.AddCommand(feature.Command);
         }
 
-        rootCommand.AddGlobalOption(_outputFileName);
+        rootCommand.AddGlobalOption(OutputFileName);
 
         var commandLineBuilder = new CommandLineBuilder(rootCommand)
-            .AddMiddleware((context, next) => UnhandledExceptionMiddleware(provider, context, next))
             .AddMiddleware((context, next) => OutputMiddleware(provider, context, next))
-            .UseDefaults() //.UseVersionOption(new []{"--help"});
+            .UseDefaults()
+            .UseExceptionHandler(UnhandledExceptionMiddleware)
+            .UseCustomVersionHandler()
             .UseHelp(ctx =>
             {
                 ctx.HelpBuilder.CustomizeLayout(
@@ -55,6 +56,7 @@ public static class Initialize
                             .Append(WriteExampleSection)
                 );
             });
+        
         var parser = commandLineBuilder.Build();
         return await parser.InvokeAsync(args.ToArray());
         //return await rootCommand.InvokeAsync(parameters);
@@ -74,17 +76,9 @@ public static class Initialize
         await WriteOutput(provider);
     }
 
-    private static async Task UnhandledExceptionMiddleware(IServiceProvider provider, InvocationContext context,
-        Func<InvocationContext, Task> next)
+    private static void UnhandledExceptionMiddleware(Exception exception, InvocationContext context)
     {
-        try
-        {
-            await next(context);
-        }
-        catch
-        {
-            //
-        }
+        System.Console.WriteLine($"Internal exception has occurred, {exception.Message}");
     }
 
     private static void WriteExampleSection(HelpContext context)
@@ -108,9 +102,9 @@ public static class Initialize
     {
         var outputParameter = provider.GetService<OutputParameter>()!;
         outputParameter.Type = OutputType.Console;
-        
+
         var outputOption = context.ParseResult.CommandResult.Children
-            .FirstOrDefault(_ => _.Symbol == _outputFileName);
+            .FirstOrDefault(_ => _.Symbol == OutputFileName);
         if (outputOption is null)
         {
             return;

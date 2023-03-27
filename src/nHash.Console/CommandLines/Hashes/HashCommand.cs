@@ -34,14 +34,4 @@ public class HashCommand : IHashCommand
 
         return command;
     }
-
-    private static List<KeyValuePair<string, string>> GetExamples()
-    {
-        return new List<KeyValuePair<string, string>>()
-        {
-            new("Calc", "nhash hash calc <text> [options]"),
-            new("Checksum", "nhash hash checksum <text> [options]"),
-            new("Checksum", "nhash h ch <text> [options]"),
-        };
-    }
 }
