@@ -48,7 +48,7 @@ public class ChecksumCommand : IChecksumCommand
     private BaseCommand GetFeatureCommand()
     {
         var command = new BaseCommand("checksum",
-            "Calculate checksum fingerprint (MD5, SHA-1, CRC32, CRC8, Adler-32,...)")
+            "Calculate checksum fingerprint (MD5, SHA-1, CRC32, CRC8, Adler-32,...)", GetExamples())
         {
             _fileName,
             _lowerCase,
@@ -57,8 +57,20 @@ public class ChecksumCommand : IChecksumCommand
         };
         command.AddArgument(_textArgument);
         command.SetHandler(CalculateText, _textArgument, _lowerCase, _fileName, _hashType, _verify);
+        command.AddAlias("ch");
 
         return command;
+    }
+
+    private static List<KeyValuePair<string, string>> GetExamples()
+    {
+        return new List<KeyValuePair<string, string>>()
+        {
+            new("Calculate the MD5 checksum of a given text", "nhash hash checksum \"Hello, World\" -t md5"),
+            new("Calculate the CRC-8 checksum of a file", "nhash h ch -f /path/to/file.txt -t crc8"),
+            new("Verify a checksum", "nhash hash checksum \"Hello, World\" -t md5 -v 82BB413746AEE42F89DEA2B59614F9EF"),
+            new("Calculate multiple checksums at once", "nhash hash checksum -f /path/to/file.txt -t all"),
+        };
     }
 
     private async Task CalculateText(string text, bool lowerCase, string fileName, ChecksumType hashType,

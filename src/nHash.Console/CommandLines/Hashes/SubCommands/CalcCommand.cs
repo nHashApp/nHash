@@ -47,7 +47,8 @@ public class CalcCommand : ICalcCommand
     private BaseCommand GetFeatureCommand()
     {
         var command = new BaseCommand("calc",
-            "Calculate hash fingerprint (MD5, SHA-1, SHA-2 (SHA-256, SHA-384, SHA512), SHA-3, Blake, ...)")
+            "Calculate hash fingerprint (MD5, SHA-1, SHA-2 (SHA-256, SHA-384, SHA512), SHA-3, Blake, ...)",
+            GetExamples())
         {
             _fileName,
             _lowerCase,
@@ -55,8 +56,21 @@ public class CalcCommand : ICalcCommand
         };
         command.AddArgument(_textArgument);
         command.SetHandler(CalculateText, _textArgument, _lowerCase, _fileName, _hashType);
+        command.AddAlias("c");
 
         return command;
+    }
+
+    private static List<KeyValuePair<string, string>> GetExamples()
+    {
+        return new List<KeyValuePair<string, string>>()
+        {
+            new("Calculate MD5 hash of a string", "nhash hash calc \"Hello World\" -t md5"),
+            new("Calculate SHA-256 hash of a file", "nhash hash calc --file /path/to/file --type sha256"),
+            new("Calculate SHA-256 hash of a file", "nhash h c -f /path/to/file -t sha256"),
+            new("Calculate all available hash types of a file and write the output to a file",
+                "nhash hash calc -f /path/to/file --output /path/to/output/file"),
+        };
     }
 
     private async Task CalculateText(string text, bool lowerCase, string fileName, HashType hashType)
