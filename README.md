@@ -30,7 +30,7 @@ For more information about nHash and its various commands and options, please vi
 4. For more information on sub-command parameters or options, run a command with the `--help` option. For example, `nhash password --help`.
 
 ```
-❯ nhash --help
+$ nhash --help
 Description:
   Hash and Text utilities in command-line mode
 
@@ -38,9 +38,9 @@ Usage:
   nhash [command] [options]
 
 Options:
-  --output <output>  File name for writing output
-  --version          Show version information
-  -?, -h, --help     Show help and usage information
+  -o, --output <output>  File name for writing output
+  --version              Show version information
+  -?, -h, --help         Show help and usage information
 
 Commands:
   uuid      Generate a Universally unique identifier (UUID/GUID) version 1 to 5
