@@ -45,7 +45,7 @@ public class OutputProvider : IOutputProvider
     private void WriteToConsole()
     {
         //AnsiConsole.Write(new Text(_texts.ToString()));
-        System.Console.WriteLine(_texts.ToString());
+        System.Console.Write(_texts.ToString());
     }
 
     private Task WriteToFile()

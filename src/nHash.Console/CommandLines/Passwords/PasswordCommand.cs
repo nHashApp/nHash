@@ -1,10 +1,11 @@
 using nHash.Application.Passwords;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Passwords;
 
 public class PasswordCommand : IPasswordCommand
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
 
     private readonly Option<bool> _upperCase;
     private readonly Option<bool> _lowerCase;
@@ -38,10 +39,10 @@ public class PasswordCommand : IPasswordCommand
         _suffix = new Option<string>(name: "--suffix", () => string.Empty, description: "Suffix");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("password",
-            "Generate a random password with custom length, prefix, suffix, character, etc options")
+        var command = new BaseCommand("password",
+            "Generate a random password with custom length, prefix, suffix, character, etc options", GetExamples())
         {
             _upperCase,
             _lowerCase,
@@ -54,8 +55,25 @@ public class PasswordCommand : IPasswordCommand
         };
         command.SetHandler(GeneratePassword, _upperCase, _lowerCase, _numeric, _specialChar, _customChar, _length,
             _prefix, _suffix);
+        command.AddAlias("p");
 
         return command;
+    }
+
+    private static List<KeyValuePair<string, string>> GetExamples()
+    {
+        return new List<KeyValuePair<string, string>>()
+        {
+            new(
+                "Random password with a length of 12 characters, uppercase letters, lowercase letters, and numbers",
+                "nhash password -l 12 --no-special"),
+            new("Random password with a length of 8 characters, only uppercase letters",
+                "nhash password -l 8 --no-lower --no-number --no-special"),
+            new("Random password with a custom character set and a length of 10 characters",
+                "nhash password --custom abc123 -l 10"),
+            new("Random password with a length of 20 characters and a prefix and suffix",
+                "nhash password --length 20 --prefix \"nHash-\" --suffix \"-2023\""),
+        };
     }
 
     private void GeneratePassword(bool noUpperCase, bool noLowerCase, bool noNumeric, bool noSpecialChar,

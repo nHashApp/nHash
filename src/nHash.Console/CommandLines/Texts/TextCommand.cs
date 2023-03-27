@@ -1,10 +1,11 @@
+using nHash.Console.CommandLines.Base;
 using nHash.Console.CommandLines.Texts.SubCommands;
 
 namespace nHash.Console.CommandLines.Texts;
 
 public class TextCommand : ITextCommand
 {
-    public Command Command => GetCommand();
+    public BaseCommand Command => GetCommand();
 
     private readonly IHumanizeCommand _humanizeFeature;
     private readonly IJsonCommand _jsonFeature;
@@ -20,7 +21,7 @@ public class TextCommand : ITextCommand
         _xmlFeature = xmlFeature;
     }
 
-    private Command GetCommand()
+    private BaseCommand GetCommand()
     {
         var features = new List<IFeature>()
         {
@@ -30,7 +31,8 @@ public class TextCommand : ITextCommand
             _xmlFeature
         };
 
-        var command = new Command("text", "Text utilities (Humanizer, JSON, YAML, XML)");
+        var command = new BaseCommand("text", "Text utilities (Humanizer, JSON, YAML, XML)");
+        command.AddAlias("t");
         foreach (var feature in features)
         {
             command.AddCommand(feature.Command);
@@ -38,4 +40,5 @@ public class TextCommand : ITextCommand
 
         return command;
     }
+
 }

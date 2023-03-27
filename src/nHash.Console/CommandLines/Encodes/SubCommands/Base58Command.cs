@@ -3,52 +3,50 @@ using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Encodes.SubCommands;
 
-public class HtmlCommand : IHtmlCommand 
+public class Base58Command : IBase58Command
 {
     public BaseCommand Command => GetFeatureCommand();
     private readonly Option<bool> _decodeText;
     private readonly Argument<string> _textArgument;
 
-    private readonly IHtmlService _htmlService;
+    private readonly IBase58Service _base58Service;
     private readonly IOutputProvider _outputProvider;
 
-    public HtmlCommand(IHtmlService htmlService, IOutputProvider outputProvider)
+    public Base58Command(IBase58Service base58Service, IOutputProvider outputProvider)
     {
-        _htmlService = htmlService;
+        _base58Service = base58Service;
         _outputProvider = outputProvider;
-        _decodeText = new Option<bool>(name: "--decode", description: "Decode html-encoded text");
+        _decodeText = new Option<bool>(name: "--decode", description: "Decode Base58 text");
         _decodeText.AddAlias("-d");
-        _textArgument = new Argument<string>("text", "text for html encode/decode");
+        _textArgument = new Argument<string>("text", "text for encode/decode Base58");
     }
 
     private BaseCommand GetFeatureCommand()
     {
-        var command = new BaseCommand("html", "HTML Encode/Decode", GetExamples())
+        var command = new BaseCommand("base58", "Encode/Decode Base58", GetExamples())
         {
             _decodeText
         };
         command.AddArgument(_textArgument);
         command.SetHandler(CalculateTextHash, _textArgument, _decodeText);
-        command.AddAlias("h");
-
+        command.AddAlias("b58");
+        
         return command;
     }
-    
+
     private static List<KeyValuePair<string,string>> GetExamples()
     {
         return new List<KeyValuePair<string,string>>()
         {
-            new( "Encode HTML", "nhash encode html \"<h1>Hello World</h1>\""  ),
-            new( "Decode HTML", "nhash encode html \"&lt;h1&gt;Hello World&lt;/h1&gt;\" -d" ),
-            new( "Decode HTML", "nhash e h \"&lt;h1&gt;Hello World&lt;/h1&gt;\" -d" ),
+            new( "Encode a text string in Base58", "nhash encode base85 \"Hello, World\""  ),
+            new( "Decode a Base58-encoded string", "nhash encode base85 \"StV1DL6CwTryKyV\" -d" ),
+            new( "Decode a Base58-encoded string", "nhash e b85 \"StV1DL6CwTryKyV\" -d" )
         };
     }
 
     private void CalculateTextHash(string text, bool decode)
     {
-        var returnText= _htmlService.CalculateTextHash(text, decode);
+        var returnText = _base58Service.Calculate(text, decode);
         _outputProvider.Append(returnText);
     }
-
-    
 }

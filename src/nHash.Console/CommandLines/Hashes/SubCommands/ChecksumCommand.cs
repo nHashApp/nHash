@@ -1,11 +1,12 @@
 using nHash.Application.Hashes;
 using nHash.Application.Hashes.Models;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Hashes.SubCommands;
 
 public class ChecksumCommand : IChecksumCommand
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
     private readonly Argument<string> _textArgument;
     private readonly Option<string> _fileName;
     private readonly Option<bool> _lowerCase;
@@ -44,10 +45,10 @@ public class ChecksumCommand : IChecksumCommand
         _verify.AddAlias("-v");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("checksum",
-            "Calculate checksum fingerprint (MD5, SHA-1, CRC32, CRC8, Adler-32,...)")
+        var command = new BaseCommand("checksum",
+            "Calculate checksum fingerprint (MD5, SHA-1, CRC32, CRC8, Adler-32,...)", GetExamples())
         {
             _fileName,
             _lowerCase,
@@ -56,8 +57,20 @@ public class ChecksumCommand : IChecksumCommand
         };
         command.AddArgument(_textArgument);
         command.SetHandler(CalculateText, _textArgument, _lowerCase, _fileName, _hashType, _verify);
+        command.AddAlias("ch");
 
         return command;
+    }
+
+    private static List<KeyValuePair<string, string>> GetExamples()
+    {
+        return new List<KeyValuePair<string, string>>()
+        {
+            new("Calculate the MD5 checksum of a given text", "nhash hash checksum \"Hello, World\" -t md5"),
+            new("Calculate the CRC-8 checksum of a file", "nhash h ch -f /path/to/file.txt -t crc8"),
+            new("Verify a checksum", "nhash hash checksum \"Hello, World\" -t md5 -v 82BB413746AEE42F89DEA2B59614F9EF"),
+            new("Calculate multiple checksums at once", "nhash hash checksum -f /path/to/file.txt -t all"),
+        };
     }
 
     private async Task CalculateText(string text, bool lowerCase, string fileName, ChecksumType hashType,

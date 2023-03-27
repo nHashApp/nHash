@@ -1,11 +1,12 @@
 using nHash.Application.Shared.Conversions;
 using nHash.Application.Texts.Xml;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Texts.SubCommands;
 
 public class XmlCommand : IXmlCommand
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
 
     private readonly Argument<string> _textArgument;
     private readonly Option<string> _fileName;
@@ -28,17 +29,27 @@ public class XmlCommand : IXmlCommand
         _conversion.AddAlias("-c");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("xml", "XML tools")
+        var command = new BaseCommand("xml", "XML tools", GetExamples())
         {
             _fileName,
             _conversion,
         };
         command.AddArgument(_textArgument);
         command.SetHandler(CalculateText, _textArgument, _fileName, _conversion);
+        command.AddAlias("x");
 
         return command;
+    }
+    
+    private static List<KeyValuePair<string, string>> GetExamples()
+    {
+        return new List<KeyValuePair<string, string>>()
+        {
+            new("Converting XML to JSON", "nhash text xml \"<person><name>John</name><age>35</age></person>\" --convert json"),
+            new("Reading XML from a file", "nhash text xml -f mydata.xml -c yaml --output mydata.yaml"),
+        };
     }
 
     private async Task CalculateText(string text, string fileName, ConversionType conversion)

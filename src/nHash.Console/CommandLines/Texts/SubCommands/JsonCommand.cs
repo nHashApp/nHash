@@ -1,12 +1,13 @@
 using nHash.Application.Shared.Conversions;
 using nHash.Application.Texts.Json;
 using nHash.Application.Texts.Json.Models;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Texts.SubCommands;
 
 public class JsonCommand : IJsonCommand
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
 
     private readonly Argument<string> _textArgument;
     private readonly Option<JsonPrintType> _printType;
@@ -31,9 +32,9 @@ public class JsonCommand : IJsonCommand
         _conversion.AddAlias("-c");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("json", "JSON tools")
+        var command = new BaseCommand("json", "JSON tools", GetExamples())
         {
             _printType,
             _fileName,
@@ -41,10 +42,20 @@ public class JsonCommand : IJsonCommand
         };
         command.AddArgument(_textArgument);
         command.SetHandler(CalculateText, _textArgument, _printType, _fileName, _conversion);
+        command.AddAlias("j");
 
         return command;
     }
-
+    
+    private static List<KeyValuePair<string, string>> GetExamples()
+    {
+        return new List<KeyValuePair<string, string>>()
+        {
+            new("Convert JSON to YAML", "nhash text json '{\"name\": \"John Doe\", \"age\": 30}' -c yaml"),
+            new("Print pretty JSON representation", "nhash text json '{\"name\": \"John Doe\", \"age\": 30}' --print pretty"),
+            new("Read JSON from a file", "nhash t j -f data.json"),
+        };
+    }
     private async Task CalculateText(string text, JsonPrintType printType, string fileName,
         ConversionType conversion)
     {

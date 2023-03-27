@@ -2,7 +2,7 @@ namespace nHash.Application.Encodes;
 
 public class Base64Service : IBase64Service 
 {
-    public string CalculateTextHash(string text, bool decode)
+    public string Calculate(string text, bool decode)
     {
         var resultText = !decode
             ? Base64Encode(text)

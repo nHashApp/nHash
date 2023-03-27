@@ -1,11 +1,12 @@
 using nHash.Application.Encodes;
 using nHash.Application.Encodes.Models;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Encodes.SubCommands;
 
 public class JwtTokenCommand : IJwtTokenCommand
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
     private readonly Option<bool> _noWriteInformation;
     private readonly Argument<string> _textArgument;
 
@@ -22,16 +23,26 @@ public class JwtTokenCommand : IJwtTokenCommand
         _textArgument = new Argument<string>("token", "Jwt token for decode");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("jwt", "JWT token decode (Comply with GDPR rules)")
+        var command = new BaseCommand("jwt", "JWT token decode (Comply with GDPR rules)", GetExamples())
         {
             _noWriteInformation
         };
         command.AddArgument(_textArgument);
         command.SetHandler(DecodeJwtToken, _textArgument, _noWriteInformation);
+        command.AddAlias("j");
 
         return command;
+    }
+    
+    private static List<KeyValuePair<string,string>> GetExamples()
+    {
+        return new List<KeyValuePair<string,string>>()
+        {
+            new( "To decode a JWT token", "nhash encode jwt eyJhbGciOiJIUzI1NiIsInR5..."  ),
+            new( "To decode a JWT token", "nhash e j eyJhbGciOiJIUzI1NiIsInR5..."  )
+        };
     }
 
     private void DecodeJwtToken(string text, bool noWriteInformation)
