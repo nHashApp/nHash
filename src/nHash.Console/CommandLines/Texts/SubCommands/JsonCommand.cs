@@ -1,12 +1,13 @@
 using nHash.Application.Shared.Conversions;
 using nHash.Application.Texts.Json;
 using nHash.Application.Texts.Json.Models;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Texts.SubCommands;
 
 public class JsonCommand : IJsonCommand
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
 
     private readonly Argument<string> _textArgument;
     private readonly Option<JsonPrintType> _printType;
@@ -31,9 +32,9 @@ public class JsonCommand : IJsonCommand
         _conversion.AddAlias("-c");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("json", "JSON tools")
+        var command = new BaseCommand("json", "JSON tools")
         {
             _printType,
             _fileName,

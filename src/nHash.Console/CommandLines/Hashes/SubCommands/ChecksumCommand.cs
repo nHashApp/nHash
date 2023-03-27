@@ -1,11 +1,12 @@
 using nHash.Application.Hashes;
 using nHash.Application.Hashes.Models;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Hashes.SubCommands;
 
 public class ChecksumCommand : IChecksumCommand
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
     private readonly Argument<string> _textArgument;
     private readonly Option<string> _fileName;
     private readonly Option<bool> _lowerCase;
@@ -44,9 +45,9 @@ public class ChecksumCommand : IChecksumCommand
         _verify.AddAlias("-v");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("checksum",
+        var command = new BaseCommand("checksum",
             "Calculate checksum fingerprint (MD5, SHA-1, CRC32, CRC8, Adler-32,...)")
         {
             _fileName,

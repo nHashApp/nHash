@@ -1,11 +1,12 @@
 using nHash.Application.Hashes;
 using nHash.Application.Hashes.Models;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Hashes.SubCommands;
 
 public class CalcCommand : ICalcCommand
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
     private readonly Argument<string> _textArgument;
     private readonly Option<string> _fileName;
     private readonly Option<bool> _lowerCase;
@@ -43,9 +44,9 @@ public class CalcCommand : ICalcCommand
         _hashType.AddAlias("-t");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("calc",
+        var command = new BaseCommand("calc",
             "Calculate hash fingerprint (MD5, SHA-1, SHA-2 (SHA-256, SHA-384, SHA512), SHA-3, Blake, ...)")
         {
             _fileName,

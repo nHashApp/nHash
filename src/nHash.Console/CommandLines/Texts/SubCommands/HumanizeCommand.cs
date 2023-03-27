@@ -1,11 +1,12 @@
 using nHash.Application.Texts.Humanizers;
 using nHash.Application.Texts.Humanizers.Models;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Texts.SubCommands;
 
 public class HumanizeCommand : IHumanizeCommand
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
     private readonly Argument<string> _textArgument;
     private readonly Argument<HumanizeType> _humanizeType;
 
@@ -20,9 +21,9 @@ public class HumanizeCommand : IHumanizeCommand
         _textArgument = new Argument<string>("text", "Text for humanize");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("humanize",
+        var command = new BaseCommand("humanize",
             "Humanizer text (Pascal-case, Camel-case, Kebab, Underscore, lowercase, etc)");
         command.AddArgument(_humanizeType);
         command.AddArgument(_textArgument);

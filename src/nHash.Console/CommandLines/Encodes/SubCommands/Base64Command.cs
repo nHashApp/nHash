@@ -1,10 +1,11 @@
 using nHash.Application.Encodes;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Encodes.SubCommands;
 
 public class Base64Command : IBase64Command 
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
     private readonly Option<bool> _decodeText;
     private readonly Argument<string> _textArgument;
 
@@ -19,18 +20,29 @@ public class Base64Command : IBase64Command
         _textArgument = new Argument<string>("text", "text for encode/decode Base64");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("base64", "Encode/Decode Base64")
+        var command = new BaseCommand("base64", "Encode/Decode Base64", GetExamples())
         {
             _decodeText
         };
         command.AddArgument(_textArgument);
         command.SetHandler(CalculateTextHash, _textArgument, _decodeText);
-
+        command.AddAlias("b64");
+        
         return command;
     }
 
+    private static List<KeyValuePair<string,string>> GetExamples()
+    {
+        return new List<KeyValuePair<string,string>>()
+        {
+            new( "Encode a text string in Base64", "nhash encode base64 \"Hello, World\""  ),
+            new( "Decode a Base64-encoded string", "nhash encode base64 SGVsbG8sIFdvcmxkIQ== -d" ),
+            new( "Decode a Base64-encoded string", "nhash e b64 SGVsbG8sIFdvcmxkIQ== -d" )
+        };
+    }
+    
     private void CalculateTextHash(string text, bool decode)
     {
         var returnText=_base64Service.Calculate(text, decode);

@@ -1,11 +1,12 @@
 using nHash.Application.Uuids;
 using nHash.Application.Uuids.Models;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Uuids;
 
 public class UuidCommand : IUuidCommand
 {
-    public Command Command => GetCommand();
+    public BaseCommand Command => GetCommand();
 
     private readonly Option<bool> _withBracket;
     private readonly Option<bool> _withoutHyphen;
@@ -32,18 +33,18 @@ public class UuidCommand : IUuidCommand
         _withoutHyphen = new Option<bool>(name: "--no-hyphen", description: "Generate without hyphens");
         _version = new Option<UuidVersion>(name: "--version", () => UuidVersion.All,
             description: "Select UUID version");
-
         _version.AddAlias("-v");
     }
 
-    private Command GetCommand()
+    private BaseCommand GetCommand()
     {
-        var command = new Command("uuid", "Generate a Universally unique identifier (UUID/GUID) version 1 to 5")
+        var command = new BaseCommand("uuid", "Generate a Universally unique identifier (UUID/GUID) version 1 to 5")
         {
             _withBracket,
             _withoutHyphen,
             _version
         };
+        command.AddAlias("u");
         command.SetHandler(GenerateUuid, _withBracket, _withoutHyphen, _version);
 
         return command;

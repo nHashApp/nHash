@@ -1,6 +1,9 @@
+using nHash.Console.CommandLines;
+using nHash.Console.CommandLines.Base;
+
 namespace nHash.Console.Base;
 
 public interface IFeature
 {
-    public Command Command { get; }
+    public BaseCommand Command { get; }
 }

@@ -1,10 +1,11 @@
 using nHash.Application.Passwords;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Passwords;
 
 public class PasswordCommand : IPasswordCommand
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
 
     private readonly Option<bool> _upperCase;
     private readonly Option<bool> _lowerCase;
@@ -38,9 +39,9 @@ public class PasswordCommand : IPasswordCommand
         _suffix = new Option<string>(name: "--suffix", () => string.Empty, description: "Suffix");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("password",
+        var command = new BaseCommand("password",
             "Generate a random password with custom length, prefix, suffix, character, etc options")
         {
             _upperCase,

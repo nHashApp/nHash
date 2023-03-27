@@ -1,6 +1,9 @@
 using System.CommandLine.Builder;
+using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using nHash.Console.CommandLines;
+using nHash.Console.CommandLines.Base;
 using nHash.Console.CommandLines.Encodes;
 using nHash.Console.CommandLines.Hashes;
 using nHash.Console.CommandLines.Passwords;
@@ -12,8 +15,14 @@ namespace nHash.Console;
 
 public static class Initialize
 {
-    private const string OutputOption = "output";
+    private static Option<string> _outputFileName;
 
+    static Initialize()
+    {
+        _outputFileName = new Option<string>(name: "--output", description: "File name for writing output");
+        _outputFileName.AddAlias("-o");
+    }
+    
     public static async Task<int> InitializeCommandLine(IEnumerable<string> args, IServiceProvider provider)
     {
         var features = new List<IFeature>()
@@ -31,26 +40,21 @@ public static class Initialize
             rootCommand.AddCommand(feature.Command);
         }
 
-        var outputFileName = new Option<string>(name: "--" + OutputOption, description: "File name for writing output");
-        outputFileName.AddAlias("-o");
-        rootCommand.AddGlobalOption(outputFileName);
+        rootCommand.AddGlobalOption(_outputFileName);
 
         var commandLineBuilder = new CommandLineBuilder(rootCommand)
+            .AddMiddleware((context, next) => UnhandledExceptionMiddleware(provider, context, next))
             .AddMiddleware((context, next) => OutputMiddleware(provider, context, next))
             .UseDefaults() //.UseVersionOption(new []{"--help"});
-            /*.UseHelp(ctx =>
+            .UseHelp(ctx =>
             {
                 ctx.HelpBuilder.CustomizeLayout(
                     _ =>
                         HelpBuilder.Default
                             .GetLayout()
-                            .Skip(1) // Skip the default command description section.
-                            .Prepend(
-                                _ => AnsiConsole.Write(
-                                    new FigletText("nHash.Console")
-                                        .Centered())
-                            ));
-            })*/;
+                            .Append(WriteExampleSection)
+                );
+            });
         var parser = commandLineBuilder.Build();
         return await parser.InvokeAsync(args.ToArray());
         //return await rootCommand.InvokeAsync(parameters);
@@ -70,18 +74,48 @@ public static class Initialize
         await WriteOutput(provider);
     }
 
+    private static async Task UnhandledExceptionMiddleware(IServiceProvider provider, InvocationContext context,
+        Func<InvocationContext, Task> next)
+    {
+        try
+        {
+            await next(context);
+        }
+        catch
+        {
+            //
+        }
+    }
+
+    private static void WriteExampleSection(HelpContext context)
+    {
+        if (context.Command is not BaseCommand command)
+        {
+            return;
+        }
+
+        if (command.Examples is null)
+        {
+            return;
+        }
+
+        context.Output.WriteLine("Examples:");
+        context.HelpBuilder.WriteColumns(
+            command.Examples.Select(_ => new TwoColumnHelpRow(_.Key, _.Value)).ToList().AsReadOnly(), context);
+    }
+
     private static void SetOutputOptions(IServiceProvider provider, InvocationContext context)
     {
         var outputParameter = provider.GetService<OutputParameter>()!;
         outputParameter.Type = OutputType.Console;
-
-        var outputOption = context.ParseResult.CommandResult.Children.Where(_ => _.GetType() == typeof(OptionResult))
-            .FirstOrDefault(_ => ((OptionResult)_).Option.Name is OutputOption or "o");
+        
+        var outputOption = context.ParseResult.CommandResult.Children
+            .FirstOrDefault(_ => _.Symbol == _outputFileName);
         if (outputOption is null)
         {
             return;
         }
-        
+
         outputParameter.Type = OutputType.File;
         outputParameter.OutputTypeValue = outputOption.Tokens[0].ToString();
     }

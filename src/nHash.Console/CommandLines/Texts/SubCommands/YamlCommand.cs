@@ -1,11 +1,12 @@
 using nHash.Application.Shared.Conversions;
 using nHash.Application.Texts.Yaml;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Texts.SubCommands;
 
 public class YamlCommand : IYamlCommand
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
 
     private readonly Argument<string> _textArgument;
     private readonly Option<string> _fileName;
@@ -28,9 +29,9 @@ public class YamlCommand : IYamlCommand
         _conversion.AddAlias("-c");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("yaml", "YAML tools")
+        var command = new BaseCommand("yaml", "YAML tools")
         {
             _fileName,
             _conversion,

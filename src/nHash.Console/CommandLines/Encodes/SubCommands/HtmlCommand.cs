@@ -1,10 +1,11 @@
 using nHash.Application.Encodes;
+using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Encodes.SubCommands;
 
 public class HtmlCommand : IHtmlCommand 
 {
-    public Command Command => GetFeatureCommand();
+    public BaseCommand Command => GetFeatureCommand();
     private readonly Option<bool> _decodeText;
     private readonly Argument<string> _textArgument;
 
@@ -20,16 +21,27 @@ public class HtmlCommand : IHtmlCommand
         _textArgument = new Argument<string>("text", "text for html encode/decode");
     }
 
-    private Command GetFeatureCommand()
+    private BaseCommand GetFeatureCommand()
     {
-        var command = new Command("html", "HTML Encode/Decode")
+        var command = new BaseCommand("html", "HTML Encode/Decode", GetExamples())
         {
             _decodeText
         };
         command.AddArgument(_textArgument);
         command.SetHandler(CalculateTextHash, _textArgument, _decodeText);
+        command.AddAlias("h");
 
         return command;
+    }
+    
+    private static List<KeyValuePair<string,string>> GetExamples()
+    {
+        return new List<KeyValuePair<string,string>>()
+        {
+            new( "Encode HTML", "nhash encode html \"<h1>Hello World</h1>\""  ),
+            new( "Decode HTML", "nhash encode html \"&lt;h1&gt;Hello World&lt;/h1&gt;\" -d" ),
+            new( "Decode HTML", "nhash e h \"&lt;h1&gt;Hello World&lt;/h1&gt;\" -d" ),
+        };
     }
 
     private void CalculateTextHash(string text, bool decode)
