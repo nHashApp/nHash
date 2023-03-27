@@ -8,6 +8,7 @@ nHash is a lightweight and easy-to-use hashing tool for Windows and Linux that a
 - [Encode](https://github.com/nHashApp/nHash/wiki/Encode)
     - [JWT](https://github.com/nHashApp/nHash/wiki/Encode-JWT): JWT token decode
     - [Base64](https://github.com/nHashApp/nHash/wiki/Encode-Base64): Encode/Decode Base64
+    - [Base58](https://github.com/nHashApp/nHash/wiki/Encode-Base58): Encode/Decode Base58
     - [URL](https://github.com/nHashApp/nHash/wiki/Encode-URL): URL Encode/Decode
     - [HTML](https://github.com/nHashApp/nHash/wiki/Encode-HTML): HTML Encode/Decode
 - [Hash](https://github.com/nHashApp/nHash/wiki/Hash)
