@@ -38,7 +38,8 @@ public class UuidCommand : IUuidCommand
 
     private BaseCommand GetCommand()
     {
-        var command = new BaseCommand("uuid", "Generate a Universally unique identifier (UUID/GUID) version 1 to 5")
+        var command = new BaseCommand("uuid", "Generate a Universally unique identifier (UUID/GUID) version 1 to 5",
+            GetExamples())
         {
             _withBracket,
             _withoutHyphen,
@@ -48,6 +49,16 @@ public class UuidCommand : IUuidCommand
         command.SetHandler(GenerateUuid, _withBracket, _withoutHyphen, _version);
 
         return command;
+    }
+
+    private static List<KeyValuePair<string, string>> GetExamples()
+    {
+        return new List<KeyValuePair<string, string>>()
+        {
+            new("Generate a version 1 UUID with hyphens", "nhash uuid -v v1"),
+            new("Generate a version 4 UUID without hyphens", "nhash u -v v4 --no-hyphen"),
+            new("Generate all versions of UUIDs with brackets and save the output to a file", "nhash uuid --bracket --output uuid.txt"),
+        };
     }
 
     private void GenerateUuid(bool withBracket, bool withoutHyphen, UuidVersion version)
