@@ -28,7 +28,7 @@ For more information about nHash and its various commands and options, please vi
 1. Download and install nHash from the [releases page](https://github.com/nHashApp/nHash/releases/latest) on your Windows or Linux machine.
 2. You can view the options by running the nHash application with the `--help`.
 3. Use nHash with your desired parameters and command.
-4. For more information on sub-command parameters or options, run a command with the `--help` option. For example, `nhash password --help`.
+4. For more information on sub-command parameters or options, run a command with the `--help` option. For example, `nhash p --help`.
 
 ```
 $ nhash --help
