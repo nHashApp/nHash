@@ -31,15 +31,25 @@ public class XmlCommand : IXmlCommand
 
     private BaseCommand GetFeatureCommand()
     {
-        var command = new BaseCommand("xml", "XML tools")
+        var command = new BaseCommand("xml", "XML tools", GetExamples())
         {
             _fileName,
             _conversion,
         };
         command.AddArgument(_textArgument);
         command.SetHandler(CalculateText, _textArgument, _fileName, _conversion);
+        command.AddAlias("x");
 
         return command;
+    }
+    
+    private static List<KeyValuePair<string, string>> GetExamples()
+    {
+        return new List<KeyValuePair<string, string>>()
+        {
+            new("Converting XML to JSON", "nhash text xml \"<person><name>John</name><age>35</age></person>\" --convert json"),
+            new("Reading XML from a file", "nhash text xml -f mydata.xml -c yaml --output mydata.yaml"),
+        };
     }
 
     private async Task CalculateText(string text, string fileName, ConversionType conversion)

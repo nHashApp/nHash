@@ -32,6 +32,7 @@ public class TextCommand : ITextCommand
         };
 
         var command = new BaseCommand("text", "Text utilities (Humanizer, JSON, YAML, XML)");
+        command.AddAlias("t");
         foreach (var feature in features)
         {
             command.AddCommand(feature.Command);
@@ -39,6 +40,5 @@ public class TextCommand : ITextCommand
 
         return command;
     }
-    
-    
+
 }

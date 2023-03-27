@@ -31,17 +31,27 @@ public class YamlCommand : IYamlCommand
 
     private BaseCommand GetFeatureCommand()
     {
-        var command = new BaseCommand("yaml", "YAML tools")
+        var command = new BaseCommand("yaml", "YAML tools", GetExamples())
         {
             _fileName,
             _conversion,
         };
         command.AddArgument(_textArgument);
         command.SetHandler(CalculateText, _textArgument, _fileName, _conversion);
+        command.AddAlias("y");
 
         return command;
     }
 
+    private static List<KeyValuePair<string, string>> GetExamples()
+    {
+        return new List<KeyValuePair<string, string>>()
+        {
+            new("To read YAML text from a file", "nhash text yaml -f input.yaml"),
+            new("To convert YAML text to JSON", "nhash t y 'name: John Doe\nage: 30' -c json"),
+        };
+    }
+    
     private async Task CalculateText(string text, string fileName, ConversionType conversion)
     {
         if (!string.IsNullOrWhiteSpace(text))

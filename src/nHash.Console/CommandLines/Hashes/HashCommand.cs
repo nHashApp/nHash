@@ -25,8 +25,7 @@ public class HashCommand : IHashCommand
         };
 
         var command = new BaseCommand("hash",
-            "Calculate hash and checksum fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)",
-            GetExamples());
+            "Calculate hash and checksum fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)");
         command.AddAlias("h");
         foreach (var feature in features)
         {
