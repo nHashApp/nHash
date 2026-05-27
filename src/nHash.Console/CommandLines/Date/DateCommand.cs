@@ -104,7 +104,7 @@ public class DateCommand(IDateService dateService, IOutputProvider outputProvide
     {
         var dateArg = new Argument<string>("date") { Description = "Date-time string to convert" };
         var fromOption = new Option<string>("--from", "-f") { Description = "Source timezone ID (e.g. UTC, 'Iran Standard Time', 'Eastern Standard Time')", DefaultValueFactory = _ => "UTC" };
-        var toOption = new Option<string>("--to", "-t") { Description = "Target timezone ID (e.g. 'Iran Standard Time', 'Greenwich Standard Time')", DefaultValueFactory = _ => "Iran Standard Time" };
+        var toOption = new Option<string>("--to", "-t") { Description = "Target timezone ID (e.g. 'Iran Standard Time', 'Greenwich Standard Time')", DefaultValueFactory = _ => "UTC" };
 
         var cmd = new BaseCommand("timezone", "Convert a date-time from one timezone to another");
         cmd.Arguments.Add(dateArg);
@@ -115,7 +115,7 @@ public class DateCommand(IDateService dateService, IOutputProvider outputProvide
         {
             var date = parseResult.GetValue(dateArg) ?? string.Empty;
             var fromTz = parseResult.GetValue(fromOption) ?? "UTC";
-            var toTz = parseResult.GetValue(toOption) ?? "Iran Standard Time";
+            var toTz = parseResult.GetValue(toOption) ?? "UTC";
 
             var res = dateService.ConvertTimezone(date, fromTz, toTz);
             outputProvider.AppendLine(res);
