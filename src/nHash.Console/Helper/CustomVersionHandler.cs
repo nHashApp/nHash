@@ -11,7 +11,9 @@ public static class CustomVersionHandler
     {
         var versionOption = builder.Command
             .Where(x => x.Name == "version")
-            .Select(x => (Option<bool>)x).First();
+            .Select(x => (Option<bool>)x)
+            .First();
+        
         versionOption.AddValidator(_ =>
         {
             AnsiConsole.Write(new FigletText("nHash").Centered());
