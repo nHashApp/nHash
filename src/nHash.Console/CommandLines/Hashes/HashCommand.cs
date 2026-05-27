@@ -3,33 +3,24 @@ using nHash.Console.CommandLines.Hashes.SubCommands;
 
 namespace nHash.Console.CommandLines.Hashes;
 
-public class HashCommand : IHashCommand
+public class HashCommand(ICalcCommand calcCommand, IChecksumCommand checksumCommand) : IHashCommand
 {
     public BaseCommand Command => GetCommand();
 
-    private readonly ICalcCommand _calcCommand;
-    private readonly IChecksumCommand _checksumCommand;
-
-    public HashCommand(ICalcCommand calcCommand, IChecksumCommand checksumCommand)
-    {
-        _calcCommand = calcCommand;
-        _checksumCommand = checksumCommand;
-    }
-
     private BaseCommand GetCommand()
     {
-        var features = new List<IFeature>()
-        {
-            _calcCommand,
-            _checksumCommand
-        };
+        List<IFeature> features =
+        [
+            calcCommand,
+            checksumCommand
+        ];
 
         var command = new BaseCommand("hash",
             "Calculate hash and checksum fingerprint (MD5, SHA-1, SHA-256, SHA-384, SHA-512, CRC32, CRC8, ...)");
-        command.AddAlias("h");
+        command.Aliases.Add("h");
         foreach (var feature in features)
         {
-            command.AddCommand(feature.Command);
+            command.Subcommands.Add(feature.Command);
         }
 
         return command;

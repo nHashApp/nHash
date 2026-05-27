@@ -4,13 +4,31 @@ using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Hashes.SubCommands;
 
-public class CalcCommand : ICalcCommand
+public class CalcCommand(IFileProvider fileProvider, IHashCalcService hashService, IOutputProvider outputProvider) : ICalcCommand
 {
     public BaseCommand Command => GetFeatureCommand();
-    private readonly Argument<string> _textArgument;
-    private readonly Option<string> _fileName;
-    private readonly Option<bool> _lowerCase;
-    private readonly Option<HashType> _hashType;
+
+    private readonly Argument<string> _textArgument = new("text")
+    {
+        Description = "Text for calculate fingerprint",
+        DefaultValueFactory = _ => string.Empty
+    };
+
+    private readonly Option<string> _fileName = new("--file", "-f")
+    {
+        Description = "File name for calculate hash"
+    };
+
+    private readonly Option<bool> _lowerCase = new("--lower")
+    {
+        Description = "Generate lower case"
+    };
+
+    private readonly Option<HashType> _hashType = new("--type", "-t")
+    {
+        Description = "Hash type (MD5, SHA-1, SHA-256,...)",
+        DefaultValueFactory = _ => HashType.All
+    };
 
     private static readonly Dictionary<HashType, string> Algorithms = new()
     {
@@ -27,71 +45,59 @@ public class CalcCommand : ICalcCommand
         { HashType.Blake2S, "Blake2s " }
     };
 
-    private readonly IFileProvider _fileProvider;
-    private readonly IHashCalcService _hashService;
-    private readonly IOutputProvider _outputProvider;
-
-    public CalcCommand(IFileProvider fileProvider, IHashCalcService hashService, IOutputProvider outputProvider)
-    {
-        _fileProvider = fileProvider;
-        _hashService = hashService;
-        _outputProvider = outputProvider;
-        _textArgument = new Argument<string>("text", () => string.Empty, "Text for calculate fingerprint");
-        _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
-        _fileName.AddAlias("-f");
-        _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
-        _hashType = new Option<HashType>(name: "--type", () => HashType.All, "Hash type (MD5, SHA-1, SHA-256,...)");
-        _hashType.AddAlias("-t");
-    }
-
     private BaseCommand GetFeatureCommand()
     {
         var command = new BaseCommand("calc",
             "Calculate hash fingerprint (MD5, SHA-1, SHA-2 (SHA-256, SHA-384, SHA512), SHA-3, Blake, ...)",
-            GetExamples())
+            GetExamples());
+
+        command.Options.Add(_fileName);
+        command.Options.Add(_lowerCase);
+        command.Options.Add(_hashType);
+        command.Arguments.Add(_textArgument);
+
+        command.SetAction(async parseResult =>
         {
-            _fileName,
-            _lowerCase,
-            _hashType
-        };
-        command.AddArgument(_textArgument);
-        command.SetHandler(CalculateText, _textArgument, _lowerCase, _fileName, _hashType);
-        command.AddAlias("c");
+            var text = parseResult.GetValue(_textArgument);
+            var lowerCase = parseResult.GetValue(_lowerCase);
+            var fileName = parseResult.GetValue(_fileName);
+            var hashType = parseResult.GetValue(_hashType);
+            await CalculateText(text ?? string.Empty, lowerCase, fileName ?? string.Empty, hashType);
+        });
+
+        command.Aliases.Add("c");
 
         return command;
     }
 
-    private static List<KeyValuePair<string, string>> GetExamples()
-    {
-        return new List<KeyValuePair<string, string>>()
-        {
+    private static List<KeyValuePair<string, string>> GetExamples() =>
+        [
             new("Calculate MD5 hash of a string", "nhash hash calc \"Hello World\" -t md5"),
             new("Calculate SHA-256 hash of a file", "nhash hash calc --file /path/to/file --type sha256"),
             new("Calculate SHA-256 hash of a file", "nhash h c -f /path/to/file -t sha256"),
             new("Calculate all available hash types of a file and write the output to a file",
                 "nhash hash calc -f /path/to/file --output /path/to/output/file"),
-        };
-    }
+        ];
 
     private async Task CalculateText(string text, bool lowerCase, string fileName, HashType hashType)
     {
         if (!string.IsNullOrWhiteSpace(text))
         {
             var inputBytes = System.Text.Encoding.UTF8.GetBytes(text);
-            var hashResults = _hashService.CalculateText(inputBytes, lowerCase, hashType);
+            var hashResults = hashService.CalculateText(inputBytes, lowerCase, hashType);
             WriteOutput(hashType, hashResults);
             return;
         }
 
         if (!string.IsNullOrWhiteSpace(fileName))
         {
-            var fileBytes = await _fileProvider.ReadAsByte(fileName);
+            var fileBytes = await fileProvider.ReadAsByte(fileName);
             if (fileBytes == Array.Empty<byte>())
             {
                 return;
             }
 
-            var hashResults = _hashService.CalculateText(fileBytes, lowerCase, hashType);
+            var hashResults = hashService.CalculateText(fileBytes, lowerCase, hashType);
             WriteOutput(hashType, hashResults);
         }
     }
@@ -100,14 +106,14 @@ public class CalcCommand : ICalcCommand
     {
         if (hashType != HashType.All)
         {
-            _outputProvider.AppendLine(hashResult.First().Value);
+            outputProvider.AppendLine(hashResult.First().Value);
             return;
         }
 
         foreach (var algorithm in hashResult)
         {
-            _outputProvider.AppendLine($"{Algorithms[algorithm.Key]}:");
-            _outputProvider.AppendLine(algorithm.Value);
+            outputProvider.AppendLine($"{Algorithms[algorithm.Key]}:");
+            outputProvider.AppendLine(algorithm.Value);
         }
     }
 }

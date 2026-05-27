@@ -3,67 +3,53 @@ using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Passwords;
 
-public class PasswordCommand : IPasswordCommand
+public class PasswordCommand(IOutputProvider outputProvider, IPasswordService passwordService) : IPasswordCommand
 {
     public BaseCommand Command => GetFeatureCommand();
 
-    private readonly Option<bool> _upperCase;
-    private readonly Option<bool> _lowerCase;
-    private readonly Option<bool> _numeric;
-    private readonly Option<bool> _specialChar;
-    private readonly Option<string> _customChar;
-    private readonly Option<int> _length;
-    private readonly Option<string> _prefix;
-    private readonly Option<string> _suffix;
-
-    private readonly IPasswordService _passwordService;
-    private readonly IOutputProvider _outputProvider;
-
-    public PasswordCommand(IOutputProvider outputProvider, IPasswordService passwordService)
-    {
-        _outputProvider = outputProvider;
-        _passwordService = passwordService;
-        _upperCase = new Option<bool>(name: "--no-upper", () => false,
-            description: "Include uppercase Characters (A-Z) or not");
-        _lowerCase = new Option<bool>(name: "--no-lower", () => false,
-            description: "Include lowercase Characters (a-z) or not");
-        _numeric = new Option<bool>(name: "--no-number", () => false,
-            description: "Include numbers (1234567890) or not");
-        _specialChar = new Option<bool>(name: "--no-special", () => false,
-            description: "Include symbols (*$-+?_&=!%{}/) or not");
-        _customChar = new Option<string>(name: "--custom", () => string.Empty,
-            description: "Custom characters. If select the custom character other options was removed");
-        _length = new Option<int>(name: "--length", () => 16, description: "Password length");
-        _length.AddAlias("-l");
-        _prefix = new Option<string>(name: "--prefix", () => string.Empty, description: "Prefix");
-        _suffix = new Option<string>(name: "--suffix", () => string.Empty, description: "Suffix");
-    }
+    private readonly Option<bool> _upperCase = new("--no-upper") { Description = "Include uppercase Characters (A-Z) or not" };
+    private readonly Option<bool> _lowerCase = new("--no-lower") { Description = "Include lowercase Characters (a-z) or not" };
+    private readonly Option<bool> _numeric = new("--no-number") { Description = "Include numbers (1234567890) or not" };
+    private readonly Option<bool> _specialChar = new("--no-special") { Description = "Include symbols (*$-+?_&=!%{}/) or not" };
+    private readonly Option<string> _customChar = new("--custom") { Description = "Custom characters. If select the custom character other options was removed", DefaultValueFactory = _ => string.Empty };
+    private readonly Option<int> _length = new("--length", "-l") { Description = "Password length", DefaultValueFactory = _ => 16 };
+    private readonly Option<string> _prefix = new("--prefix") { Description = "Prefix", DefaultValueFactory = _ => string.Empty };
+    private readonly Option<string> _suffix = new("--suffix") { Description = "Suffix", DefaultValueFactory = _ => string.Empty };
 
     private BaseCommand GetFeatureCommand()
     {
         var command = new BaseCommand("password",
-            "Generate a random password with custom length, prefix, suffix, character, etc options", GetExamples())
+            "Generate a random password with custom length, prefix, suffix, character, etc options", GetExamples());
+
+        command.Options.Add(_upperCase);
+        command.Options.Add(_lowerCase);
+        command.Options.Add(_numeric);
+        command.Options.Add(_specialChar);
+        command.Options.Add(_customChar);
+        command.Options.Add(_length);
+        command.Options.Add(_prefix);
+        command.Options.Add(_suffix);
+
+        command.SetAction(parseResult =>
         {
-            _upperCase,
-            _lowerCase,
-            _numeric,
-            _specialChar,
-            _customChar,
-            _length,
-            _prefix,
-            _suffix,
-        };
-        command.SetHandler(GeneratePassword, _upperCase, _lowerCase, _numeric, _specialChar, _customChar, _length,
-            _prefix, _suffix);
-        command.AddAlias("p");
+            var noUpper = parseResult.GetValue(_upperCase);
+            var noLower = parseResult.GetValue(_lowerCase);
+            var noNum = parseResult.GetValue(_numeric);
+            var noSpecial = parseResult.GetValue(_specialChar);
+            var custom = parseResult.GetValue(_customChar);
+            var len = parseResult.GetValue(_length);
+            var pref = parseResult.GetValue(_prefix);
+            var suff = parseResult.GetValue(_suffix);
+            GeneratePassword(noUpper, noLower, noNum, noSpecial, custom ?? string.Empty, len, pref ?? string.Empty, suff ?? string.Empty);
+        });
+
+        command.Aliases.Add("p");
 
         return command;
     }
 
-    private static List<KeyValuePair<string, string>> GetExamples()
-    {
-        return new List<KeyValuePair<string, string>>()
-        {
+    private static List<KeyValuePair<string, string>> GetExamples() =>
+        [
             new(
                 "Random password with a length of 12 characters, uppercase letters, lowercase letters, and numbers",
                 "nhash password -l 12 --no-special"),
@@ -73,14 +59,13 @@ public class PasswordCommand : IPasswordCommand
                 "nhash password --custom abc123 -l 10"),
             new("Random password with a length of 20 characters and a prefix and suffix",
                 "nhash password --length 20 --prefix \"nHash-\" --suffix \"-2023\""),
-        };
-    }
+        ];
 
     private void GeneratePassword(bool noUpperCase, bool noLowerCase, bool noNumeric, bool noSpecialChar,
         string customChar, int length, string prefix, string suffix)
     {
-        var returnText = _passwordService.GeneratePassword(noUpperCase, noLowerCase, noNumeric, noSpecialChar,
+        var returnText = passwordService.GeneratePassword(noUpperCase, noLowerCase, noNumeric, noSpecialChar,
             customChar, length, prefix, suffix);
-        _outputProvider.AppendLine(returnText);
+        outputProvider.AppendLine(returnText);
     }
 }

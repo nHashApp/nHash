@@ -1,4 +1,3 @@
-using System.CommandLine.Builder;
 using Spectre.Console;
 
 namespace nHash.Console.Helper;
@@ -7,21 +6,24 @@ public static class CustomVersionHandler
 {
     private const string Version = "version: ";
 
-    public static CommandLineBuilder UseCustomVersionHandler(this CommandLineBuilder builder)
+    public static RootCommand UseCustomVersionHandler(this RootCommand rootCommand)
     {
-        var versionOption = builder.Command
+        var versionOption = rootCommand.Options
             .Where(x => x.Name == "version")
             .Select(x => (Option<bool>)x)
-            .First();
+            .FirstOrDefault();
         
-        versionOption.AddValidator(_ =>
+        if (versionOption is not null)
         {
-            AnsiConsole.Write(new FigletText("nHash").Centered());
-            System.Console.SetCursorPosition((System.Console.WindowWidth - Version.Length - 5) / 2,
-                System.Console.CursorTop);
-            System.Console.Write(Version);
-        });
+            versionOption.Validators.Add(_ =>
+            {
+                AnsiConsole.Write(new FigletText("nHash").Centered());
+                System.Console.SetCursorPosition((System.Console.WindowWidth - Version.Length - 5) / 2,
+                    System.Console.CursorTop);
+                System.Console.Write(Version);
+            });
+        }
 
-        return builder;
+        return rootCommand;
     }
 }

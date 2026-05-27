@@ -1,7 +1,4 @@
-using System.CommandLine.Builder;
-using System.CommandLine.Help;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
+using System.CommandLine;
 using nHash.Console.CommandLines.Base;
 using nHash.Console.CommandLines.Encodes;
 using nHash.Console.CommandLines.Hashes;
@@ -19,7 +16,7 @@ public static class Initialize
 
     public static async Task<int> InitializeCommandLine(IEnumerable<string> args, IServiceProvider provider)
     {
-        var features = new List<IFeature>()
+        var features = new List<IFeature>
         {
             Get<IUuidCommand>(provider),
             Get<IEncodeCommand>(provider),
@@ -31,91 +28,60 @@ public static class Initialize
         var rootCommand = new RootCommand("Hash and Text utilities in command-line mode");
         foreach (var feature in features)
         {
-            rootCommand.AddCommand(feature.Command);
+            rootCommand.Subcommands.Add(feature.Command);
         }
 
-        rootCommand.AddGlobalOption(OutputFileName);
+        rootCommand.Options.Add(OutputFileName);
+        rootCommand.UseCustomVersionHandler();
 
-        var commandLineBuilder = new CommandLineBuilder(rootCommand)
-            .AddMiddleware((context, next) => OutputMiddleware(provider, context, next))
-            .UseDefaults()
-            .UseExceptionHandler(UnhandledExceptionMiddleware)
-            .UseCustomVersionHandler()
-            .UseHelp(ctx =>
-            {
-                ctx.HelpBuilder.CustomizeLayout(_ =>
-                    HelpBuilder.Default
-                        .GetLayout()
-                        .Append(WriteExampleSection)
-                );
-            });
+        var parseResult = rootCommand.Parse(args.ToArray());
 
-        var parser = commandLineBuilder.Build();
-        return await parser.InvokeAsync(args.ToArray());
+        SetOutputOptions(provider, parseResult);
+
+        int exitCode;
+        try
+        {
+            exitCode = await parseResult.InvokeAsync();
+        }
+        catch (Exception exception)
+        {
+            System.Console.WriteLine("Internal exception has occurred");
+            System.Console.WriteLine($"Detail: {exception.Message}");
+            exitCode = 1;
+        }
+
+        await WriteOutput(provider);
+
+        return exitCode;
     }
 
     private static T Get<T>(IServiceProvider provider)
         where T : IFeature
         => provider.GetService<T>()!;
 
-    private static async Task OutputMiddleware(IServiceProvider provider, InvocationContext context,
-        Func<InvocationContext, Task> next)
-    {
-        SetOutputOptions(provider, context);
-
-        await next(context);
-
-        await WriteOutput(provider);
-    }
-
-    private static void UnhandledExceptionMiddleware(Exception exception, InvocationContext context)
-    {
-        System.Console.WriteLine("Internal exception has occurred");
-        System.Console.WriteLine($"Detail: {exception.Message}");
-    }
-
-    private static void WriteExampleSection(HelpContext context)
-    {
-        if (context.Command is not BaseCommand command)
-        {
-            return;
-        }
-
-        if (command.Examples is null)
-        {
-            return;
-        }
-
-        context.Output.WriteLine("Examples:");
-        context.HelpBuilder.WriteColumns(
-            command.Examples
-                .Select(x => new TwoColumnHelpRow(x.Key, x.Value))
-                .ToList()
-                .AsReadOnly(), context
-        );
-    }
-
     private static Option<string> InitializeOutput()
     {
-        var outputOption = new Option<string>(name: "--output", description: "File name for writing output");
-        outputOption.AddAlias("-o");
+        var outputOption = new Option<string>("--output", "-o")
+        {
+            Description = "File name for writing output",
+            Recursive = true
+        };
         return outputOption;
     }
-
-    private static void SetOutputOptions(IServiceProvider provider, InvocationContext context)
+    
+    private static void SetOutputOptions(IServiceProvider provider, ParseResult parseResult)
     {
         var outputParameter = provider.GetService<OutputParameter>()!;
         outputParameter.Type = OutputType.Console;
 
-        var outputOption = context.ParseResult.CommandResult.Children
-            .FirstOrDefault(x => x.Symbol == OutputFileName);
-        if (outputOption is null)
+        var outputValue = parseResult.GetValue(OutputFileName);
+        if (string.IsNullOrWhiteSpace(outputValue))
         {
             return;
         }
 
         outputParameter.Type = OutputType.File;
-        outputParameter.OutputTypeValue = outputOption.Tokens[0].ToString();
+        outputParameter.OutputTypeValue = outputValue;
     }
 
     private static async Task WriteOutput(IServiceProvider provider)

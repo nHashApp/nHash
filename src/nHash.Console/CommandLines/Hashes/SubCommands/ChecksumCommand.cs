@@ -4,14 +4,36 @@ using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Hashes.SubCommands;
 
-public class ChecksumCommand : IChecksumCommand
+public class ChecksumCommand(IFileProvider fileProvider, IChecksumService hashService, IOutputProvider outputProvider) : IChecksumCommand
 {
     public BaseCommand Command => GetFeatureCommand();
-    private readonly Argument<string> _textArgument;
-    private readonly Option<string> _fileName;
-    private readonly Option<bool> _lowerCase;
-    private readonly Option<string> _verify;
-    private readonly Option<ChecksumType> _hashType;
+
+    private readonly Argument<string> _textArgument = new("text")
+    {
+        Description = "Text for calculate fingerprint",
+        DefaultValueFactory = _ => string.Empty
+    };
+
+    private readonly Option<string> _fileName = new("--file", "-f")
+    {
+        Description = "File name for calculate hash"
+    };
+
+    private readonly Option<bool> _lowerCase = new("--lower")
+    {
+        Description = "Generate lower case"
+    };
+
+    private readonly Option<string> _verify = new("--verify", "-v")
+    {
+        Description = "Use the checksum type provided to verify your checksum"
+    };
+
+    private readonly Option<ChecksumType> _hashType = new("--type", "-t")
+    {
+        Description = "Hash type (MD5, SHA-1, CRC-8, CRC-32, Adler-32,...)",
+        DefaultValueFactory = _ => ChecksumType.All
+    };
 
     private static readonly Dictionary<ChecksumType, string> Algorithms = new()
     {
@@ -24,54 +46,39 @@ public class ChecksumCommand : IChecksumCommand
         { ChecksumType.Fletcher32, "Fletcher-32" }
     };
 
-    private readonly IFileProvider _fileProvider;
-    private readonly IChecksumService _hashService;
-    private readonly IOutputProvider _outputProvider;
-
-    public ChecksumCommand(IFileProvider fileProvider, IChecksumService hashService, IOutputProvider outputProvider)
-    {
-        _fileProvider = fileProvider;
-        _hashService = hashService;
-        _outputProvider = outputProvider;
-        _textArgument = new Argument<string>("text", () => string.Empty, "Text for calculate fingerprint");
-        _fileName = new Option<string>(name: "--file", description: "File name for calculate hash");
-        _fileName.AddAlias("-f");
-        _lowerCase = new Option<bool>(name: "--lower", description: "Generate lower case");
-        _hashType = new Option<ChecksumType>(name: "--type", () => ChecksumType.All,
-            "Hash type (MD5, SHA-1, CRC-8, CRC-32, Adler-32,...)");
-        _hashType.AddAlias("-t");
-        _verify = new Option<string>(name: "--verify",
-            description: "Use the checksum type provided to verify your checksum");
-        _verify.AddAlias("-v");
-    }
-
     private BaseCommand GetFeatureCommand()
     {
         var command = new BaseCommand("checksum",
-            "Calculate checksum fingerprint (MD5, SHA-1, CRC32, CRC8, Adler-32,...)", GetExamples())
+            "Calculate checksum fingerprint (MD5, SHA-1, CRC32, CRC8, Adler-32,...)", GetExamples());
+
+        command.Options.Add(_fileName);
+        command.Options.Add(_lowerCase);
+        command.Options.Add(_hashType);
+        command.Options.Add(_verify);
+        command.Arguments.Add(_textArgument);
+
+        command.SetAction(async parseResult =>
         {
-            _fileName,
-            _lowerCase,
-            _hashType,
-            _verify
-        };
-        command.AddArgument(_textArgument);
-        command.SetHandler(CalculateText, _textArgument, _lowerCase, _fileName, _hashType, _verify);
-        command.AddAlias("ch");
+            var text = parseResult.GetValue(_textArgument);
+            var lowerCase = parseResult.GetValue(_lowerCase);
+            var fileName = parseResult.GetValue(_fileName);
+            var hashType = parseResult.GetValue(_hashType);
+            var verify = parseResult.GetValue(_verify);
+            await CalculateText(text ?? string.Empty, lowerCase, fileName ?? string.Empty, hashType, verify ?? string.Empty);
+        });
+
+        command.Aliases.Add("ch");
 
         return command;
     }
 
-    private static List<KeyValuePair<string, string>> GetExamples()
-    {
-        return new List<KeyValuePair<string, string>>()
-        {
+    private static List<KeyValuePair<string, string>> GetExamples() =>
+        [
             new("Calculate the MD5 checksum of a given text", "nhash hash checksum \"Hello, World\" -t md5"),
             new("Calculate the CRC-8 checksum of a file", "nhash h ch -f /path/to/file.txt -t crc8"),
             new("Verify a checksum", "nhash hash checksum \"Hello, World\" -t md5 -v 82BB413746AEE42F89DEA2B59614F9EF"),
             new("Calculate multiple checksums at once", "nhash hash checksum -f /path/to/file.txt -t all"),
-        };
-    }
+        ];
 
     private async Task CalculateText(string text, bool lowerCase, string fileName, ChecksumType hashType,
         string targetChecksum)
@@ -91,7 +98,7 @@ public class ChecksumCommand : IChecksumCommand
 
         if (!string.IsNullOrWhiteSpace(fileName))
         {
-            inputBytes = await _fileProvider.ReadAsByte(fileName);
+            inputBytes = await fileProvider.ReadAsByte(fileName);
         }
 
         if (inputBytes == Array.Empty<byte>())
@@ -101,12 +108,12 @@ public class ChecksumCommand : IChecksumCommand
 
         if (string.IsNullOrWhiteSpace(targetChecksum))
         {
-            var hashResults = _hashService.CalculateText(inputBytes, lowerCase, hashType);
+            var hashResults = hashService.CalculateText(inputBytes, lowerCase, hashType);
             WriteHashOutput(hashType, hashResults);
         }
         else
         {
-            var verifyResult = _hashService.VerifyChecksum(inputBytes, targetChecksum, hashType);
+            var verifyResult = hashService.VerifyChecksum(inputBytes, targetChecksum, hashType);
             WriteVerifyOutput(targetChecksum, verifyResult.NewChecksum, verifyResult.IsMatch);
         }
     }
@@ -115,22 +122,22 @@ public class ChecksumCommand : IChecksumCommand
     {
         if (hashType != ChecksumType.All)
         {
-            _outputProvider.AppendLine(hashResult.First().Value);
+            outputProvider.AppendLine(hashResult.First().Value);
             return;
         }
 
         foreach (var algorithm in hashResult)
         {
-            _outputProvider.AppendLine($"{Algorithms[algorithm.Key]}:");
-            _outputProvider.AppendLine(algorithm.Value);
-            _outputProvider.AppendLine();
+            outputProvider.AppendLine($"{Algorithms[algorithm.Key]}:");
+            outputProvider.AppendLine(algorithm.Value);
+            outputProvider.AppendLine();
         }
     }
 
     private void WriteVerifyOutput(string targetChecksum, string newChecksum, bool isMatch)
     {
-        _outputProvider.AppendLine($"Your checksum= {targetChecksum}");
-        _outputProvider.AppendLine($"Data checksum= {newChecksum}");
-        _outputProvider.AppendLine($"Result is: {(isMatch ? "Match" : "Not Match")}");
+        outputProvider.AppendLine($"Your checksum= {targetChecksum}");
+        outputProvider.AppendLine($"Data checksum= {newChecksum}");
+        outputProvider.AppendLine($"Result is: {(isMatch ? "Match" : "Not Match")}");
     }
 }
