@@ -112,7 +112,7 @@ Calendar, timezone, and business workday calculations.
 | Command | Aliases | Description | Example |
 | :--- | :--- | :--- | :--- |
 | `epoch` | - | Translates Unix epoch values to human datetime, or converts datetime to epoch. | `nhash date epoch 1716800000` |
-| `timezone` | - | Translates time zones (e.g. converting UTC to Iran Standard Time). | `nhash date timezone "12:00" -f UTC -t "Iran Standard Time"` |
+| `timezone` | - | Translates time zones (e.g. converting UTC to Eastern European Time). | `nhash date timezone "12:00" -f UTC -t "Eastern European Time"` |
 | `convert` | - | Conversions between Gregorian, Jalali (Shamsi), and Hijri calendars. | `nhash date convert "2026-05-27" -f gregorian -t jalali` |
 | `diff` | - | Evaluates time durations and exact intervals between two dates. | `nhash date diff "2026-05-01" "2026-05-27"` |
 | `iso` | - | Detailed parsing of ISO 8601 strings into discrete offsets, days, and weeks. | `nhash date iso "2026-05-27T12:00:00Z"` |
