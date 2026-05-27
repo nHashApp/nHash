@@ -3,15 +3,15 @@ using System.Security.Cryptography;
 
 namespace nHash.Application.Uuids;
 
-public class UUIDGenerator : IUUIDGenerator
+public class UuidGenerator : IUuidGenerator
 {
-    public Guid GenerateUUIDv1()
+    public Guid GenerateUuiDv1()
     {
         var currentTime = DateTime.UtcNow;
         var timeBytes = BitConverter.GetBytes(currentTime.Ticks);
         Array.Reverse(timeBytes);
         var nodeId = GetMachineIdentifier();
-        var versionAndVariant = new byte[2] { (byte)0b00000001, (byte)0b10000000 };
+        var versionAndVariant = new byte[] { 0b00000001, 0b10000000 };
         var uuidBytes = new byte[16];
         Array.Copy(timeBytes, 2, uuidBytes, 0, 6);
         Array.Copy(nodeId, 0, uuidBytes, 6, 6);
@@ -19,13 +19,13 @@ public class UUIDGenerator : IUUIDGenerator
         return new Guid(uuidBytes);
     }
 
-    public Guid GenerateUUIDv2()
+    public Guid GenerateUuiDv2()
     {
         var currentTime = DateTime.UtcNow;
         var timeBytes = BitConverter.GetBytes(currentTime.Ticks);
         Array.Reverse(timeBytes);
         var nodeId = GetMachineIdentifier();
-        var versionAndVariant = new byte[2] { (byte)0b00000010, (byte)0b10000000 };
+        var versionAndVariant = new byte[] { 0b00000010, 0b10000000 };
 
         var uuidBytes = new byte[16];
         Array.Copy(timeBytes, 2, uuidBytes, 0, 4);
@@ -34,7 +34,7 @@ public class UUIDGenerator : IUUIDGenerator
         return new Guid(uuidBytes);
     }
 
-    public Guid GenerateUUIDv3(Guid namespaceId, string name)
+    public Guid GenerateUuiDv3(Guid namespaceId, string name)
     {
         var nameBytes = System.Text.Encoding.UTF8.GetBytes(name);
         var namespaceBytes = namespaceId.ToByteArray();
@@ -42,24 +42,24 @@ public class UUIDGenerator : IUUIDGenerator
         var uuidBytes = new byte[16];
         Array.Copy(hashBytes, 0, uuidBytes, 0, 16);
         uuidBytes[6] &= 0x0f;
-        uuidBytes[6] |= (byte)(3 << 4);
+        uuidBytes[6] |= 3 << 4;
         uuidBytes[8] &= 0x3f;
         uuidBytes[8] |= 0x80;
         return new Guid(uuidBytes);
     }
 
-    public Guid GenerateUUIDv4()
+    public Guid GenerateUuiDv4()
     {
         var uuidBytes = new byte[16];
         RandomNumberGenerator.Create().GetBytes(uuidBytes);
         uuidBytes[6] &= 0x0f;
-        uuidBytes[6] |= (byte)(4 << 4);
+        uuidBytes[6] |= 4 << 4;
         uuidBytes[8] &= 0x3f;
         uuidBytes[8] |= 0x80;
         return new Guid(uuidBytes);
     }
 
-    public Guid GenerateUUIDv5(Guid namespaceId, string name)
+    public Guid GenerateUuiDv5(Guid namespaceId, string name)
     {
         var nameBytes = System.Text.Encoding.UTF8.GetBytes(name);
         var namespaceBytes = namespaceId.ToByteArray();
@@ -67,7 +67,7 @@ public class UUIDGenerator : IUUIDGenerator
         var uuidBytes = new byte[16];
         Array.Copy(hashBytes, 0, uuidBytes, 0, 16);
         uuidBytes[6] &= 0x0f;
-        uuidBytes[6] |= (byte)(5 << 4);
+        uuidBytes[6] |= 5 << 4;
         uuidBytes[8] &= 0x3f;
         uuidBytes[8] |= 0x80;
         return new Guid(uuidBytes);

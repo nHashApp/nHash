@@ -4,8 +4,8 @@ namespace nHash.Application.Uuids;
 
 public class UuidService : IUuidService 
 {
-    private readonly IUUIDGenerator _uuidGenerator;
-    public UuidService(IUUIDGenerator uuidGenerator)
+    private readonly IUuidGenerator _uuidGenerator;
+    public UuidService(IUuidGenerator uuidGenerator)
     {
         _uuidGenerator = uuidGenerator;
     }
@@ -50,12 +50,12 @@ public class UuidService : IUuidService
     {
         return version switch
         {
-            UuidVersion.V1 => _uuidGenerator.GenerateUUIDv1(),
-            UuidVersion.V2 => _uuidGenerator.GenerateUUIDv2(),
-            UuidVersion.V3 => _uuidGenerator.GenerateUUIDv3(Guid.NewGuid(), "nHash"),
-            UuidVersion.V4 => _uuidGenerator.GenerateUUIDv4(),
-            UuidVersion.V5 => _uuidGenerator.GenerateUUIDv5(Guid.NewGuid(), "nHash"),
-            _ => _uuidGenerator.GenerateUUIDv4()
+            UuidVersion.V1 => _uuidGenerator.GenerateUuiDv1(),
+            UuidVersion.V2 => _uuidGenerator.GenerateUuiDv2(),
+            UuidVersion.V3 => _uuidGenerator.GenerateUuiDv3(Guid.NewGuid(), "nHash"),
+            UuidVersion.V4 => _uuidGenerator.GenerateUuiDv4(),
+            UuidVersion.V5 => _uuidGenerator.GenerateUuiDv5(Guid.NewGuid(), "nHash"),
+            _ => _uuidGenerator.GenerateUuiDv4()
         };
     }
 }

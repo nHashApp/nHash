@@ -1,4 +1,3 @@
-using nHash.Application.Hashes.Models;
 using nHash.Console.CommandLines.Encodes;
 using nHash.Console.CommandLines.Encodes.SubCommands;
 using nHash.Console.CommandLines.Hashes;

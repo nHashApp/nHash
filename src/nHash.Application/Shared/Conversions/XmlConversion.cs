@@ -11,9 +11,9 @@ public class XmlConversion : IConversion
     {
         return sourceType switch
         {
-            ConversionType.XML => value,
-            ConversionType.JSON => FromJson(value),
-            ConversionType.YAML => FromYaml(value),
+            ConversionType.Xml => value,
+            ConversionType.Json => FromJson(value),
+            ConversionType.Yaml => FromYaml(value),
             _ => value
         };
     }
@@ -48,8 +48,6 @@ public class XmlConversion : IConversion
                     case XmlNodeType.EndElement:
                         root = root!.Parent;
                         break;
-                    default:
-                        break;
                 }
             }
         }
@@ -74,7 +72,7 @@ public class XmlConversion : IConversion
 
     private static string FromYaml(string yaml)
     {
-        var json = Conversion.ToJson(yaml, ConversionType.YAML);
+        var json = Conversion.ToJson(yaml, ConversionType.Yaml);
         return FromJson(json);
     }
 }

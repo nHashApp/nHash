@@ -15,13 +15,7 @@ namespace nHash.Console;
 
 public static class Initialize
 {
-    private static readonly Option<string> OutputFileName;
-
-    static Initialize()
-    {
-        OutputFileName = new Option<string>(name: "--output", description: "File name for writing output");
-        OutputFileName.AddAlias("-o");
-    }
+    private static readonly Option<string> OutputFileName = InitializeOutput();
 
     public static async Task<int> InitializeCommandLine(IEnumerable<string> args, IServiceProvider provider)
     {
@@ -49,17 +43,15 @@ public static class Initialize
             .UseCustomVersionHandler()
             .UseHelp(ctx =>
             {
-                ctx.HelpBuilder.CustomizeLayout(
-                    _ =>
-                        HelpBuilder.Default
-                            .GetLayout()
-                            .Append(WriteExampleSection)
+                ctx.HelpBuilder.CustomizeLayout(_ =>
+                    HelpBuilder.Default
+                        .GetLayout()
+                        .Append(WriteExampleSection)
                 );
             });
-        
+
         var parser = commandLineBuilder.Build();
         return await parser.InvokeAsync(args.ToArray());
-        //return await rootCommand.InvokeAsync(parameters);
     }
 
     private static T Get<T>(IServiceProvider provider)
@@ -96,7 +88,18 @@ public static class Initialize
 
         context.Output.WriteLine("Examples:");
         context.HelpBuilder.WriteColumns(
-            command.Examples.Select(_ => new TwoColumnHelpRow(_.Key, _.Value)).ToList().AsReadOnly(), context);
+            command.Examples
+                .Select(x => new TwoColumnHelpRow(x.Key, x.Value))
+                .ToList()
+                .AsReadOnly(), context
+        );
+    }
+
+    private static Option<string> InitializeOutput()
+    {
+        var outputOption = new Option<string>(name: "--output", description: "File name for writing output");
+        outputOption.AddAlias("-o");
+        return outputOption;
     }
 
     private static void SetOutputOptions(IServiceProvider provider, InvocationContext context)
@@ -105,7 +108,7 @@ public static class Initialize
         outputParameter.Type = OutputType.Console;
 
         var outputOption = context.ParseResult.CommandResult.Children
-            .FirstOrDefault(_ => _.Symbol == OutputFileName);
+            .FirstOrDefault(x => x.Symbol == OutputFileName);
         if (outputOption is null)
         {
             return;

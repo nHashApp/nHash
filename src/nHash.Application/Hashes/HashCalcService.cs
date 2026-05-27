@@ -50,18 +50,18 @@ public class HashCalcService : IHashCalcService
     {
         IHash provider = hashType switch
         {
-            HashType.MD5 => new MD5Hash(),
-            HashType.SHA1 => new SHA1Hash(),
-            HashType.SHA256 => new SHA256Hash(),
-            HashType.SHA384 => new SHA384Hash(),
-            HashType.SHA512 => new SHA512Hash(),
-            HashType.SHA3_224 => new Sha3224Hash(),
-            HashType.SHA3_256 => new Sha3256Hash(),
-            HashType.SHA3_384 => new Sha3384Hash(),
-            HashType.SHA3_512 => new Sha3512Hash(),
-            HashType.BLAKE2b => new BLAKE2bHash(),
-            HashType.BLAKE2s => new BLAKE2sHash(),
-            _ => new MD5Hash()
+            HashType.Md5 => new Md5Hash(),
+            HashType.Sha1 => new Sha1Hash(),
+            HashType.Sha256 => new Sha256Hash(),
+            HashType.Sha384 => new Sha384Hash(),
+            HashType.Sha512 => new Sha512Hash(),
+            HashType.Sha3224 => new Sha3224Hash(),
+            HashType.Sha3256 => new Sha3256Hash(),
+            HashType.Sha3384 => new Sha3384Hash(),
+            HashType.Sha3512 => new Sha3512Hash(),
+            HashType.Blake2B => new Blake2BHash(),
+            HashType.Blake2S => new Blake2SHash(),
+            _ => new Md5Hash()
         };
 
         var hashBytes = provider.ComputeHash(inputBytes);

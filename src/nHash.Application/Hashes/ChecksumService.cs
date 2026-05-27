@@ -61,14 +61,14 @@ public class ChecksumService : IChecksumService
     {
         IHash provider = hashType switch
         {
-            ChecksumType.MD5 => new MD5Hash(),
-            ChecksumType.SHA1 => new SHA1Hash(),
-            ChecksumType.CRC8 => new CRC8Hash(),
-            ChecksumType.CRC32 => new CRC32Hash(),
+            ChecksumType.Md5 => new Md5Hash(),
+            ChecksumType.Sha1 => new Sha1Hash(),
+            ChecksumType.Crc8 => new Crc8Hash(),
+            ChecksumType.Crc32 => new Crc32Hash(),
             ChecksumType.Adler32 => new Adler32Hash(),
             ChecksumType.Fletcher16 => new Fletcher16Hash(),
             ChecksumType.Fletcher32 => new Fletcher32Hash(),
-            _ => new MD5Hash()
+            _ => new Md5Hash()
         };
 
         var hashBytes = provider.ComputeHash(inputBytes);

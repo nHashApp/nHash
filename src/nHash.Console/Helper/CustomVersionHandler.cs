@@ -5,17 +5,19 @@ namespace nHash.Console.Helper;
 
 public static class CustomVersionHandler
 {
-    const string version = "version: ";
+    private const string Version = "version: ";
 
     public static CommandLineBuilder UseCustomVersionHandler(this CommandLineBuilder builder)
     {
-        var versionOption = builder.Command.Where(_ => _.Name == "version").Select(_ => (Option<bool>)_).First();
-        versionOption.AddValidator(result =>
+        var versionOption = builder.Command
+            .Where(x => x.Name == "version")
+            .Select(x => (Option<bool>)x).First();
+        versionOption.AddValidator(_ =>
         {
             AnsiConsole.Write(new FigletText("nHash").Centered());
-            System.Console.SetCursorPosition((System.Console.WindowWidth - version.Length - 5) / 2,
+            System.Console.SetCursorPosition((System.Console.WindowWidth - Version.Length - 5) / 2,
                 System.Console.CursorTop);
-            System.Console.Write(version);
+            System.Console.Write(Version);
         });
 
         return builder;

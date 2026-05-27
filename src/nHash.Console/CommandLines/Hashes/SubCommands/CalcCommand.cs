@@ -14,17 +14,17 @@ public class CalcCommand : ICalcCommand
 
     private static readonly Dictionary<HashType, string> Algorithms = new()
     {
-        { HashType.MD5, "MD5" },
-        { HashType.SHA1, "SHA-1" },
-        { HashType.SHA256, "SHA-256" },
-        { HashType.SHA384, "SHA-384" },
-        { HashType.SHA512, "SHA-512" },
-        { HashType.SHA3_224, "SHA-3 (224)" },
-        { HashType.SHA3_256, "SHA-3 (256)" },
-        { HashType.SHA3_384, "SHA-3 (384)" },
-        { HashType.SHA3_512, "SHA-3 (512)" },
-        { HashType.BLAKE2b, "Blake2b " },
-        { HashType.BLAKE2s, "Blake2s " }
+        { HashType.Md5, "MD5" },
+        { HashType.Sha1, "SHA-1" },
+        { HashType.Sha256, "SHA-256" },
+        { HashType.Sha384, "SHA-384" },
+        { HashType.Sha512, "SHA-512" },
+        { HashType.Sha3224, "SHA-3 (224)" },
+        { HashType.Sha3256, "SHA-3 (256)" },
+        { HashType.Sha3384, "SHA-3 (384)" },
+        { HashType.Sha3512, "SHA-3 (512)" },
+        { HashType.Blake2B, "Blake2b " },
+        { HashType.Blake2S, "Blake2s " }
     };
 
     private readonly IFileProvider _fileProvider;

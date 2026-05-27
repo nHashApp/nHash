@@ -15,10 +15,10 @@ public class ChecksumCommand : IChecksumCommand
 
     private static readonly Dictionary<ChecksumType, string> Algorithms = new()
     {
-        { ChecksumType.MD5, "MD5" },
-        { ChecksumType.SHA1, "SHA-1" },
-        { ChecksumType.CRC8, "CRC-8" },
-        { ChecksumType.CRC32, "CRC-32" },
+        { ChecksumType.Md5, "MD5" },
+        { ChecksumType.Sha1, "SHA-1" },
+        { ChecksumType.Crc8, "CRC-8" },
+        { ChecksumType.Crc32, "CRC-32" },
         { ChecksumType.Adler32, "Adler-32" },
         { ChecksumType.Fletcher16, "Fletcher-16" },
         { ChecksumType.Fletcher32, "Fletcher-32" }

@@ -41,6 +41,8 @@ public static class Startup
             list.Add(pipedText);
         }
 
-        return list.Where(_ => !string.IsNullOrWhiteSpace(_)).ToArray();
+        return list
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToArray();
     }
 }

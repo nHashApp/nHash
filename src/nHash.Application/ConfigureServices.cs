@@ -59,6 +59,6 @@ public static class ConfigureServices
     private static void RegisterUuidServices(IServiceCollection services)
     {
         services.AddSingleton<IUuidService, UuidService>();
-        services.AddSingleton<IUUIDGenerator, UUIDGenerator>();
+        services.AddSingleton<IUuidGenerator, UuidGenerator>();
     }
 }

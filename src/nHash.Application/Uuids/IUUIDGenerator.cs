@@ -1,10 +1,10 @@
 namespace nHash.Application.Uuids;
 
-public interface IUUIDGenerator
+public interface IUuidGenerator
 {
-    Guid GenerateUUIDv1();
-    Guid GenerateUUIDv2();
-    Guid GenerateUUIDv3(Guid namespaceId, string name);
-    Guid GenerateUUIDv4();
-    Guid GenerateUUIDv5(Guid namespaceId, string name);
+    Guid GenerateUuiDv1();
+    Guid GenerateUuiDv2();
+    Guid GenerateUuiDv3(Guid namespaceId, string name);
+    Guid GenerateUuiDv4();
+    Guid GenerateUuiDv5(Guid namespaceId, string name);
 }
