@@ -10,7 +10,7 @@ public class DevCommand(IDevService devService, IOutputProvider outputProvider) 
 
     private BaseCommand GetCommand()
     {
-        var command = new BaseCommand("dev", "Developer utility subcommands (cron, regex, color)");
+        var command = new BaseCommand("dev", "Developer utility subcommands (cron, regex, color, jwt, semver, number)");
         command.Aliases.Add("developer");
 
         command.Subcommands.Add(GetCronCommand());
@@ -31,6 +31,7 @@ public class DevCommand(IDevService devService, IOutputProvider outputProvider) 
         var cmd = new BaseCommand("cron", "Translate a cron expression to human-readable text and estimate schedule");
         cmd.Arguments.Add(exprArg);
         cmd.Options.Add(countOption);
+        cmd.Aliases.Add("cr");
 
         cmd.SetAction(parseResult =>
         {
@@ -52,6 +53,7 @@ public class DevCommand(IDevService devService, IOutputProvider outputProvider) 
         var cmd = new BaseCommand("regex", "Test regular expressions against an input string and show matches");
         cmd.Arguments.Add(inputArg);
         cmd.Options.Add(patternOption);
+        cmd.Aliases.Add("rg");
 
         cmd.SetAction(parseResult =>
         {
@@ -71,6 +73,7 @@ public class DevCommand(IDevService devService, IOutputProvider outputProvider) 
 
         var cmd = new BaseCommand("color", "Convert between color spaces (HEX, RGB, HSL, CMYK) with terminal preview");
         cmd.Arguments.Add(valArg);
+        cmd.Aliases.Add("c");
 
         cmd.SetAction(parseResult =>
         {
@@ -90,6 +93,8 @@ public class DevCommand(IDevService devService, IOutputProvider outputProvider) 
         var cmd = new BaseCommand("jwt-build", "Build an unsigned JWT token from JSON header and payload strings");
         cmd.Options.Add(headerOption);
         cmd.Options.Add(payloadOption);
+        cmd.Aliases.Add("jwt");
+        cmd.Aliases.Add("j");
 
         cmd.SetAction(parseResult =>
         {
@@ -111,6 +116,7 @@ public class DevCommand(IDevService devService, IOutputProvider outputProvider) 
         var cmd = new BaseCommand("semver", "Compare two semantic versions");
         cmd.Arguments.Add(version1Arg);
         cmd.Arguments.Add(version2Arg);
+        cmd.Aliases.Add("sv");
 
         cmd.SetAction(parseResult =>
         {
@@ -130,6 +136,8 @@ public class DevCommand(IDevService devService, IOutputProvider outputProvider) 
 
         var cmd = new BaseCommand("number", "Inspect a number and show its representations in decimal, hex, octal, binary, and scientific formats");
         cmd.Arguments.Add(valueArg);
+        cmd.Aliases.Add("num");
+        cmd.Aliases.Add("n");
 
         cmd.SetAction(parseResult =>
         {

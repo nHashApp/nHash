@@ -22,6 +22,7 @@ public class SysCommand(ISysService sysService, IOutputProvider outputProvider) 
     private BaseCommand GetInfoCommand()
     {
         var cmd = new BaseCommand("info", "Display system information (OS, CPU, memory, runtime)");
+        cmd.Aliases.Add("i");
         cmd.SetAction(parseResult =>
         {
             var res = sysService.GetSystemInfo();
@@ -35,6 +36,7 @@ public class SysCommand(ISysService sysService, IOutputProvider outputProvider) 
         var filterOption = new Option<string?>("--filter", "-f") { Description = "Filter environment variables by name (case-insensitive contains)" };
         var cmd = new BaseCommand("env", "List environment variables, optionally filtered by name");
         cmd.Options.Add(filterOption);
+        cmd.Aliases.Add("e");
         cmd.SetAction(parseResult =>
         {
             var filter = parseResult.GetValue(filterOption);
@@ -51,6 +53,8 @@ public class SysCommand(ISysService sysService, IOutputProvider outputProvider) 
         var cmd = new BaseCommand("process", "List running processes sorted by memory usage");
         cmd.Options.Add(filterOption);
         cmd.Options.Add(topOption);
+        cmd.Aliases.Add("ps");
+        cmd.Aliases.Add("p");
         cmd.SetAction(parseResult =>
         {
             var filter = parseResult.GetValue(filterOption);

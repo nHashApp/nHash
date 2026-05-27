@@ -25,6 +25,8 @@ public class MathCommand(IMathService mathService, IOutputProvider outputProvide
         var numberArg = new Argument<long>("number") { Description = "Number to check" };
         var cmd = new BaseCommand("prime", "Check if a number is prime, perfect, or Fibonacci, and calculate digit sum");
         cmd.Arguments.Add(numberArg);
+        cmd.Aliases.Add("pr");
+        cmd.Aliases.Add("p");
         cmd.SetAction(parseResult =>
         {
             var num = parseResult.GetValue(numberArg);
@@ -39,6 +41,8 @@ public class MathCommand(IMathService mathService, IOutputProvider outputProvide
         var countOption = new Option<int>("--count", "-c") { Description = "Count of Fibonacci numbers to generate", DefaultValueFactory = _ => 10 };
         var cmd = new BaseCommand("fibonacci", "Generate a sequence of Fibonacci numbers");
         cmd.Options.Add(countOption);
+        cmd.Aliases.Add("fib");
+        cmd.Aliases.Add("f");
         cmd.SetAction(parseResult =>
         {
             var count = parseResult.GetValue(countOption);
@@ -53,6 +57,8 @@ public class MathCommand(IMathService mathService, IOutputProvider outputProvide
         var numberArg = new Argument<long>("number") { Description = "Number to factorize" };
         var cmd = new BaseCommand("factor", "Factorize a positive number into its prime factors");
         cmd.Arguments.Add(numberArg);
+        cmd.Aliases.Add("fac");
+        cmd.Aliases.Add("fact");
         cmd.SetAction(parseResult =>
         {
             var num = parseResult.GetValue(numberArg);
@@ -67,6 +73,8 @@ public class MathCommand(IMathService mathService, IOutputProvider outputProvide
         var expressionArg = new Argument<string>("expression") { Description = "Math expression to evaluate" };
         var cmd = new BaseCommand("evaluate", "Evaluate a mathematical expression (+, -, *, /, %, ^, sin, cos, etc.)");
         cmd.Aliases.Add("eval");
+        cmd.Aliases.Add("calc");
+        cmd.Aliases.Add("c");
         cmd.Arguments.Add(expressionArg);
         cmd.SetAction(parseResult =>
         {
