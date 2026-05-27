@@ -10,13 +10,12 @@ public class DevCommand(IDevService devService, IOutputProvider outputProvider) 
 
     private BaseCommand GetCommand()
     {
-        var command = new BaseCommand("dev", "Developer utility subcommands (cron, regex, color, jwt, semver, number)");
+        var command = new BaseCommand("dev", "Developer utility subcommands (cron, regex, color, semver, number)");
         command.Aliases.Add("developer");
 
         command.Subcommands.Add(GetCronCommand());
         command.Subcommands.Add(GetRegexCommand());
         command.Subcommands.Add(GetColorCommand());
-        command.Subcommands.Add(GetJwtBuildCommand());
         command.Subcommands.Add(GetSemverCommand());
         command.Subcommands.Add(GetNumberCommand());
 
@@ -85,28 +84,6 @@ public class DevCommand(IDevService devService, IOutputProvider outputProvider) 
         return cmd;
     }
 
-    private BaseCommand GetJwtBuildCommand()
-    {
-        var headerOption = new Option<string>("--header", "-H") { Description = "JSON header string", DefaultValueFactory = _ => "{\"alg\":\"HS256\",\"typ\":\"JWT\"}" };
-        var payloadOption = new Option<string>("--payload", "-p") { Description = "JSON payload string", Required = true };
-
-        var cmd = new BaseCommand("jwt-build", "Build an unsigned JWT token from JSON header and payload strings");
-        cmd.Options.Add(headerOption);
-        cmd.Options.Add(payloadOption);
-        cmd.Aliases.Add("jwt");
-        cmd.Aliases.Add("j");
-
-        cmd.SetAction(parseResult =>
-        {
-            var header = parseResult.GetValue(headerOption) ?? "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
-            var payload = parseResult.GetValue(payloadOption) ?? string.Empty;
-
-            var res = devService.BuildJwt(header, payload);
-            outputProvider.AppendLine(res);
-        });
-
-        return cmd;
-    }
 
     private BaseCommand GetSemverCommand()
     {

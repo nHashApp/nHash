@@ -1,40 +1,82 @@
 using nHash.Application.Encodes;
 using nHash.Application.Encodes.Models;
+using nHash.Application.Dev;
 using nHash.Console.CommandLines.Base;
+using System.CommandLine;
 
 namespace nHash.Console.CommandLines.Encodes.SubCommands;
 
-public class JwtTokenCommand(IJwtTokenService jwtTokenService, IOutputProvider outputProvider) : IJwtTokenCommand
+public class JwtTokenCommand(IJwtTokenService jwtTokenService, IDevService devService, IOutputProvider outputProvider) : IJwtTokenCommand
 {
     public BaseCommand Command => GetFeatureCommand();
-    private readonly Option<bool> _noWriteInformation = new("--no-summary") { Description = "Don't write human readable information", DefaultValueFactory = _ => false };
-    private readonly Argument<string> _textArgument = new("token") { Description = "Jwt token for decode" };
 
     private BaseCommand GetFeatureCommand()
     {
-        var command = new BaseCommand("jwt", "JWT token decode (Comply with GDPR rules)", GetExamples());
-        command.Options.Add(_noWriteInformation);
-        command.Arguments.Add(_textArgument);
-        command.SetAction(parseResult =>
-        {
-            var text = parseResult.GetValue(_textArgument);
-            var noSummary = parseResult.GetValue(_noWriteInformation);
-            DecodeJwtToken(text ?? string.Empty, noSummary);
-        });
+        var command = new BaseCommand("jwt", "JWT token tools (decode, build)", GetExamples());
         command.Aliases.Add("j");
+
+        command.Subcommands.Add(GetDecodeSubCommand());
+        command.Subcommands.Add(GetBuildSubCommand());
 
         return command;
     }
-    
-    private static List<KeyValuePair<string,string>> GetExamples() =>
+
+    private BaseCommand GetDecodeSubCommand()
+    {
+        var noWriteInformation = new Option<bool>("--no-summary") { Description = "Don't write human readable information", DefaultValueFactory = _ => false };
+        var textArgument = new Argument<string>("token") { Description = "Jwt token for decode" };
+
+        var cmd = new BaseCommand("decode", "Decode a JWT token and display its header, payload, and summary info");
+        cmd.Aliases.Add("d");
+        cmd.Aliases.Add("dec");
+        cmd.Options.Add(noWriteInformation);
+        cmd.Arguments.Add(textArgument);
+
+        cmd.SetAction(parseResult =>
+        {
+            var text = parseResult.GetValue(textArgument) ?? string.Empty;
+            var noSummary = parseResult.GetValue(noWriteInformation);
+            DecodeJwtToken(text, noSummary);
+        });
+
+        return cmd;
+    }
+
+    private BaseCommand GetBuildSubCommand()
+    {
+        var headerOption = new Option<string>("--header", "-H") { Description = "JSON header string", DefaultValueFactory = _ => "{\"alg\":\"HS256\",\"typ\":\"JWT\"}" };
+        var payloadOption = new Option<string>("--payload", "-p") { Description = "JSON payload string", Required = true };
+
+        var cmd = new BaseCommand("build", "Build an unsigned JWT token from JSON header and payload strings");
+        cmd.Aliases.Add("b");
+        cmd.Aliases.Add("gen");
+        cmd.Aliases.Add("create");
+        cmd.Options.Add(headerOption);
+        cmd.Options.Add(payloadOption);
+
+        cmd.SetAction(parseResult =>
+        {
+            var header = parseResult.GetValue(headerOption) ?? "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
+            var payload = parseResult.GetValue(payloadOption) ?? string.Empty;
+
+            var res = devService.BuildJwt(header, payload);
+            outputProvider.AppendLine(res);
+        });
+
+        return cmd;
+    }
+
+    private static List<KeyValuePair<string, string>> GetExamples() =>
         [
-            new( "To decode a JWT token", "nhash encode jwt eyJhbGciOiJIUzI1NiIsInR5..."  ),
-            new( "To decode a JWT token", "nhash e j eyJhbGciOiJIUzI1NiIsInR5..."  )
+            new("Decode a JWT token", "nhash encode jwt decode eyJhbGciOiJIUzI1NiIsInR5..."),
+            new("Decode using short alias", "nhash e j d eyJhbGciOiJIUzI1NiIsInR5..."),
+            new("Build a JWT token", "nhash encode jwt build -p \"{\\\"sub\\\":\\\"123\\\"}\""),
+            new("Build using short alias", "nhash e j b -p \"{\\\"sub\\\":\\\"123\\\"}\"")
         ];
 
     private void DecodeJwtToken(string text, bool noWriteInformation)
     {
-       var jwtResult = jwtTokenService.DecodeJwtToken(text, noWriteInformation);
+        var jwtResult = jwtTokenService.DecodeJwtToken(text, noWriteInformation);
          
         outputProvider.AppendLine();
         outputProvider.AppendLine("Header: (ALGORITHM & TOKEN TYPE)");
