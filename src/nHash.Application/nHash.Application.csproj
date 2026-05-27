@@ -13,6 +13,7 @@
         <PackageReference Include="SauceControl.Blake2Fast" Version="2.0.0" />
         <PackageReference Include="SHA3.Net" Version="2.0.0" />
         <PackageReference Include="YamlDotNet" Version="18.0.0" />
+        <PackageReference Include="System.IO.Hashing" Version="10.0.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\nHash.Domain\nHash.Domain.csproj" />

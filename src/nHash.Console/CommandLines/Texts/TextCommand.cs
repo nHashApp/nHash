@@ -7,7 +7,11 @@ public class TextCommand(
     IHumanizeCommand humanizeFeature,
     IJsonCommand jsonFeature,
     IYamlCommand yamlFeature,
-    IXmlCommand xmlFeature)
+    IXmlCommand xmlFeature,
+    ICaseCommand caseFeature,
+    IDiffCommand diffFeature,
+    IStatsCommand statsFeature,
+    ILoremCommand loremFeature)
     : ITextCommand
 {
     public BaseCommand Command => GetCommand();
@@ -19,10 +23,14 @@ public class TextCommand(
             humanizeFeature,
             jsonFeature,
             yamlFeature,
-            xmlFeature
+            xmlFeature,
+            caseFeature,
+            diffFeature,
+            statsFeature,
+            loremFeature
         ];
 
-        var command = new BaseCommand("text", "Text utilities (Humanizer, JSON, YAML, XML)");
+        var command = new BaseCommand("text", "Text utilities (Humanizer, JSON, YAML, XML, Case, Diff, Stats, Lorem)");
         command.Aliases.Add("t");
         foreach (var feature in features)
         {

@@ -5,6 +5,14 @@ using nHash.Console.CommandLines.Hashes;
 using nHash.Console.CommandLines.Passwords;
 using nHash.Console.CommandLines.Texts;
 using nHash.Console.CommandLines.Uuids;
+using nHash.Console.CommandLines.Ids;
+using nHash.Console.CommandLines.Cryptos;
+using nHash.Console.CommandLines.Converts;
+using nHash.Console.CommandLines.Arts;
+using nHash.Console.CommandLines.Network;
+using nHash.Console.CommandLines.Date;
+using nHash.Console.CommandLines.File;
+using nHash.Console.CommandLines.Dev;
 using nHash.Console.Helper;
 using nHash.Domain.Models;
 
@@ -18,11 +26,15 @@ public static class Initialize
     {
         var features = new List<IFeature>
         {
-            Get<IUuidCommand>(provider),
-            Get<IEncodeCommand>(provider),
-            Get<IHashCommand>(provider),
+            Get<IIdCommand>(provider),
+            Get<IConvertCommand>(provider),
+            Get<ICryptoCommand>(provider),
             Get<ITextCommand>(provider),
-            Get<IPasswordCommand>(provider),
+            Get<IArtCommand>(provider),
+            Get<INetworkCommand>(provider),
+            Get<IDateCommand>(provider),
+            Get<IFileCommand>(provider),
+            Get<IDevCommand>(provider),
         };
 
         var rootCommand = new RootCommand("Hash and Text utilities in command-line mode");
