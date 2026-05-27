@@ -17,6 +17,9 @@ public class DateCommand(IDateService dateService, IOutputProvider outputProvide
         command.Subcommands.Add(GetConvertCommand());
         command.Subcommands.Add(GetDiffCommand());
         command.Subcommands.Add(GetTimezoneCommand());
+        command.Subcommands.Add(GetIsoCommand());
+        command.Subcommands.Add(GetAddCommand());
+        command.Subcommands.Add(GetWorkdaysCommand());
 
         return command;
     }
@@ -123,4 +126,53 @@ public class DateCommand(IDateService dateService, IOutputProvider outputProvide
 
         return cmd;
     }
+
+    private BaseCommand GetIsoCommand()
+    {
+        var valueArg = new Argument<string>("value") { Description = "ISO 8601 date-time string to parse" };
+        var cmd = new BaseCommand("iso", "Parse an ISO 8601 string and show detailed components");
+        cmd.Arguments.Add(valueArg);
+        cmd.SetAction(parseResult =>
+        {
+            var value = parseResult.GetValue(valueArg) ?? string.Empty;
+            var res = dateService.ParseIso8601(value);
+            outputProvider.AppendLine(res);
+        });
+        return cmd;
+    }
+
+    private BaseCommand GetAddCommand()
+    {
+        var datetimeArg = new Argument<string>("datetime") { Description = "Base date-time string" };
+        var durationOption = new Option<string>("--duration", "-d") { Description = "Duration to add/subtract (e.g. +30d, -2h, +1y, +30m, +1w)", Required = true };
+        var cmd = new BaseCommand("add", "Add or subtract duration from a date-time");
+        cmd.Arguments.Add(datetimeArg);
+        cmd.Options.Add(durationOption);
+        cmd.SetAction(parseResult =>
+        {
+            var datetime = parseResult.GetValue(datetimeArg) ?? string.Empty;
+            var duration = parseResult.GetValue(durationOption) ?? string.Empty;
+            var res = dateService.AddDuration(datetime, duration);
+            outputProvider.AppendLine(res);
+        });
+        return cmd;
+    }
+
+    private BaseCommand GetWorkdaysCommand()
+    {
+        var startArg = new Argument<string>("start") { Description = "Start date string" };
+        var endArg = new Argument<string>("end") { Description = "End date string" };
+        var cmd = new BaseCommand("workdays", "Count working days (excluding weekends) between two dates");
+        cmd.Arguments.Add(startArg);
+        cmd.Arguments.Add(endArg);
+        cmd.SetAction(parseResult =>
+        {
+            var start = parseResult.GetValue(startArg) ?? string.Empty;
+            var end = parseResult.GetValue(endArg) ?? string.Empty;
+            var res = dateService.CountWorkingDays(start, end);
+            outputProvider.AppendLine(res);
+        });
+        return cmd;
+    }
 }
+

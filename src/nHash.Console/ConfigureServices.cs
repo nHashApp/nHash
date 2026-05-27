@@ -14,6 +14,8 @@ using nHash.Console.CommandLines.Network;
 using nHash.Console.CommandLines.Date;
 using nHash.Console.CommandLines.File;
 using nHash.Console.CommandLines.Dev;
+using nHash.Console.CommandLines.Maths;
+using nHash.Console.CommandLines.Sys;
 
 namespace nHash.Console;
 
@@ -32,6 +34,8 @@ public static class ConfigureServices
         RegisterDateServices(services);
         RegisterFileServices(services);
         RegisterDevServices(services);
+        RegisterSysServices(services);
+        RegisterMathServices(services);
         
         services.AddSingleton<IOutputProvider, OutputProvider>();
 
@@ -51,6 +55,12 @@ public static class ConfigureServices
         services.AddSingleton<IBase62Command, Base62Command>();
         services.AddSingleton<IBase85Command, Base85Command>();
         services.AddSingleton<IBase36Command, Base36Command>();
+        services.AddSingleton<IBase45Command, Base45Command>();
+        services.AddSingleton<IBase91Command, Base91Command>();
+        services.AddSingleton<IPunycodeCommand, PunycodeCommand>();
+        services.AddSingleton<IRot13Command, Rot13Command>();
+        services.AddSingleton<IMorseCommand, MorseCommand>();
+        services.AddSingleton<IBinaryTextCommand, BinaryTextCommand>();
     }
 
     private static void RegisterHashServices(IServiceCollection services)
@@ -61,12 +71,12 @@ public static class ConfigureServices
         services.AddSingleton<ICryptoCommand, CryptoCommand>();
         services.AddSingleton<IHmacCommand, HmacCommand>();
         services.AddSingleton<ICipherCommand, CipherCommand>();
+        services.AddSingleton<ISignatureCommand, SignatureCommand>();
     }
 
     private static void RegisterPasswordServices(IServiceCollection services)
     {
         services.AddSingleton<IPasswordCommand, PasswordCommand>();
-
     }
 
     private static void RegisterTextServices(IServiceCollection services)
@@ -80,6 +90,11 @@ public static class ConfigureServices
         services.AddSingleton<IDiffCommand, DiffCommand>();
         services.AddSingleton<IStatsCommand, StatsCommand>();
         services.AddSingleton<ILoremCommand, LoremCommand>();
+        services.AddSingleton<ISlugCommand, SlugCommand>();
+        services.AddSingleton<IWordFreqCommand, WordFreqCommand>();
+        services.AddSingleton<IPalindromeCommand, PalindromeCommand>();
+        services.AddSingleton<ICountCommand, CountCommand>();
+        services.AddSingleton<IEscapeCommand, EscapeCommand>();
     }
 
     private static void RegisterUuidServices(IServiceCollection services)
@@ -88,6 +103,8 @@ public static class ConfigureServices
         services.AddSingleton<IIdCommand, IdCommand>();
         services.AddSingleton<ISnowflakeCommand, SnowflakeCommand>();
         services.AddSingleton<ICuidCommand, CuidCommand>();
+        services.AddSingleton<IUuidInspectCommand, UuidInspectCommand>();
+        services.AddSingleton<ITotpCommand, TotpCommand>();
     }
 
     private static void RegisterConvertServices(IServiceCollection services)
@@ -121,5 +138,15 @@ public static class ConfigureServices
     private static void RegisterDevServices(IServiceCollection services)
     {
         services.AddSingleton<IDevCommand, DevCommand>();
+    }
+
+    private static void RegisterSysServices(IServiceCollection services)
+    {
+        services.AddSingleton<ISysCommand, SysCommand>();
+    }
+
+    private static void RegisterMathServices(IServiceCollection services)
+    {
+        services.AddSingleton<IMathCommand, MathCommand>();
     }
 }

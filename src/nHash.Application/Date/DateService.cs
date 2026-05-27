@@ -164,4 +164,132 @@ public class DateService : IDateService
 
         return (year, month, day, hour, minute, second);
     }
+
+    public string ParseIso8601(string iso8601String)
+    {
+        if (string.IsNullOrWhiteSpace(iso8601String))
+            return "Error: ISO 8601 string cannot be empty.";
+
+        try
+        {
+            var dto = DateTimeOffset.Parse(iso8601String, null, System.Globalization.DateTimeStyles.RoundtripKind);
+            var cal = new GregorianCalendar();
+            int weekOfYear = cal.GetWeekOfYear(dto.DateTime, System.Globalization.CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+
+            return $"ISO 8601:    {iso8601String}\n" +
+                   $"Year:        {dto.Year}\n" +
+                   $"Month:       {dto.Month}\n" +
+                   $"Day:         {dto.Day}\n" +
+                   $"Hour:        {dto.Hour}\n" +
+                   $"Minute:      {dto.Minute}\n" +
+                   $"Second:      {dto.Second}\n" +
+                   $"Millisecond: {dto.Millisecond}\n" +
+                   $"Offset:      {dto.Offset}\n" +
+                   $"DayOfWeek:   {dto.DayOfWeek}\n" +
+                   $"WeekOfYear:  {weekOfYear}\n" +
+                   $"DayOfYear:   {dto.DayOfYear}\n" +
+                   $"IsUtc:       {dto.Offset == TimeSpan.Zero}";
+        }
+        catch (Exception ex)
+        {
+            return $"Error parsing ISO 8601: {ex.Message}";
+        }
+    }
+
+    public string AddDuration(string dateTimeStr, string duration)
+    {
+        if (string.IsNullOrWhiteSpace(dateTimeStr))
+            return "Error: Date-time string cannot be empty.";
+        if (string.IsNullOrWhiteSpace(duration))
+            return "Error: Duration string cannot be empty.";
+
+        try
+        {
+            var dto = DateTimeOffset.Parse(dateTimeStr, CultureInfo.InvariantCulture);
+            var result = ApplyDuration(dto, duration);
+            return $"Input:    {dto:O}\nDuration: {duration}\nResult:   {result:O}";
+        }
+        catch (Exception ex)
+        {
+            return $"Error adding duration: {ex.Message}";
+        }
+    }
+
+    private static DateTimeOffset ApplyDuration(DateTimeOffset dto, string duration)
+    {
+        // Parse patterns like +1y2M3w4d5h6m7s or -30d
+        var input = duration.Trim();
+        int sign = 1;
+        int start = 0;
+
+        if (input.StartsWith('+')) { sign = 1; start = 1; }
+        else if (input.StartsWith('-')) { sign = -1; start = 1; }
+
+        var rest = input[start..];
+
+        // Parse each unit group: number followed by unit letter
+        int i = 0;
+        while (i < rest.Length)
+        {
+            // Read digits
+            int numStart = i;
+            while (i < rest.Length && char.IsDigit(rest[i])) i++;
+            if (i == numStart) { i++; continue; } // skip unexpected chars
+            int amount = int.Parse(rest[numStart..i]) * sign;
+
+            if (i >= rest.Length) break;
+            char unit = rest[i++];
+
+            dto = unit switch
+            {
+                'y' => dto.AddYears(amount),
+                'M' => dto.AddMonths(amount),
+                'w' => dto.AddDays(amount * 7),
+                'd' => dto.AddDays(amount),
+                'h' => dto.AddHours(amount),
+                'm' => dto.AddMinutes(amount),
+                's' => dto.AddSeconds(amount),
+                _ => dto
+            };
+        }
+
+        return dto;
+    }
+
+    public string CountWorkingDays(string startStr, string endStr)
+    {
+        if (string.IsNullOrWhiteSpace(startStr) || string.IsNullOrWhiteSpace(endStr))
+            return "Error: Start and end dates cannot be empty.";
+
+        try
+        {
+            var start = DateTimeOffset.Parse(startStr, CultureInfo.InvariantCulture).Date;
+            var end = DateTimeOffset.Parse(endStr, CultureInfo.InvariantCulture).Date;
+
+            if (end < start)
+                (start, end) = (end, start);
+
+            int count = 0;
+            var current = start;
+            while (current <= end)
+            {
+                if (current.DayOfWeek != DayOfWeek.Saturday && current.DayOfWeek != DayOfWeek.Sunday)
+                    count++;
+                current = current.AddDays(1);
+            }
+
+            int totalDays = (end - start).Days + 1;
+            int weekendDays = totalDays - count;
+
+            return $"Start:        {start:yyyy-MM-dd} ({start.DayOfWeek})\n" +
+                   $"End:          {end:yyyy-MM-dd} ({end.DayOfWeek})\n" +
+                   $"Total Days:   {totalDays}\n" +
+                   $"Weekend Days: {weekendDays}\n" +
+                   $"Working Days: {count}";
+        }
+        catch (Exception ex)
+        {
+            return $"Error counting working days: {ex.Message}";
+        }
+    }
 }

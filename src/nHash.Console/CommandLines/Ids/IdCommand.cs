@@ -6,7 +6,9 @@ namespace nHash.Console.CommandLines.Ids;
 public class IdCommand(
     IUuidCommand uuidFeature,
     ISnowflakeCommand snowflakeFeature,
-    ICuidCommand cuidFeature)
+    ICuidCommand cuidFeature,
+    IUuidInspectCommand uuidInspectFeature,
+    ITotpCommand totpFeature)
     : IIdCommand
 {
     public BaseCommand Command => GetCommand();
@@ -17,10 +19,12 @@ public class IdCommand(
         [
             uuidFeature,
             snowflakeFeature,
-            cuidFeature
+            cuidFeature,
+            uuidInspectFeature,
+            totpFeature
         ];
 
-        var command = new BaseCommand("id", "Unique Identifier utilities (UUID, Snowflake, CUID2)");
+        var command = new BaseCommand("id", "Unique Identifier utilities (UUID, Snowflake, CUID2, UUID Inspect, TOTP)");
         foreach (var feature in features)
         {
             command.Subcommands.Add(feature.Command);
@@ -29,3 +33,4 @@ public class IdCommand(
         return command;
     }
 }
+

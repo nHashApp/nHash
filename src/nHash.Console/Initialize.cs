@@ -13,6 +13,8 @@ using nHash.Console.CommandLines.Network;
 using nHash.Console.CommandLines.Date;
 using nHash.Console.CommandLines.File;
 using nHash.Console.CommandLines.Dev;
+using nHash.Console.CommandLines.Sys;
+using nHash.Console.CommandLines.Maths;
 using nHash.Console.Helper;
 using nHash.Domain.Models;
 
@@ -35,6 +37,8 @@ public static class Initialize
             Get<IDateCommand>(provider),
             Get<IFileCommand>(provider),
             Get<IDevCommand>(provider),
+            Get<ISysCommand>(provider),
+            Get<IMathCommand>(provider),
         };
 
         var rootCommand = new RootCommand("Hash and Text utilities in command-line mode");
@@ -66,6 +70,7 @@ public static class Initialize
 
         return exitCode;
     }
+
 
     private static T Get<T>(IServiceProvider provider)
         where T : IFeature

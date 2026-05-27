@@ -17,6 +17,10 @@ public class NetworkCommand(INetworkService networkService, IOutputProvider outp
         command.Subcommands.Add(GetDnsCommand());
         command.Subcommands.Add(GetPortCommand());
         command.Subcommands.Add(GetWhoisCommand());
+        command.Subcommands.Add(GetPingCommand());
+        command.Subcommands.Add(GetSslCommand());
+        command.Subcommands.Add(GetCidrCommand());
+        command.Subcommands.Add(GetMacCommand());
 
         return command;
     }
@@ -93,4 +97,76 @@ public class NetworkCommand(INetworkService networkService, IOutputProvider outp
 
         return cmd;
     }
+
+    private BaseCommand GetPingCommand()
+    {
+        var urlArg = new Argument<string>("url") { Description = "URL or host to ping" };
+        var timeoutOption = new Option<int>("--timeout", "-t") { Description = "Timeout in seconds", DefaultValueFactory = _ => 10 };
+
+        var cmd = new BaseCommand("ping", "Perform HTTP ping to measure latency and return response headers");
+        cmd.Arguments.Add(urlArg);
+        cmd.Options.Add(timeoutOption);
+
+        cmd.SetAction(async parseResult =>
+        {
+            var url = parseResult.GetValue(urlArg) ?? string.Empty;
+            var timeout = parseResult.GetValue(timeoutOption);
+            var res = await networkService.HttpPingAsync(url, timeout);
+            outputProvider.AppendLine(res);
+        });
+
+        return cmd;
+    }
+
+    private BaseCommand GetSslCommand()
+    {
+        var hostArg = new Argument<string>("hostname") { Description = "Hostname/Domain to inspect SSL cert" };
+
+        var cmd = new BaseCommand("ssl", "Retrieve SSL/TLS certificate details for a domain");
+        cmd.Arguments.Add(hostArg);
+
+        cmd.SetAction(async parseResult =>
+        {
+            var host = parseResult.GetValue(hostArg) ?? string.Empty;
+            var res = await networkService.GetSslInfoAsync(host);
+            outputProvider.AppendLine(res);
+        });
+
+        return cmd;
+    }
+
+    private BaseCommand GetCidrCommand()
+    {
+        var cidrArg = new Argument<string>("cidr") { Description = "CIDR notation (e.g. 192.168.1.0/24)" };
+
+        var cmd = new BaseCommand("cidr", "Calculate IP range, broadcast, subnet mask, and host count from CIDR notation");
+        cmd.Arguments.Add(cidrArg);
+
+        cmd.SetAction(parseResult =>
+        {
+            var cidr = parseResult.GetValue(cidrArg) ?? string.Empty;
+            var res = networkService.CalculateCidr(cidr);
+            outputProvider.AppendLine(res);
+        });
+
+        return cmd;
+    }
+
+    private BaseCommand GetMacCommand()
+    {
+        var addressArg = new Argument<string>("address") { Description = "MAC address to lookup" };
+
+        var cmd = new BaseCommand("mac", "Look up the hardware manufacturer/vendor of a MAC address");
+        cmd.Arguments.Add(addressArg);
+
+        cmd.SetAction(async parseResult =>
+        {
+            var addr = parseResult.GetValue(addressArg) ?? string.Empty;
+            var res = await networkService.LookupMacVendorAsync(addr);
+            outputProvider.AppendLine(res);
+        });
+
+        return cmd;
+    }
 }
+

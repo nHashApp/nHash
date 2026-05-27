@@ -16,6 +16,9 @@ public class DevCommand(IDevService devService, IOutputProvider outputProvider) 
         command.Subcommands.Add(GetCronCommand());
         command.Subcommands.Add(GetRegexCommand());
         command.Subcommands.Add(GetColorCommand());
+        command.Subcommands.Add(GetJwtBuildCommand());
+        command.Subcommands.Add(GetSemverCommand());
+        command.Subcommands.Add(GetNumberCommand());
 
         return command;
     }
@@ -78,4 +81,65 @@ public class DevCommand(IDevService devService, IOutputProvider outputProvider) 
 
         return cmd;
     }
+
+    private BaseCommand GetJwtBuildCommand()
+    {
+        var headerOption = new Option<string>("--header", "-H") { Description = "JSON header string", DefaultValueFactory = _ => "{\"alg\":\"HS256\",\"typ\":\"JWT\"}" };
+        var payloadOption = new Option<string>("--payload", "-p") { Description = "JSON payload string", Required = true };
+
+        var cmd = new BaseCommand("jwt-build", "Build an unsigned JWT token from JSON header and payload strings");
+        cmd.Options.Add(headerOption);
+        cmd.Options.Add(payloadOption);
+
+        cmd.SetAction(parseResult =>
+        {
+            var header = parseResult.GetValue(headerOption) ?? "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
+            var payload = parseResult.GetValue(payloadOption) ?? string.Empty;
+
+            var res = devService.BuildJwt(header, payload);
+            outputProvider.AppendLine(res);
+        });
+
+        return cmd;
+    }
+
+    private BaseCommand GetSemverCommand()
+    {
+        var version1Arg = new Argument<string>("version1") { Description = "First semver string (e.g. 1.0.0-alpha)" };
+        var version2Arg = new Argument<string>("version2") { Description = "Second semver string (e.g. 1.0.0)" };
+
+        var cmd = new BaseCommand("semver", "Compare two semantic versions");
+        cmd.Arguments.Add(version1Arg);
+        cmd.Arguments.Add(version2Arg);
+
+        cmd.SetAction(parseResult =>
+        {
+            var v1 = parseResult.GetValue(version1Arg) ?? string.Empty;
+            var v2 = parseResult.GetValue(version2Arg) ?? string.Empty;
+
+            var res = devService.CompareSemver(v1, v2);
+            outputProvider.AppendLine(res);
+        });
+
+        return cmd;
+    }
+
+    private BaseCommand GetNumberCommand()
+    {
+        var valueArg = new Argument<string>("value") { Description = "Number value to inspect" };
+
+        var cmd = new BaseCommand("number", "Inspect a number and show its representations in decimal, hex, octal, binary, and scientific formats");
+        cmd.Arguments.Add(valueArg);
+
+        cmd.SetAction(parseResult =>
+        {
+            var val = parseResult.GetValue(valueArg) ?? string.Empty;
+
+            var res = devService.InspectNumber(val);
+            outputProvider.AppendLine(res);
+        });
+
+        return cmd;
+    }
 }
+

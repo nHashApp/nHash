@@ -11,7 +11,12 @@ public class TextCommand(
     ICaseCommand caseFeature,
     IDiffCommand diffFeature,
     IStatsCommand statsFeature,
-    ILoremCommand loremFeature)
+    ILoremCommand loremFeature,
+    ISlugCommand slugFeature,
+    IWordFreqCommand wordFreqFeature,
+    IPalindromeCommand palindromeFeature,
+    ICountCommand countFeature,
+    IEscapeCommand escapeFeature)
     : ITextCommand
 {
     public BaseCommand Command => GetCommand();
@@ -27,10 +32,15 @@ public class TextCommand(
             caseFeature,
             diffFeature,
             statsFeature,
-            loremFeature
+            loremFeature,
+            slugFeature,
+            wordFreqFeature,
+            palindromeFeature,
+            countFeature,
+            escapeFeature
         ];
 
-        var command = new BaseCommand("text", "Text utilities (Humanizer, JSON, YAML, XML, Case, Diff, Stats, Lorem)");
+        var command = new BaseCommand("text", "Text utilities (Humanizer, JSON, YAML, XML, Case, Diff, Stats, Lorem, Slug, WordFreq, Palindrome, Count, Escape)");
         command.Aliases.Add("t");
         foreach (var feature in features)
         {

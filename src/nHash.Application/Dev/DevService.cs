@@ -352,4 +352,167 @@ public class DevService : IDevService
 
         return (c * 100, m * 100, y * 100, k * 100);
     }
+
+    public string BuildJwt(string headerJson, string payloadJson)
+    {
+        if (string.IsNullOrWhiteSpace(payloadJson))
+            return "Error: Payload JSON cannot be empty.";
+
+        try
+        {
+            var headerBytes = System.Text.Encoding.UTF8.GetBytes(headerJson);
+            var payloadBytes = System.Text.Encoding.UTF8.GetBytes(payloadJson);
+
+            var encodedHeader = Base64UrlEncode(headerBytes);
+            var encodedPayload = Base64UrlEncode(payloadBytes);
+
+            // Signature placeholder (unsigned)
+            var signatureBytes = System.Text.Encoding.UTF8.GetBytes("unsigned");
+            var encodedSignature = Base64UrlEncode(signatureBytes);
+
+            var token = $"{encodedHeader}.{encodedPayload}.{encodedSignature}";
+
+            var sb = new StringBuilder();
+            sb.AppendLine("JWT Token (unsigned):");
+            sb.AppendLine(token);
+            sb.AppendLine();
+            sb.AppendLine("--- Decoded Parts ---");
+            sb.AppendLine($"Header:    {headerJson}");
+            sb.AppendLine($"Payload:   {payloadJson}");
+            sb.AppendLine($"Signature: unsigned (placeholder)");
+            return sb.ToString();
+        }
+        catch (Exception ex)
+        {
+            return $"Error building JWT: {ex.Message}";
+        }
+    }
+
+    private static string Base64UrlEncode(byte[] input)
+    {
+        return Convert.ToBase64String(input)
+            .TrimEnd('=')
+            .Replace('+', '-')
+            .Replace('/', '_');
+    }
+
+    public string CompareSemver(string version1, string version2)
+    {
+        if (string.IsNullOrWhiteSpace(version1) || string.IsNullOrWhiteSpace(version2))
+            return "Error: Both version strings are required.";
+
+        try
+        {
+            var v1 = ParseSemver(version1);
+            var v2 = ParseSemver(version2);
+
+            string comparison;
+            if (v1.major != v2.major)
+                comparison = v1.major > v2.major ? "v1 > v2" : "v1 < v2";
+            else if (v1.minor != v2.minor)
+                comparison = v1.minor > v2.minor ? "v1 > v2" : "v1 < v2";
+            else if (v1.patch != v2.patch)
+                comparison = v1.patch > v2.patch ? "v1 > v2" : "v1 < v2";
+            else
+                comparison = "v1 == v2";
+
+            var sb = new StringBuilder();
+            sb.AppendLine($"Version 1: {version1}");
+            sb.AppendLine($"  Major:      {v1.major}");
+            sb.AppendLine($"  Minor:      {v1.minor}");
+            sb.AppendLine($"  Patch:      {v1.patch}");
+            if (!string.IsNullOrEmpty(v1.prerelease)) sb.AppendLine($"  Pre-release:{v1.prerelease}");
+            if (!string.IsNullOrEmpty(v1.build)) sb.AppendLine($"  Build:      {v1.build}");
+            sb.AppendLine();
+            sb.AppendLine($"Version 2: {version2}");
+            sb.AppendLine($"  Major:      {v2.major}");
+            sb.AppendLine($"  Minor:      {v2.minor}");
+            sb.AppendLine($"  Patch:      {v2.patch}");
+            if (!string.IsNullOrEmpty(v2.prerelease)) sb.AppendLine($"  Pre-release:{v2.prerelease}");
+            if (!string.IsNullOrEmpty(v2.build)) sb.AppendLine($"  Build:      {v2.build}");
+            sb.AppendLine();
+            sb.AppendLine($"Result:    {comparison}");
+            return sb.ToString();
+        }
+        catch (Exception ex)
+        {
+            return $"Error comparing semver: {ex.Message}";
+        }
+    }
+
+    private static (int major, int minor, int patch, string prerelease, string build) ParseSemver(string version)
+    {
+        var v = version.TrimStart('v', 'V');
+
+        string build = string.Empty;
+        string prerelease = string.Empty;
+
+        int plusIdx = v.IndexOf('+');
+        if (plusIdx >= 0)
+        {
+            build = v[(plusIdx + 1)..];
+            v = v[..plusIdx];
+        }
+
+        int dashIdx = v.IndexOf('-');
+        if (dashIdx >= 0)
+        {
+            prerelease = v[(dashIdx + 1)..];
+            v = v[..dashIdx];
+        }
+
+        var parts = v.Split('.');
+        int major = parts.Length > 0 ? int.Parse(parts[0]) : 0;
+        int minor = parts.Length > 1 ? int.Parse(parts[1]) : 0;
+        int patch = parts.Length > 2 ? int.Parse(parts[2]) : 0;
+
+        return (major, minor, patch, prerelease, build);
+    }
+
+    public string InspectNumber(string number)
+    {
+        if (string.IsNullOrWhiteSpace(number))
+            return "Error: Number cannot be empty.";
+
+        try
+        {
+            // Try integer first
+            if (long.TryParse(number, out long intVal))
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine($"Input:       {number}");
+                sb.AppendLine($"Type:        Integer (64-bit)");
+                sb.AppendLine($"Decimal:     {intVal:N0}");
+                sb.AppendLine($"Binary:      {Convert.ToString(intVal, 2)}");
+                sb.AppendLine($"Octal:       {Convert.ToString(intVal, 8)}");
+                sb.AppendLine($"Hexadecimal: 0x{intVal:X}");
+                sb.AppendLine($"Scientific:  {(double)intVal:E6}");
+                sb.AppendLine($"Positive:    {intVal >= 0}");
+                sb.AppendLine($"Even:        {intVal % 2 == 0}");
+                return sb.ToString();
+            }
+
+            // Try floating point
+            if (double.TryParse(number, System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out double dblVal))
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine($"Input:       {number}");
+                sb.AppendLine($"Type:        Double (64-bit float)");
+                sb.AppendLine($"Decimal:     {dblVal}");
+                sb.AppendLine($"Scientific:  {dblVal:E6}");
+                sb.AppendLine($"Hex (raw):   0x{BitConverter.DoubleToInt64Bits(dblVal):X16}");
+                sb.AppendLine($"IsNaN:       {double.IsNaN(dblVal)}");
+                sb.AppendLine($"IsInfinity:  {double.IsInfinity(dblVal)}");
+                sb.AppendLine($"IsFinite:    {double.IsFinite(dblVal)}");
+                return sb.ToString();
+            }
+
+            return $"Error: '{number}' is not a valid number.";
+        }
+        catch (Exception ex)
+        {
+            return $"Error inspecting number: {ex.Message}";
+        }
+    }
 }

@@ -18,6 +18,8 @@ using nHash.Application.Network;
 using nHash.Application.Date;
 using nHash.Application.File;
 using nHash.Application.Dev;
+using nHash.Application.Sys;
+using nHash.Application.Maths;
 
 namespace nHash.Application;
 
@@ -35,6 +37,8 @@ public static class ConfigureServices
         RegisterDateServices(services);
         RegisterFileServices(services);
         RegisterDevServices(services);
+        RegisterSysServices(services);
+        RegisterMathServices(services);
 
         return services;
     }
@@ -51,6 +55,12 @@ public static class ConfigureServices
         services.AddSingleton<IBase62Service, Base62Service>();
         services.AddSingleton<IBase85Service, Base85Service>();
         services.AddSingleton<IBase36Service, Base36Service>();
+        services.AddSingleton<IBase45Service, Base45Service>();
+        services.AddSingleton<IBase91Service, Base91Service>();
+        services.AddSingleton<IPunycodeService, PunycodeService>();
+        services.AddSingleton<IRot13Service, Rot13Service>();
+        services.AddSingleton<IMorseService, MorseService>();
+        services.AddSingleton<IBinaryTextService, BinaryTextService>();
     }
 
     private static void RegisterHashServices(IServiceCollection services)
@@ -59,6 +69,7 @@ public static class ConfigureServices
         services.AddSingleton<IChecksumService, ChecksumService>();
         services.AddSingleton<IHmacService, HmacService>();
         services.AddSingleton<ICipherService, CipherService>();
+        services.AddSingleton<ISignatureService, SignatureService>();
     }
 
     private static void RegisterPasswordServices(IServiceCollection services)
@@ -76,6 +87,7 @@ public static class ConfigureServices
         services.AddSingleton<ITextDiffService, TextDiffService>();
         services.AddSingleton<ITextStatisticsService, TextStatisticsService>();
         services.AddSingleton<ILoremIpsumService, LoremIpsumService>();
+        services.AddSingleton<ITextToolsService, TextToolsService>();
         
         services.AddSingleton<IJsonTools, JsonTools>();
         services.AddSingleton<IYamlTools, YamlTools>();
@@ -87,6 +99,8 @@ public static class ConfigureServices
         services.AddSingleton<IUuidGenerator, UuidGenerator>();
         services.AddSingleton<ISnowflakeService, SnowflakeService>();
         services.AddSingleton<ICuidService, CuidService>();
+        services.AddSingleton<ITotpService, TotpService>();
+        services.AddSingleton<IUuidInspectService, UuidInspectService>();
     }
 
     private static void RegisterConvertServices(IServiceCollection services)
@@ -113,5 +127,15 @@ public static class ConfigureServices
     private static void RegisterDevServices(IServiceCollection services)
     {
         services.AddSingleton<IDevService, DevService>();
+    }
+
+    private static void RegisterSysServices(IServiceCollection services)
+    {
+        services.AddSingleton<ISysService, SysService>();
+    }
+
+    private static void RegisterMathServices(IServiceCollection services)
+    {
+        services.AddSingleton<IMathService, MathService>();
     }
 }
