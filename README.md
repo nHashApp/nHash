@@ -8,7 +8,6 @@ It uses a sleek, harmoniously designed terminal user experience powered by `Spec
 
 ## 🚀 Key Features
 
-*   **⚡ Blazing Fast & Native AOT Ready**: Instant CLI invocation, lightweight footprints, zero reflection runtime execution.
 *   **🧩 10 Clean-Architecture Modules**: Extensively structured into logically independent subdomains.
 *   **🎨 Premium Visual Design**: Implements truecolor gradient formatting, beautiful panel boxes, and tabular structures.
 *   **💾 Global Output Redirection**: All commands natively support saving output to a file using the recursive `--output` / `-o` option.
@@ -198,17 +197,6 @@ cd nHash\src
 # Build the solution
 dotnet build -c Release
 ```
-
-### ⚡ 100% Native AOT (Ahead-of-Time) Compilation
-Compiling directly to a Native AOT binary creates a single, self-contained executable that starts instantly and does not require the .NET Runtime on the target machine.
-
-```powershell
-# Publish the Console executable as self-contained Native AOT
-dotnet publish nHash.Console\nHash.Console.csproj -c Release -r win-x64 --self-contained -p:PublishAot=true
-```
-*(Replace `win-x64` with your target runtime identifier, e.g. `linux-x64` or `osx-arm64`.)*
-
----
 
 ## 📂 Project Architecture
 
