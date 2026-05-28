@@ -1,13 +1,20 @@
-using System.CommandLine.Builder;
-using System.CommandLine.Help;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
+using System.CommandLine;
 using nHash.Console.CommandLines.Base;
 using nHash.Console.CommandLines.Encodes;
 using nHash.Console.CommandLines.Hashes;
 using nHash.Console.CommandLines.Passwords;
 using nHash.Console.CommandLines.Texts;
 using nHash.Console.CommandLines.Uuids;
+using nHash.Console.CommandLines.Ids;
+using nHash.Console.CommandLines.Cryptos;
+using nHash.Console.CommandLines.Converts;
+using nHash.Console.CommandLines.Arts;
+using nHash.Console.CommandLines.Network;
+using nHash.Console.CommandLines.Date;
+using nHash.Console.CommandLines.File;
+using nHash.Console.CommandLines.Dev;
+using nHash.Console.CommandLines.Sys;
+using nHash.Console.CommandLines.Maths;
 using nHash.Console.Helper;
 using nHash.Domain.Models;
 
@@ -15,104 +22,83 @@ namespace nHash.Console;
 
 public static class Initialize
 {
-    private static readonly Option<string> OutputFileName;
-
-    static Initialize()
-    {
-        OutputFileName = new Option<string>(name: "--output", description: "File name for writing output");
-        OutputFileName.AddAlias("-o");
-    }
+    private static readonly Option<string> OutputFileName = InitializeOutput();
 
     public static async Task<int> InitializeCommandLine(IEnumerable<string> args, IServiceProvider provider)
     {
-        var features = new List<IFeature>()
+        var features = new List<IFeature>
         {
-            Get<IUuidCommand>(provider),
-            Get<IEncodeCommand>(provider),
-            Get<IHashCommand>(provider),
+            Get<IIdCommand>(provider),
+            Get<IConvertCommand>(provider),
+            Get<ICryptoCommand>(provider),
             Get<ITextCommand>(provider),
-            Get<IPasswordCommand>(provider),
+            Get<IArtCommand>(provider),
+            Get<INetworkCommand>(provider),
+            Get<IDateCommand>(provider),
+            Get<IFileCommand>(provider),
+            Get<IDevCommand>(provider),
+            Get<ISysCommand>(provider),
+            Get<IMathCommand>(provider),
         };
 
         var rootCommand = new RootCommand("Hash and Text utilities in command-line mode");
         foreach (var feature in features)
         {
-            rootCommand.AddCommand(feature.Command);
+            rootCommand.Subcommands.Add(feature.Command);
         }
 
-        rootCommand.AddGlobalOption(OutputFileName);
+        rootCommand.Options.Add(OutputFileName);
+        rootCommand.UseCustomVersionHandler();
 
-        var commandLineBuilder = new CommandLineBuilder(rootCommand)
-            .AddMiddleware((context, next) => OutputMiddleware(provider, context, next))
-            .UseDefaults()
-            .UseExceptionHandler(UnhandledExceptionMiddleware)
-            .UseCustomVersionHandler()
-            .UseHelp(ctx =>
-            {
-                ctx.HelpBuilder.CustomizeLayout(
-                    _ =>
-                        HelpBuilder.Default
-                            .GetLayout()
-                            .Append(WriteExampleSection)
-                );
-            });
-        
-        var parser = commandLineBuilder.Build();
-        return await parser.InvokeAsync(args.ToArray());
-        //return await rootCommand.InvokeAsync(parameters);
+        var parseResult = rootCommand.Parse(args.ToArray());
+
+        SetOutputOptions(provider, parseResult);
+
+        int exitCode;
+        try
+        {
+            exitCode = await parseResult.InvokeAsync();
+        }
+        catch (Exception exception)
+        {
+            System.Console.WriteLine("Internal exception has occurred");
+            System.Console.WriteLine($"Detail: {exception.Message}");
+            exitCode = 1;
+        }
+
+        await WriteOutput(provider);
+
+        return exitCode;
     }
+
 
     private static T Get<T>(IServiceProvider provider)
         where T : IFeature
         => provider.GetService<T>()!;
 
-    private static async Task OutputMiddleware(IServiceProvider provider, InvocationContext context,
-        Func<InvocationContext, Task> next)
+    private static Option<string> InitializeOutput()
     {
-        SetOutputOptions(provider, context);
-
-        await next(context);
-
-        await WriteOutput(provider);
-    }
-
-    private static void UnhandledExceptionMiddleware(Exception exception, InvocationContext context)
-    {
-        System.Console.WriteLine("Internal exception has occurred");
-        System.Console.WriteLine($"Detail: {exception.Message}");
-    }
-
-    private static void WriteExampleSection(HelpContext context)
-    {
-        if (context.Command is not BaseCommand command)
+        var outputOption = new Option<string>("--output", "-o")
         {
-            return;
-        }
-
-        if (command.Examples is null)
-        {
-            return;
-        }
-
-        context.Output.WriteLine("Examples:");
-        context.HelpBuilder.WriteColumns(
-            command.Examples.Select(_ => new TwoColumnHelpRow(_.Key, _.Value)).ToList().AsReadOnly(), context);
+            Description = "File name for writing output",
+            Recursive = true
+        };
+        return outputOption;
     }
-
-    private static void SetOutputOptions(IServiceProvider provider, InvocationContext context)
+    
+    private static void SetOutputOptions(IServiceProvider provider, ParseResult parseResult)
     {
         var outputParameter = provider.GetService<OutputParameter>()!;
         outputParameter.Type = OutputType.Console;
 
-        var outputOption = context.ParseResult.CommandResult.Children
-            .FirstOrDefault(_ => _.Symbol == OutputFileName);
-        if (outputOption is null)
+        var outputValue = parseResult.GetValue(OutputFileName);
+        if (string.IsNullOrWhiteSpace(outputValue))
         {
             return;
         }
 
         outputParameter.Type = OutputType.File;
-        outputParameter.OutputTypeValue = outputOption.Tokens[0].ToString();
+        outputParameter.OutputTypeValue = outputValue;
     }
 
     private static async Task WriteOutput(IServiceProvider provider)

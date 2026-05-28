@@ -11,12 +11,12 @@ public class XmlService : IXmlService
 
     private static string WriteOutput(string text, ConversionType conversion)
     {
-        if (conversion != ConversionType.XML)
+        if (conversion != ConversionType.Xml)
         {
             text = conversion switch
             {
-                ConversionType.YAML => Conversion.ToXml(text, ConversionType.XML),
-                ConversionType.JSON => Conversion.ToJson(text, ConversionType.XML),
+                ConversionType.Yaml => Conversion.ToXml(text, ConversionType.Xml),
+                ConversionType.Json => Conversion.ToJson(text, ConversionType.Xml),
                 _ => text
             };
         }

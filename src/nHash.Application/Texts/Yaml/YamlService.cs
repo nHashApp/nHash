@@ -11,12 +11,12 @@ public class YamlService : IYamlService
 
     private static string WriteOutput(string text, ConversionType conversion)
     {
-        if (conversion != ConversionType.YAML)
+        if (conversion != ConversionType.Yaml)
         {
             text = conversion switch
             {
-                ConversionType.XML => Conversion.ToXml(text, ConversionType.YAML),
-                ConversionType.JSON => Conversion.ToJson(text, ConversionType.YAML),
+                ConversionType.Xml => Conversion.ToXml(text, ConversionType.Yaml),
+                ConversionType.Json => Conversion.ToJson(text, ConversionType.Yaml),
                 _ => text
             };
         }

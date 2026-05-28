@@ -11,9 +11,9 @@ public class JsonConversion : IConversion
     {
         return sourceType switch
         {
-            ConversionType.JSON => value,
-            ConversionType.YAML => FromYaml(value),
-            ConversionType.XML => FromXml(value),
+            ConversionType.Json => value,
+            ConversionType.Yaml => FromYaml(value),
+            ConversionType.Xml => FromXml(value),
             _ => value
         };
     }
@@ -39,7 +39,7 @@ public class JsonConversion : IConversion
     {
         var doc = XDocument.Parse(xml);
         var result = new Dictionary<string, object>();
-        if (doc?.Root is null)
+        if (doc.Root is null)
         {
             return string.Empty;
         }
@@ -66,7 +66,7 @@ public class JsonConversion : IConversion
         }
         else
         {
-            obj.Add(nodeName, attributes.Count > 0 ? (object)attributes : element.Value);
+            obj.Add(nodeName, attributes.Count > 0 ? attributes : element.Value);
         }
     }
 }

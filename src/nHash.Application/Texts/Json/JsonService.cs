@@ -14,12 +14,12 @@ public class JsonService : IJsonService
 
     private static string WriteOutput(string text, ConversionType conversion)
     {
-        if (conversion != ConversionType.JSON)
+        if (conversion != ConversionType.Json)
         {
             text = conversion switch
             {
-                ConversionType.XML => Conversion.ToXml(text, ConversionType.JSON),
-                ConversionType.YAML => Conversion.ToYaml(text, ConversionType.JSON),
+                ConversionType.Xml => Conversion.ToXml(text, ConversionType.Json),
+                ConversionType.Yaml => Conversion.ToYaml(text, ConversionType.Json),
                 _ => text
             };
         }

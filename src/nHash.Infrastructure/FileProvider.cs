@@ -16,7 +16,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            Console.WriteLine("Error reading from '{FileName}'", fileName);
+            Console.WriteLine("Error reading from '{0}'", fileName);
         }
         return Task.FromResult(string.Empty);
     }    
@@ -35,7 +35,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            Console.WriteLine("Error reading from '{FileName}'", fileName);
+            Console.WriteLine("Error reading from '{0}'", fileName);
         }
         return Task.FromResult(Array.Empty<byte>());
     }
@@ -54,7 +54,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            Console.WriteLine("Error writing output to '{FileName}'", fileName);
+            Console.WriteLine("Error writing output to '{0}'", fileName);
         }
         return Task.CompletedTask;
     }
@@ -73,7 +73,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            Console.WriteLine("Error writing output to '{FileName}'", fileName);
+            Console.WriteLine("Error writing output to '{0}'", fileName);
         }
         return Task.CompletedTask;
     }

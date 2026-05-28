@@ -3,42 +3,50 @@ using nHash.Console.CommandLines.Texts.SubCommands;
 
 namespace nHash.Console.CommandLines.Texts;
 
-public class TextCommand : ITextCommand
+public class TextCommand(
+    IHumanizeCommand humanizeFeature,
+    IJsonCommand jsonFeature,
+    IYamlCommand yamlFeature,
+    IXmlCommand xmlFeature,
+    ICaseCommand caseFeature,
+    IDiffCommand diffFeature,
+    IStatsCommand statsFeature,
+    ILoremCommand loremFeature,
+    ISlugCommand slugFeature,
+    IWordFreqCommand wordFreqFeature,
+    IPalindromeCommand palindromeFeature,
+    ICountCommand countFeature,
+    IEscapeCommand escapeFeature)
+    : ITextCommand
 {
     public BaseCommand Command => GetCommand();
 
-    private readonly IHumanizeCommand _humanizeFeature;
-    private readonly IJsonCommand _jsonFeature;
-    private readonly IYamlCommand _yamlFeature;
-    private readonly IXmlCommand _xmlFeature;
-
-    public TextCommand(IHumanizeCommand humanizeFeature, IJsonCommand jsonFeature, IYamlCommand yamlFeature,
-        IXmlCommand xmlFeature)
-    {
-        _humanizeFeature = humanizeFeature;
-        _jsonFeature = jsonFeature;
-        _yamlFeature = yamlFeature;
-        _xmlFeature = xmlFeature;
-    }
-
     private BaseCommand GetCommand()
     {
-        var features = new List<IFeature>()
-        {
-            _humanizeFeature,
-            _jsonFeature,
-            _yamlFeature,
-            _xmlFeature
-        };
+        List<IFeature> features =
+        [
+            humanizeFeature,
+            jsonFeature,
+            yamlFeature,
+            xmlFeature,
+            caseFeature,
+            diffFeature,
+            statsFeature,
+            loremFeature,
+            slugFeature,
+            wordFreqFeature,
+            palindromeFeature,
+            countFeature,
+            escapeFeature
+        ];
 
-        var command = new BaseCommand("text", "Text utilities (Humanizer, JSON, YAML, XML)");
-        command.AddAlias("t");
+        var command = new BaseCommand("text", "Text utilities (Humanizer, JSON, YAML, XML, Case, Diff, Stats, Lorem, Slug, WordFreq, Palindrome, Count, Escape)");
+        command.Aliases.Add("t");
         foreach (var feature in features)
         {
-            command.AddCommand(feature.Command);
+            command.Subcommands.Add(feature.Command);
         }
 
         return command;
     }
-
 }
