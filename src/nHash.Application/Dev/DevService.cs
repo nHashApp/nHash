@@ -1,56 +1,49 @@
+using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using nHash.Application.Dev.Models;
 
 namespace nHash.Application.Dev;
 
 public class DevService : IDevService
 {
-    public string ParseCron(string cronExpression, int nextExecutionCount)
+    public CronParseResult ParseCron(string cronExpression, int nextExecutionCount)
     {
+        var result = new CronParseResult();
         if (string.IsNullOrWhiteSpace(cronExpression))
-            return "Error: Cron expression cannot be empty.";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Cron expression cannot be empty.";
+            return result;
+        }
 
         var parts = cronExpression.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 5)
-            return "Error: Invalid Cron expression. Must contain exactly 5 fields (minute, hour, day-of-month, month, day-of-week).";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Invalid Cron expression. Must contain exactly 5 fields (minute, hour, day-of-month, month, day-of-week).";
+            return result;
+        }
 
         try
         {
-            var minuteDesc = DescribeCronField(parts[0], "minute", 0, 59);
-            var hourDesc = DescribeCronField(parts[1], "hour", 0, 23);
-            var dayDesc = DescribeCronField(parts[2], "day of month", 1, 31);
-            var monthDesc = DescribeCronField(parts[3], "month", 1, 12);
-            var dowDesc = DescribeCronField(parts[4], "day of week", 0, 6, true);
-
-            var sb = new StringBuilder();
-            sb.AppendLine("Cron Description:");
-            sb.AppendLine($"- Minutes: {minuteDesc}");
-            sb.AppendLine($"- Hours: {hourDesc}");
-            sb.AppendLine($"- Days of Month: {dayDesc}");
-            sb.AppendLine($"- Months: {monthDesc}");
-            sb.AppendLine($"- Days of Week: {dowDesc}");
-            sb.AppendLine();
+            result.MinuteDescription = DescribeCronField(parts[0], "minute", 0, 59);
+            result.HourDescription = DescribeCronField(parts[1], "hour", 0, 23);
+            result.DayOfMonthDescription = DescribeCronField(parts[2], "day of month", 1, 31);
+            result.MonthDescription = DescribeCronField(parts[3], "month", 1, 12);
+            result.DayOfWeekDescription = DescribeCronField(parts[4], "day of week", 0, 6, true);
 
             var matcher = new CronMatcher(parts);
-            var nextTimes = matcher.GetNextExecutions(DateTime.Now, nextExecutionCount);
-            sb.AppendLine($"Next {nextExecutionCount} Executions (Local Time):");
-            if (nextTimes.Count == 0)
-            {
-                sb.AppendLine("  No matching execution times found in the near future.");
-            }
-            else
-            {
-                foreach (var time in nextTimes)
-                {
-                    sb.AppendLine($"  - {time:yyyy-MM-dd HH:mm:ss}");
-                }
-            }
-
-            return sb.ToString();
+            result.NextExecutions = matcher.GetNextExecutions(DateTime.Now, nextExecutionCount);
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Cron Parsing Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Cron Parsing Error: {ex.Message}";
+            return result;
         }
     }
 
@@ -187,54 +180,79 @@ public class DevService : IDevService
         }
     }
 
-    public string TestRegex(string pattern, string input)
+    public RegexTestResult TestRegex(string pattern, string input)
     {
-        if (string.IsNullOrEmpty(pattern)) return "Error: Pattern cannot be empty.";
-        if (input == null) return "Error: Input cannot be null.";
+        var result = new RegexTestResult();
+        if (string.IsNullOrEmpty(pattern))
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Pattern cannot be empty.";
+            return result;
+        }
+        if (input == null)
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Input cannot be null.";
+            return result;
+        }
 
         try
         {
             var regex = new Regex(pattern, RegexOptions.Compiled);
             var matches = regex.Matches(input);
 
-            var sb = new StringBuilder();
-            sb.AppendLine($"Regex Pattern: {pattern}");
-            sb.AppendLine($"Input Text: {input}");
-            sb.AppendLine($"Is Match: {regex.IsMatch(input)}");
-            sb.AppendLine($"Matches Count: {matches.Count}");
-            sb.AppendLine();
+            result.Pattern = pattern;
+            result.Input = input;
+            result.IsMatch = regex.IsMatch(input);
+            result.MatchCount = matches.Count;
+            result.Success = true;
 
             int matchIndex = 1;
             foreach (Match match in matches)
             {
-                sb.AppendLine($"Match #{matchIndex++}:");
-                sb.AppendLine($"  - Value: \"{match.Value}\"");
-                sb.AppendLine($"  - Index: {match.Index}");
-                sb.AppendLine($"  - Length: {match.Length}");
-                
+                var matchDetail = new RegexMatchDetail
+                {
+                    MatchNumber = matchIndex++,
+                    Value = match.Value,
+                    Index = match.Index,
+                    Length = match.Length
+                };
+
                 if (match.Groups.Count > 1)
                 {
-                    sb.AppendLine("  - Capture Groups:");
                     for (int i = 1; i < match.Groups.Count; i++)
                     {
                         var group = match.Groups[i];
-                        sb.AppendLine($"    Group {i} ({regex.GroupNameFromNumber(i)}): \"{group.Value}\" (Index: {group.Index})");
+                        matchDetail.CaptureGroups.Add(new RegexCaptureGroupDetail
+                        {
+                            Index = i,
+                            Name = regex.GroupNameFromNumber(i),
+                            Value = group.Value
+                        });
                     }
                 }
-                sb.AppendLine();
+                result.Matches.Add(matchDetail);
             }
 
-            return sb.ToString();
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Regex Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Regex Error: {ex.Message}";
+            return result;
         }
     }
 
-    public string ConvertColor(string inputColor)
+    public ColorConvertResult ConvertColor(string inputColor)
     {
-        if (string.IsNullOrWhiteSpace(inputColor)) return "Error: Input color cannot be empty.";
+        var result = new ColorConvertResult();
+        if (string.IsNullOrWhiteSpace(inputColor))
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Input color cannot be empty.";
+            return result;
+        }
         inputColor = inputColor.Trim().ToLowerInvariant();
 
         try
@@ -246,7 +264,9 @@ public class DevService : IDevService
                 var hex = inputColor.StartsWith('#') ? inputColor[1..] : inputColor;
                 if (hex.Length != 6 && hex.Length != 3)
                 {
-                    return "Error: Invalid Hex color format. Use #RRGGBB or #RGB.";
+                    result.Success = false;
+                    result.ErrorMessage = "Error: Invalid Hex color format. Use #RRGGBB or #RGB.";
+                    return result;
                 }
 
                 if (hex.Length == 3)
@@ -262,40 +282,48 @@ public class DevService : IDevService
             {
                 var clean = inputColor.Replace("rgb", "").Replace("(", "").Replace(")", "").Trim();
                 var parts = clean.Split(',');
-                if (parts.Length < 3) return "Error: Invalid RGB color format. Use r,g,b.";
+                if (parts.Length < 3)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = "Error: Invalid RGB color format. Use r,g,b.";
+                    return result;
+                }
                 r = int.Parse(parts[0]);
                 g = int.Parse(parts[1]);
                 b = int.Parse(parts[2]);
             }
             else
             {
-                return "Error: Unsupported color format. Use hex (#FF5733) or RGB (255,87,51).";
+                result.Success = false;
+                result.ErrorMessage = "Error: Unsupported color format. Use hex (#FF5733) or RGB (255,87,51).";
+                return result;
             }
 
             if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
             {
-                return "Error: Color values must be between 0 and 255.";
+                result.Success = false;
+                result.ErrorMessage = "Error: Color values must be between 0 and 255.";
+                return result;
             }
 
-            var hexStr = $"#{r:x2}{g:x2}{b:x2}".ToUpperInvariant();
-            var rgbStr = $"rgb({r}, {g}, {b})";
+            result.R = r;
+            result.G = g;
+            result.B = b;
+            result.Hex = $"#{r:x2}{g:x2}{b:x2}".ToUpperInvariant();
+            result.Rgb = $"rgb({r}, {g}, {b})";
             var (h, s, l) = RgbToHsl(r, g, b);
-            var hslStr = $"hsl({h:0}, {s:0}%, {l:0}%)";
+            result.Hsl = $"hsl({h:0}, {s:0}%, {l:0}%)";
             var (c, m, y, k) = RgbToCmyk(r, g, b);
-            var cmykStr = $"cmyk({c:0}%, {m:0}%, {y:0}%, {k:0}%)";
+            result.Cmyk = $"cmyk({c:0}%, {m:0}%, {y:0}%, {k:0}%)";
+            result.Success = true;
 
-            var colorBlock = $"\x1b[48;2;{r};{g};{b}m      \x1b[0m";
-
-            return $"Color Details:\n" +
-                   $"- Visual Preview: {colorBlock}\n" +
-                   $"- HEX: {hexStr}\n" +
-                   $"- RGB: {rgbStr}\n" +
-                   $"- HSL: {hslStr}\n" +
-                   $"- CMYK: {cmykStr}";
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Color Conversion Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Color Conversion Error: {ex.Message}";
+            return result;
         }
     }
 
@@ -353,10 +381,15 @@ public class DevService : IDevService
         return (c * 100, m * 100, y * 100, k * 100);
     }
 
-    public string BuildJwt(string headerJson, string payloadJson)
+    public JwtBuildResult BuildJwt(string headerJson, string payloadJson)
     {
+        var result = new JwtBuildResult();
         if (string.IsNullOrWhiteSpace(payloadJson))
-            return "Error: Payload JSON cannot be empty.";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Payload JSON cannot be empty.";
+            return result;
+        }
 
         try
         {
@@ -370,21 +403,18 @@ public class DevService : IDevService
             var signatureBytes = System.Text.Encoding.UTF8.GetBytes("unsigned");
             var encodedSignature = Base64UrlEncode(signatureBytes);
 
-            var token = $"{encodedHeader}.{encodedPayload}.{encodedSignature}";
-
-            var sb = new StringBuilder();
-            sb.AppendLine("JWT Token (unsigned):");
-            sb.AppendLine(token);
-            sb.AppendLine();
-            sb.AppendLine("--- Decoded Parts ---");
-            sb.AppendLine($"Header:    {headerJson}");
-            sb.AppendLine($"Payload:   {payloadJson}");
-            sb.AppendLine($"Signature: unsigned (placeholder)");
-            return sb.ToString();
+            result.Token = $"{encodedHeader}.{encodedPayload}.{encodedSignature}";
+            result.Header = headerJson;
+            result.Payload = payloadJson;
+            result.Signature = "unsigned (placeholder)";
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error building JWT: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error building JWT: {ex.Message}";
+            return result;
         }
     }
 
@@ -396,47 +426,61 @@ public class DevService : IDevService
             .Replace('/', '_');
     }
 
-    public string CompareSemver(string version1, string version2)
+    public SemverCompareResult CompareSemver(string version1, string version2)
     {
+        var result = new SemverCompareResult();
         if (string.IsNullOrWhiteSpace(version1) || string.IsNullOrWhiteSpace(version2))
-            return "Error: Both version strings are required.";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Both version strings are required.";
+            return result;
+        }
 
         try
         {
             var v1 = ParseSemver(version1);
             var v2 = ParseSemver(version2);
 
-            string comparison;
-            if (v1.major != v2.major)
-                comparison = v1.major > v2.major ? "v1 > v2" : "v1 < v2";
-            else if (v1.minor != v2.minor)
-                comparison = v1.minor > v2.minor ? "v1 > v2" : "v1 < v2";
-            else if (v1.patch != v2.patch)
-                comparison = v1.patch > v2.patch ? "v1 > v2" : "v1 < v2";
-            else
-                comparison = "v1 == v2";
+            result.Version1 = version1;
+            result.Version2 = version2;
 
-            var sb = new StringBuilder();
-            sb.AppendLine($"Version 1: {version1}");
-            sb.AppendLine($"  Major:      {v1.major}");
-            sb.AppendLine($"  Minor:      {v1.minor}");
-            sb.AppendLine($"  Patch:      {v1.patch}");
-            if (!string.IsNullOrEmpty(v1.prerelease)) sb.AppendLine($"  Pre-release:{v1.prerelease}");
-            if (!string.IsNullOrEmpty(v1.build)) sb.AppendLine($"  Build:      {v1.build}");
-            sb.AppendLine();
-            sb.AppendLine($"Version 2: {version2}");
-            sb.AppendLine($"  Major:      {v2.major}");
-            sb.AppendLine($"  Minor:      {v2.minor}");
-            sb.AppendLine($"  Patch:      {v2.patch}");
-            if (!string.IsNullOrEmpty(v2.prerelease)) sb.AppendLine($"  Pre-release:{v2.prerelease}");
-            if (!string.IsNullOrEmpty(v2.build)) sb.AppendLine($"  Build:      {v2.build}");
-            sb.AppendLine();
-            sb.AppendLine($"Result:    {comparison}");
-            return sb.ToString();
+            result.Details1 = new SemverDetails
+            {
+                Original = version1,
+                Major = v1.major,
+                Minor = v1.minor,
+                Patch = v1.patch,
+                Prerelease = v1.prerelease,
+                Build = v1.build
+            };
+
+            result.Details2 = new SemverDetails
+            {
+                Original = version2,
+                Major = v2.major,
+                Minor = v2.minor,
+                Patch = v2.patch,
+                Prerelease = v2.prerelease,
+                Build = v2.build
+            };
+
+            if (v1.major != v2.major)
+                result.ComparisonResult = v1.major > v2.major ? "v1 > v2" : "v1 < v2";
+            else if (v1.minor != v2.minor)
+                result.ComparisonResult = v1.minor > v2.minor ? "v1 > v2" : "v1 < v2";
+            else if (v1.patch != v2.patch)
+                result.ComparisonResult = v1.patch > v2.patch ? "v1 > v2" : "v1 < v2";
+            else
+                result.ComparisonResult = "v1 == v2";
+
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error comparing semver: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error comparing semver: {ex.Message}";
+            return result;
         }
     }
 
@@ -469,50 +513,63 @@ public class DevService : IDevService
         return (major, minor, patch, prerelease, build);
     }
 
-    public string InspectNumber(string number)
+    public NumberInspectResult InspectNumber(string number)
     {
+        var result = new NumberInspectResult();
         if (string.IsNullOrWhiteSpace(number))
-            return "Error: Number cannot be empty.";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Number cannot be empty.";
+            return result;
+        }
 
         try
         {
+            result.Input = number;
+
             // Try integer first
             if (long.TryParse(number, out long intVal))
             {
-                var sb = new StringBuilder();
-                sb.AppendLine($"Input:       {number}");
-                sb.AppendLine($"Type:        Integer (64-bit)");
-                sb.AppendLine($"Decimal:     {intVal:N0}");
-                sb.AppendLine($"Binary:      {Convert.ToString(intVal, 2)}");
-                sb.AppendLine($"Octal:       {Convert.ToString(intVal, 8)}");
-                sb.AppendLine($"Hexadecimal: 0x{intVal:X}");
-                sb.AppendLine($"Scientific:  {(double)intVal:E6}");
-                sb.AppendLine($"Positive:    {intVal >= 0}");
-                sb.AppendLine($"Even:        {intVal % 2 == 0}");
-                return sb.ToString();
+                result.Success = true;
+                result.IsInteger = true;
+                result.IntegerValue = intVal;
+                result.Type = "Integer (64-bit)";
+                result.Decimal = $"{intVal:N0}";
+                result.Binary = Convert.ToString(intVal, 2);
+                result.Octal = Convert.ToString(intVal, 8);
+                result.Hexadecimal = $"0x{intVal:X}";
+                result.Scientific = $"{(double)intVal:E6}";
+                result.Positive = intVal >= 0;
+                result.Even = intVal % 2 == 0;
+                return result;
             }
 
             // Try floating point
             if (double.TryParse(number, System.Globalization.NumberStyles.Float,
                 System.Globalization.CultureInfo.InvariantCulture, out double dblVal))
             {
-                var sb = new StringBuilder();
-                sb.AppendLine($"Input:       {number}");
-                sb.AppendLine($"Type:        Double (64-bit float)");
-                sb.AppendLine($"Decimal:     {dblVal}");
-                sb.AppendLine($"Scientific:  {dblVal:E6}");
-                sb.AppendLine($"Hex (raw):   0x{BitConverter.DoubleToInt64Bits(dblVal):X16}");
-                sb.AppendLine($"IsNaN:       {double.IsNaN(dblVal)}");
-                sb.AppendLine($"IsInfinity:  {double.IsInfinity(dblVal)}");
-                sb.AppendLine($"IsFinite:    {double.IsFinite(dblVal)}");
-                return sb.ToString();
+                result.Success = true;
+                result.IsInteger = false;
+                result.DoubleValue = dblVal;
+                result.Type = "Double (64-bit float)";
+                result.Decimal = $"{dblVal}";
+                result.Scientific = $"{dblVal:E6}";
+                result.Hexadecimal = $"0x{BitConverter.DoubleToInt64Bits(dblVal):X16}";
+                result.IsNaN = double.IsNaN(dblVal);
+                result.IsInfinity = double.IsInfinity(dblVal);
+                result.IsFinite = double.IsFinite(dblVal);
+                return result;
             }
 
-            return $"Error: '{number}' is not a valid number.";
+            result.Success = false;
+            result.ErrorMessage = $"Error: '{number}' is not a valid number.";
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error inspecting number: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error inspecting number: {ex.Message}";
+            return result;
         }
     }
 }

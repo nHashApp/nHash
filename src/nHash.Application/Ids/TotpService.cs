@@ -1,14 +1,21 @@
+using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text;
+using nHash.Application.Ids.Models;
 
 namespace nHash.Application.Ids;
 
 public class TotpService : ITotpService
 {
-    public string Generate(string secretBase32, int digits, int periodSeconds)
+    public TotpGenerateResult Generate(string secretBase32, int digits, int periodSeconds)
     {
+        var result = new TotpGenerateResult();
         if (string.IsNullOrWhiteSpace(secretBase32))
-            return "Error: Secret cannot be empty.";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Secret cannot be empty.";
+            return result;
+        }
 
         try
         {
@@ -33,24 +40,29 @@ public class TotpService : ITotpService
 
             int remaining = periodSeconds - (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % periodSeconds);
 
-            var sb = new StringBuilder();
-            sb.AppendLine($"OTP Code:          {code.ToString().PadLeft(digits, '0')}");
-            sb.AppendLine($"Digits:            {digits}");
-            sb.AppendLine($"Period:            {periodSeconds}s");
-            sb.AppendLine($"Remaining:         {remaining}s");
-            sb.AppendLine($"Algorithm:         HMAC-SHA1 (RFC 6238)");
-            return sb.ToString();
+            result.Code = code.ToString().PadLeft(digits, '0');
+            result.Digits = digits;
+            result.PeriodSeconds = periodSeconds;
+            result.RemainingSeconds = remaining;
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error generating TOTP: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error generating TOTP: {ex.Message}";
+            return result;
         }
     }
 
-    public string Remaining(int periodSeconds)
+    public TotpRemainingResult Remaining(int periodSeconds)
     {
         int remaining = periodSeconds - (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % periodSeconds);
-        return $"Remaining: {remaining}s of {periodSeconds}s period";
+        return new TotpRemainingResult
+        {
+            RemainingSeconds = remaining,
+            PeriodSeconds = periodSeconds
+        };
     }
 
     private static byte[] Base32Decode(string base32)

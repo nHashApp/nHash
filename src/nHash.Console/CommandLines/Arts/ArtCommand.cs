@@ -1,11 +1,11 @@
 using Spectre.Console;
 using nHash.Console.CommandLines.Base;
-using nHash.Application.Abstraction;
+using nHash.Console.Services;
 using System.CommandLine;
 
 namespace nHash.Console.CommandLines.Arts;
 
-public class ArtCommand(IAsciiCommand asciiCommand) : IArtCommand
+public class ArtCommand(IAsciiCommand asciiCommand, IAnsiConsoleProvider consoleProvider) : IArtCommand
 {
     public BaseCommand Command => GetCommand();
 
@@ -47,7 +47,7 @@ public class ArtCommand(IAsciiCommand asciiCommand) : IArtCommand
             var panel = new Panel(text).Border(panelBorder).Padding(1, 0);
             if (!string.IsNullOrEmpty(title))
                 panel = panel.Header(title);
-            AnsiConsole.Write(panel);
+            consoleProvider.Console.Write(panel);
         });
         return cmd;
     }
@@ -87,7 +87,7 @@ public class ArtCommand(IAsciiCommand asciiCommand) : IArtCommand
                 table.AddRow(cells.Select(c => c.Trim()).ToArray());
             }
             
-            AnsiConsole.Write(table);
+            consoleProvider.Console.Write(table);
         });
         return cmd;
     }
@@ -121,16 +121,25 @@ public class ArtCommand(IAsciiCommand asciiCommand) : IArtCommand
             
             if (text.Length == 0) return;
             
-            for (int i = 0; i < text.Length; i++)
+            var isFile = consoleProvider.StringWriter != null;
+            if (isFile)
             {
-                float t = text.Length > 1 ? (float)i / (text.Length - 1) : 0;
-                int r = (int)(r1 + (r2 - r1) * t);
-                int g = (int)(g1 + (g2 - g1) * t);
-                int b = (int)(b1 + (b2 - b1) * t);
-                System.Console.Write($"\x1b[38;2;{r};{g};{b}m{text[i]}");
+                consoleProvider.Console.Write(text);
+                consoleProvider.Console.WriteLine();
             }
-            System.Console.Write("\x1b[0m");
-            System.Console.WriteLine();
+            else
+            {
+                for (int i = 0; i < text.Length; i++)
+                {
+                    float t = text.Length > 1 ? (float)i / (text.Length - 1) : 0;
+                    int r = (int)(r1 + (r2 - r1) * t);
+                    int g = (int)(g1 + (g2 - g1) * t);
+                    int b = (int)(b1 + (b2 - b1) * t);
+                    System.Console.Write($"\x1b[38;2;{r};{g};{b}m{text[i]}");
+                }
+                System.Console.Write("\x1b[0m");
+                System.Console.WriteLine();
+            }
         });
         return cmd;
     }

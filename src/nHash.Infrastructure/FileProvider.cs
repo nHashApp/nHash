@@ -5,11 +5,13 @@ namespace nHash.Infrastructure;
 
 public class FileProvider : IFileProvider
 {
-    private readonly IOutputProvider _outputProvider;
+    private readonly IServiceProvider _serviceProvider;
+    private IOutputProvider? _outputProviderInstance;
+    private IOutputProvider _outputProvider => _outputProviderInstance ??= (IOutputProvider)_serviceProvider.GetService(typeof(IOutputProvider))!;
 
-    public FileProvider(IOutputProvider outputProvider)
+    public FileProvider(IServiceProvider serviceProvider)
     {
-        _outputProvider = outputProvider;
+        _serviceProvider = serviceProvider;
     }
 
     public Task<string> ReadAsText(string fileName)
@@ -62,9 +64,10 @@ public class FileProvider : IFileProvider
         {
             return File.WriteAllTextAsync(fileName, text);
         }
-        catch
+        catch (Exception ex)
         {
             _outputProvider.AppendLine($"Error writing output to '{fileName}'");
+            System.Console.WriteLine($"Error writing output to '{fileName}': {ex.Message}");
         }
         return Task.CompletedTask;
     }

@@ -1,5 +1,6 @@
 using System.Text;
 using nHash.Domain.Models;
+using nHash.Console.Services;
 
 namespace nHash.Console;
 
@@ -8,11 +9,13 @@ public class OutputProvider : IOutputProvider
     private readonly OutputParameter _outputParameter;
     private readonly StringBuilder _texts;
     private readonly IFileProvider _fileProvider;
+    private readonly IAnsiConsoleProvider _ansiConsoleProvider;
 
-    public OutputProvider(OutputParameter outputParameter, IFileProvider fileProvider)
+    public OutputProvider(OutputParameter outputParameter, IFileProvider fileProvider, IAnsiConsoleProvider ansiConsoleProvider)
     {
         _outputParameter = outputParameter;
         _fileProvider = fileProvider;
+        _ansiConsoleProvider = ansiConsoleProvider;
         _texts = new StringBuilder();
     }
 
@@ -44,12 +47,13 @@ public class OutputProvider : IOutputProvider
 
     private void WriteToConsole()
     {
-        //AnsiConsole.Write(new Text(_texts.ToString()));
         System.Console.Write(_texts.ToString());
     }
 
     private Task WriteToFile()
     {
-        return _fileProvider.Write(_outputParameter.OutputTypeValue, _texts.ToString());
+        var consoleText = _ansiConsoleProvider.StringWriter?.ToString() ?? string.Empty;
+        var fullText = _texts.ToString() + consoleText;
+        return _fileProvider.Write(_outputParameter.OutputTypeValue, fullText);
     }
 }

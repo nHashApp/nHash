@@ -1,48 +1,74 @@
+using System;
 using System.Globalization;
+using nHash.Application.Date.Models;
 
 namespace nHash.Application.Date;
 
 public class DateService : IDateService
 {
-    public string EpochToDateTime(long epochValue, bool isMilliseconds)
+    public EpochToDateTimeResult EpochToDateTime(long epochValue, bool isMilliseconds)
     {
+        var result = new EpochToDateTimeResult();
         try
         {
             var offset = isMilliseconds
                 ? DateTimeOffset.FromUnixTimeMilliseconds(epochValue)
                 : DateTimeOffset.FromUnixTimeSeconds(epochValue);
 
-            return $"UTC: {offset.UtcDateTime:yyyy-MM-dd HH:mm:ss.fff K}\nLocal: {offset.LocalDateTime:yyyy-MM-dd HH:mm:ss.fff K}";
+            result.DateTimeOffset = offset;
+            result.UtcDateTime = offset.UtcDateTime;
+            result.LocalDateTime = offset.LocalDateTime;
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error: {ex.Message}";
+            return result;
         }
     }
 
-    public string DateTimeToEpoch(string dateTimeStr)
+    public DateTimeToEpochResult DateTimeToEpoch(string dateTimeStr)
     {
+        var result = new DateTimeToEpochResult();
         if (string.IsNullOrWhiteSpace(dateTimeStr))
         {
             var now = DateTimeOffset.UtcNow;
-            return $"Current Epoch (Seconds): {now.ToUnixTimeSeconds()}\nCurrent Epoch (Milliseconds): {now.ToUnixTimeMilliseconds()}";
+            result.Label = "Current Epoch";
+            result.Seconds = now.ToUnixTimeSeconds();
+            result.Milliseconds = now.ToUnixTimeMilliseconds();
+            result.Success = true;
+            return result;
         }
 
         try
         {
             var offset = DateTimeOffset.Parse(dateTimeStr, CultureInfo.InvariantCulture);
-            return $"Epoch (Seconds): {offset.ToUnixTimeSeconds()}\nEpoch (Milliseconds): {offset.ToUnixTimeMilliseconds()}";
+            result.Label = "Epoch";
+            result.Seconds = offset.ToUnixTimeSeconds();
+            result.Milliseconds = offset.ToUnixTimeMilliseconds();
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error parsing date: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error parsing date: {ex.Message}";
+            return result;
         }
     }
 
-    public string ConvertCalendars(string dateTimeStr, string fromCalendar, string toCalendar)
+    public CalendarConvertResult ConvertCalendars(string dateTimeStr, string fromCalendar, string toCalendar)
     {
-        if (string.IsNullOrWhiteSpace(dateTimeStr)) return "Error: Input date cannot be empty.";
-        
+        var result = new CalendarConvertResult();
+        if (string.IsNullOrWhiteSpace(dateTimeStr))
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Input date cannot be empty.";
+            return result;
+        }
+
         var from = fromCalendar.ToLowerInvariant().Trim();
         var to = toCalendar.ToLowerInvariant().Trim();
 
@@ -66,26 +92,32 @@ public class DateService : IDateService
             if (to is "jalali" or "persian" or "shamsi")
             {
                 var pc = new PersianCalendar();
-                return $"{pc.GetYear(gregorianDate):0000}/{pc.GetMonth(gregorianDate):00}/{pc.GetDayOfMonth(gregorianDate):00} {gregorianDate.Hour:00}:{gregorianDate.Minute:00}:{gregorianDate.Second:00}";
+                result.ConvertedDate = $"{pc.GetYear(gregorianDate):0000}/{pc.GetMonth(gregorianDate):00}/{pc.GetDayOfMonth(gregorianDate):00} {gregorianDate.Hour:00}:{gregorianDate.Minute:00}:{gregorianDate.Second:00}";
             }
             else if (to is "hijri" or "islamic")
             {
                 var hc = new UmAlQuraCalendar();
-                return $"{hc.GetYear(gregorianDate):0000}/{hc.GetMonth(gregorianDate):00}/{hc.GetDayOfMonth(gregorianDate):00} {gregorianDate.Hour:00}:{gregorianDate.Minute:00}:{gregorianDate.Second:00}";
+                result.ConvertedDate = $"{hc.GetYear(gregorianDate):0000}/{hc.GetMonth(gregorianDate):00}/{hc.GetDayOfMonth(gregorianDate):00} {gregorianDate.Hour:00}:{gregorianDate.Minute:00}:{gregorianDate.Second:00}";
             }
             else
             {
-                return gregorianDate.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                result.ConvertedDate = gregorianDate.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
             }
+
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Calendar Conversion Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Calendar Conversion Error: {ex.Message}";
+            return result;
         }
     }
 
-    public string CalculateDifference(string startStr, string endStr)
+    public CalculateDifferenceResult CalculateDifference(string startStr, string endStr)
     {
+        var result = new CalculateDifferenceResult();
         try
         {
             var start = DateTimeOffset.Parse(startStr, CultureInfo.InvariantCulture);
@@ -93,37 +125,50 @@ public class DateService : IDateService
             var diff = end - start;
 
             var absDiff = diff.Duration();
-            return $"Difference details:\n" +
-                   $"- Total Days: {absDiff.TotalDays:N2} days\n" +
-                   $"- Total Hours: {absDiff.TotalHours:N2} hours\n" +
-                   $"- Total Minutes: {absDiff.TotalMinutes:N2} minutes\n" +
-                   $"- Total Seconds: {absDiff.TotalSeconds:N0} seconds\n" +
-                   $"- Human Readable: {absDiff.Days}d {absDiff.Hours}h {absDiff.Minutes}m {absDiff.Seconds}s";
+            result.TotalDays = absDiff.TotalDays;
+            result.TotalHours = absDiff.TotalHours;
+            result.TotalMinutes = absDiff.TotalMinutes;
+            result.TotalSeconds = absDiff.TotalSeconds;
+            result.Days = absDiff.Days;
+            result.Hours = absDiff.Hours;
+            result.Minutes = absDiff.Minutes;
+            result.Seconds = absDiff.Seconds;
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Difference calculation error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Difference calculation error: {ex.Message}";
+            return result;
         }
     }
 
-    public string ConvertTimezone(string dateTimeStr, string fromTimezoneId, string toTimezoneId)
+    public ConvertTimezoneResult ConvertTimezone(string dateTimeStr, string fromTimezoneId, string toTimezoneId)
     {
+        var result = new ConvertTimezoneResult();
         try
         {
             var parsed = DateTime.Parse(dateTimeStr, CultureInfo.InvariantCulture);
-            
+
             var fromTz = TimeZoneInfo.FindSystemTimeZoneById(fromTimezoneId);
             var toTz = TimeZoneInfo.FindSystemTimeZoneById(toTimezoneId);
 
             var utc = TimeZoneInfo.ConvertTimeToUtc(parsed, fromTz);
             var targetTime = TimeZoneInfo.ConvertTimeFromUtc(utc, toTz);
 
-            return $"Source ({fromTimezoneId}): {parsed:yyyy-MM-dd HH:mm:ss}\n" +
-                   $"Target ({toTimezoneId}): {targetTime:yyyy-MM-dd HH:mm:ss}";
+            result.SourceTimezone = fromTimezoneId;
+            result.SourceTime = parsed;
+            result.TargetTimezone = toTimezoneId;
+            result.TargetTime = targetTime;
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Timezone Conversion Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Timezone Conversion Error: {ex.Message}";
+            return result;
         }
     }
 
@@ -165,10 +210,15 @@ public class DateService : IDateService
         return (year, month, day, hour, minute, second);
     }
 
-    public string ParseIso8601(string iso8601String)
+    public ParseIso8601Result ParseIso8601(string iso8601String)
     {
+        var result = new ParseIso8601Result();
         if (string.IsNullOrWhiteSpace(iso8601String))
-            return "Error: ISO 8601 string cannot be empty.";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: ISO 8601 string cannot be empty.";
+            return result;
+        }
 
         try
         {
@@ -176,42 +226,62 @@ public class DateService : IDateService
             var cal = new GregorianCalendar();
             int weekOfYear = cal.GetWeekOfYear(dto.DateTime, System.Globalization.CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
 
-            return $"ISO 8601:    {iso8601String}\n" +
-                   $"Year:        {dto.Year}\n" +
-                   $"Month:       {dto.Month}\n" +
-                   $"Day:         {dto.Day}\n" +
-                   $"Hour:        {dto.Hour}\n" +
-                   $"Minute:      {dto.Minute}\n" +
-                   $"Second:      {dto.Second}\n" +
-                   $"Millisecond: {dto.Millisecond}\n" +
-                   $"Offset:      {dto.Offset}\n" +
-                   $"DayOfWeek:   {dto.DayOfWeek}\n" +
-                   $"WeekOfYear:  {weekOfYear}\n" +
-                   $"DayOfYear:   {dto.DayOfYear}\n" +
-                   $"IsUtc:       {dto.Offset == TimeSpan.Zero}";
+            result.Iso8601String = iso8601String;
+            result.Year = dto.Year;
+            result.Month = dto.Month;
+            result.Day = dto.Day;
+            result.Hour = dto.Hour;
+            result.Minute = dto.Minute;
+            result.Second = dto.Second;
+            result.Millisecond = dto.Millisecond;
+            result.Offset = dto.Offset;
+            result.DayOfWeek = dto.DayOfWeek;
+            result.WeekOfYear = weekOfYear;
+            result.DayOfYear = dto.DayOfYear;
+            result.IsUtc = dto.Offset == TimeSpan.Zero;
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error parsing ISO 8601: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error parsing ISO 8601: {ex.Message}";
+            return result;
         }
     }
 
-    public string AddDuration(string dateTimeStr, string duration)
+    public AddDurationResult AddDuration(string dateTimeStr, string duration)
     {
+        var result = new AddDurationResult();
         if (string.IsNullOrWhiteSpace(dateTimeStr))
-            return "Error: Date-time string cannot be empty.";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Date-time string cannot be empty.";
+            return result;
+        }
         if (string.IsNullOrWhiteSpace(duration))
-            return "Error: Duration string cannot be empty.";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Duration string cannot be empty.";
+            return result;
+        }
 
         try
         {
             var dto = DateTimeOffset.Parse(dateTimeStr, CultureInfo.InvariantCulture);
-            var result = ApplyDuration(dto, duration);
-            return $"Input:    {dto:O}\nDuration: {duration}\nResult:   {result:O}";
+            var durationResult = ApplyDuration(dto, duration);
+
+            result.Input = dto;
+            result.Duration = duration;
+            result.Result = durationResult;
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error adding duration: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error adding duration: {ex.Message}";
+            return result;
         }
     }
 
@@ -256,10 +326,15 @@ public class DateService : IDateService
         return dto;
     }
 
-    public string CountWorkingDays(string startStr, string endStr)
+    public CountWorkingDaysResult CountWorkingDays(string startStr, string endStr)
     {
+        var result = new CountWorkingDaysResult();
         if (string.IsNullOrWhiteSpace(startStr) || string.IsNullOrWhiteSpace(endStr))
-            return "Error: Start and end dates cannot be empty.";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Start and end dates cannot be empty.";
+            return result;
+        }
 
         try
         {
@@ -281,15 +356,21 @@ public class DateService : IDateService
             int totalDays = (end - start).Days + 1;
             int weekendDays = totalDays - count;
 
-            return $"Start:        {start:yyyy-MM-dd} ({start.DayOfWeek})\n" +
-                   $"End:          {end:yyyy-MM-dd} ({end.DayOfWeek})\n" +
-                   $"Total Days:   {totalDays}\n" +
-                   $"Weekend Days: {weekendDays}\n" +
-                   $"Working Days: {count}";
+            result.StartDate = start;
+            result.StartDayOfWeek = start.DayOfWeek;
+            result.EndDate = end;
+            result.EndDayOfWeek = end.DayOfWeek;
+            result.TotalDays = totalDays;
+            result.WeekendDays = weekendDays;
+            result.WorkingDays = count;
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error counting working days: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error counting working days: {ex.Message}";
+            return result;
         }
     }
 }

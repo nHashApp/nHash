@@ -8,6 +8,7 @@ using nHash.Application.Texts.Json;
 using nHash.Application.Texts.Xml;
 using nHash.Application.Texts.Yaml;
 using nHash.Application.Texts;
+using nHash.Application.Texts.Counter;
 using nHash.Application.Ids;
 using nHash.Application.Cryptos;
 using nHash.Application.Cryptos.Hashes;
@@ -86,6 +87,7 @@ public static class ConfigureServices
         services.AddSingleton<ITextStatisticsService, TextStatisticsService>();
         services.AddSingleton<ILoremIpsumService, LoremIpsumService>();
         services.AddSingleton<ITextToolsService, TextToolsService>();
+        services.AddSingleton<ITextCounterService, TextCounterService>();
         
         services.AddSingleton<IJsonTools, JsonTools>();
         services.AddSingleton<IYamlTools, YamlTools>();

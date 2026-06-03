@@ -1,10 +1,11 @@
 using System.CommandLine;
 using nHash.Console.CommandLines.Base;
 using Spectre.Console;
+using nHash.Console.Services;
 
 namespace nHash.Console.CommandLines.Arts;
 
-public class AsciiCommand : IAsciiCommand
+public class AsciiCommand(IAnsiConsoleProvider consoleProvider) : IAsciiCommand
 {
     public BaseCommand Command => GetFeatureCommand();
 
@@ -33,8 +34,8 @@ public class AsciiCommand : IAsciiCommand
                 var fontsDir = GetFontsDirectory();
                 if (!System.IO.Directory.Exists(fontsDir))
                 {
-                    AnsiConsole.MarkupLine($"[yellow]Fonts directory not found at: {fontsDir}[/]");
-                    AnsiConsole.MarkupLine("[yellow]Please create a 'fonts' folder and place your .flf Figlet fonts there.[/]");
+                    consoleProvider.Console.MarkupLine($"[yellow]Fonts directory not found at: {fontsDir}[/]");
+                    consoleProvider.Console.MarkupLine("[yellow]Please create a 'fonts' folder and place your .flf Figlet fonts there.[/]");
                     return;
                 }
 
@@ -44,21 +45,21 @@ public class AsciiCommand : IAsciiCommand
 
                 if (fontFiles.Count == 0)
                 {
-                    AnsiConsole.MarkupLine($"[yellow]No Figlet font (.flf) files found in: {fontsDir}[/]");
+                    consoleProvider.Console.MarkupLine($"[yellow]No Figlet font (.flf) files found in: {fontsDir}[/]");
                     return;
                 }
 
-                AnsiConsole.MarkupLine($"[green]Available Figlet Fonts in '{fontsDir}':[/]");
+                consoleProvider.Console.MarkupLine($"[green]Available Figlet Fonts in '{fontsDir}':[/]");
                 foreach (var name in fontFiles)
                 {
-                    AnsiConsole.MarkupLine($"  - {name}");
+                    consoleProvider.Console.MarkupLine($"  - {name}");
                 }
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(text))
             {
-                AnsiConsole.MarkupLine("[red]Error: Input text cannot be empty. Please specify a text to render, or use --list to list available fonts.[/]");
+                consoleProvider.Console.MarkupLine("[red]Error: Input text cannot be empty. Please specify a text to render, or use --list to list available fonts.[/]");
                 return;
             }
 
@@ -84,7 +85,7 @@ public class AsciiCommand : IAsciiCommand
                         }
                         else
                         {
-                            AnsiConsole.MarkupLine($"[red]Error: Font '{fontName}' could not be found directly or in the 'fonts' folder ({fontsDir}).[/]");
+                            consoleProvider.Console.MarkupLine($"[red]Error: Font '{fontName}' could not be found directly or in the 'fonts' folder ({fontsDir}).[/]");
                             return;
                         }
                     }
@@ -100,11 +101,11 @@ public class AsciiCommand : IAsciiCommand
                 var color = ParseColor(colorName);
                 figletText.Color(color);
 
-                AnsiConsole.Write(figletText);
+                consoleProvider.Console.Write(figletText);
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]Error generating ASCII art: {ex.Message}[/]");
+                consoleProvider.Console.MarkupLine($"[red]Error generating ASCII art: {ex.Message}[/]");
             }
         });
 

@@ -1,6 +1,8 @@
+using nHash.Application.Ids.Models;
+
 namespace nHash.Application.Ids;
 
 public interface IUuidInspectService
 {
-    string Inspect(string uuid);
+    UuidInspectResult Inspect(string uuid);
 }

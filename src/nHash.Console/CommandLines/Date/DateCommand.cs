@@ -1,5 +1,6 @@
 using System.CommandLine;
 using nHash.Application.Date;
+using nHash.Application.Date.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Date;
@@ -41,17 +42,35 @@ public class DateCommand(IDateService dateService, IOutputProvider outputProvide
             if (string.IsNullOrWhiteSpace(value))
             {
                 var res = dateService.DateTimeToEpoch(string.Empty);
-                outputProvider.AppendLine(res);
+                if (!res.Success)
+                {
+                    outputProvider.AppendLine(res.ErrorMessage);
+                    return;
+                }
+                outputProvider.AppendLine($"{res.Label} (Seconds): {res.Seconds}");
+                outputProvider.AppendLine($"{res.Label} (Milliseconds): {res.Milliseconds}");
             }
             else if (long.TryParse(value, out long epochVal))
             {
                 var res = dateService.EpochToDateTime(epochVal, ms);
-                outputProvider.AppendLine(res);
+                if (!res.Success)
+                {
+                    outputProvider.AppendLine(res.ErrorMessage);
+                    return;
+                }
+                outputProvider.AppendLine($"UTC: {res.UtcDateTime:yyyy-MM-dd HH:mm:ss.fff K}");
+                outputProvider.AppendLine($"Local: {res.LocalDateTime:yyyy-MM-dd HH:mm:ss.fff K}");
             }
             else
             {
                 var res = dateService.DateTimeToEpoch(value);
-                outputProvider.AppendLine(res);
+                if (!res.Success)
+                {
+                    outputProvider.AppendLine(res.ErrorMessage);
+                    return;
+                }
+                outputProvider.AppendLine($"{res.Label} (Seconds): {res.Seconds}");
+                outputProvider.AppendLine($"{res.Label} (Milliseconds): {res.Milliseconds}");
             }
         });
 
@@ -76,7 +95,12 @@ public class DateCommand(IDateService dateService, IOutputProvider outputProvide
             var toCal = parseResult.GetValue(toOption) ?? "jalali";
 
             var res = dateService.ConvertCalendars(date, fromCal, toCal);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+            outputProvider.AppendLine(res.ConvertedDate);
         });
 
         return cmd;
@@ -97,7 +121,18 @@ public class DateCommand(IDateService dateService, IOutputProvider outputProvide
             var end = parseResult.GetValue(endArg) ?? string.Empty;
 
             var res = dateService.CalculateDifference(start, end);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine("Difference details:");
+            outputProvider.AppendLine($"- Total Days: {res.TotalDays:N2} days");
+            outputProvider.AppendLine($"- Total Hours: {res.TotalHours:N2} hours");
+            outputProvider.AppendLine($"- Total Minutes: {res.TotalMinutes:N2} minutes");
+            outputProvider.AppendLine($"- Total Seconds: {res.TotalSeconds:N0} seconds");
+            outputProvider.AppendLine($"- Human Readable: {res.Days}d {res.Hours}h {res.Minutes}m {res.Seconds}s");
         });
 
         return cmd;
@@ -121,7 +156,13 @@ public class DateCommand(IDateService dateService, IOutputProvider outputProvide
             var toTz = parseResult.GetValue(toOption) ?? "UTC";
 
             var res = dateService.ConvertTimezone(date, fromTz, toTz);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+            outputProvider.AppendLine($"Source ({res.SourceTimezone}): {res.SourceTime:yyyy-MM-dd HH:mm:ss}");
+            outputProvider.AppendLine($"Target ({res.TargetTimezone}): {res.TargetTime:yyyy-MM-dd HH:mm:ss}");
         });
 
         return cmd;
@@ -136,7 +177,24 @@ public class DateCommand(IDateService dateService, IOutputProvider outputProvide
         {
             var value = parseResult.GetValue(valueArg) ?? string.Empty;
             var res = dateService.ParseIso8601(value);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+            outputProvider.AppendLine($"ISO 8601:    {res.Iso8601String}");
+            outputProvider.AppendLine($"Year:        {res.Year}");
+            outputProvider.AppendLine($"Month:       {res.Month}");
+            outputProvider.AppendLine($"Day:         {res.Day}");
+            outputProvider.AppendLine($"Hour:        {res.Hour}");
+            outputProvider.AppendLine($"Minute:      {res.Minute}");
+            outputProvider.AppendLine($"Second:      {res.Second}");
+            outputProvider.AppendLine($"Millisecond: {res.Millisecond}");
+            outputProvider.AppendLine($"Offset:      {res.Offset}");
+            outputProvider.AppendLine($"DayOfWeek:   {res.DayOfWeek}");
+            outputProvider.AppendLine($"WeekOfYear:  {res.WeekOfYear}");
+            outputProvider.AppendLine($"DayOfYear:   {res.DayOfYear}");
+            outputProvider.AppendLine($"IsUtc:       {res.IsUtc}");
         });
         return cmd;
     }
@@ -153,7 +211,14 @@ public class DateCommand(IDateService dateService, IOutputProvider outputProvide
             var datetime = parseResult.GetValue(datetimeArg) ?? string.Empty;
             var duration = parseResult.GetValue(durationOption) ?? string.Empty;
             var res = dateService.AddDuration(datetime, duration);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+            outputProvider.AppendLine($"Input:    {res.Input:O}");
+            outputProvider.AppendLine($"Duration: {res.Duration}");
+            outputProvider.AppendLine($"Result:   {res.Result:O}");
         });
         return cmd;
     }
@@ -170,9 +235,17 @@ public class DateCommand(IDateService dateService, IOutputProvider outputProvide
             var start = parseResult.GetValue(startArg) ?? string.Empty;
             var end = parseResult.GetValue(endArg) ?? string.Empty;
             var res = dateService.CountWorkingDays(start, end);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+            outputProvider.AppendLine($"Start:        {res.StartDate:yyyy-MM-dd} ({res.StartDayOfWeek})");
+            outputProvider.AppendLine($"End:          {res.EndDate:yyyy-MM-dd} ({res.EndDayOfWeek})");
+            outputProvider.AppendLine($"Total Days:   {res.TotalDays}");
+            outputProvider.AppendLine($"Weekend Days: {res.WeekendDays}");
+            outputProvider.AppendLine($"Working Days: {res.WorkingDays}");
         });
         return cmd;
     }
 }
-

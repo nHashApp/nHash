@@ -15,6 +15,7 @@ using nHash.Console.CommandLines.File;
 using nHash.Console.CommandLines.Dev;
 using nHash.Console.CommandLines.Maths;
 using nHash.Console.CommandLines.Sys;
+using nHash.Console.Services;
 
 namespace nHash.Console;
 
@@ -37,6 +38,7 @@ public static class ConfigureServices
         RegisterMathServices(services);
         
         services.AddSingleton<IOutputProvider, OutputProvider>();
+        services.AddSingleton<IAnsiConsoleProvider, AnsiConsoleProvider>();
 
         return services;
     }

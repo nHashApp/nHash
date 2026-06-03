@@ -59,7 +59,18 @@ public class JwtTokenCommand(IJwtTokenService jwtTokenService, IDevService devSe
             var payload = parseResult.GetValue(payloadOption) ?? string.Empty;
 
             var res = devService.BuildJwt(header, payload);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+            outputProvider.AppendLine("JWT Token (unsigned):");
+            outputProvider.AppendLine(res.Token);
+            outputProvider.AppendLine();
+            outputProvider.AppendLine("--- Decoded Parts ---");
+            outputProvider.AppendLine($"Header:    {res.Header}");
+            outputProvider.AppendLine($"Payload:   {res.Payload}");
+            outputProvider.AppendLine($"Signature: {res.Signature}");
         });
 
         return cmd;

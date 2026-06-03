@@ -1,5 +1,6 @@
 using System.CommandLine;
 using nHash.Application.Ids;
+using nHash.Application.Ids.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Ids;
@@ -27,7 +28,16 @@ public class TotpCommand(ITotpService service, IOutputProvider outputProvider) :
             var period = parseResult.GetValue(periodOption);
 
             var result = service.Generate(secret, digits, period);
-            outputProvider.AppendLine(result);
+            if (!result.Success)
+            {
+                outputProvider.AppendLine(result.ErrorMessage);
+                return;
+            }
+            outputProvider.AppendLine($"OTP Code:          {result.Code}");
+            outputProvider.AppendLine($"Digits:            {result.Digits}");
+            outputProvider.AppendLine($"Period:            {result.PeriodSeconds}s");
+            outputProvider.AppendLine($"Remaining:         {result.RemainingSeconds}s");
+            outputProvider.AppendLine("Algorithm:         HMAC-SHA1 (RFC 6238)");
         });
 
         return command;
