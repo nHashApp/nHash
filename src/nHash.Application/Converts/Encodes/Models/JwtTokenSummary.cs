@@ -1,4 +1,4 @@
-namespace nHash.Application.Encodes.Models;
+namespace nHash.Application.Converts.Encodes.Models;
 
 public class JwtTokenSummary
 {

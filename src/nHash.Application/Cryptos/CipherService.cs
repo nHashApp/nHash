@@ -5,11 +5,14 @@ namespace nHash.Application.Cryptos;
 
 public class CipherService : ICipherService
 {
-    private static readonly byte[] Salt = "nHashSalt9876543"u8.ToArray();
+    private static readonly byte[] DefaultSalt = "nHashSalt9876543"u8.ToArray();
 
     public string Encrypt(string plainText, string password, string algorithm)
     {
-        var key = DeriveKey(password);
+        var salt = new byte[16];
+        RandomNumberGenerator.Fill(salt);
+
+        var key = DeriveKey(password, salt);
         var plainBytes = Encoding.UTF8.GetBytes(plainText);
 
         var nonce = new byte[12];
@@ -29,10 +32,11 @@ public class CipherService : ICipherService
             aes.Encrypt(nonce, plainBytes, cipherBytes, tag);
         }
 
-        var result = new byte[12 + 16 + cipherBytes.Length];
-        Array.Copy(nonce, 0, result, 0, 12);
-        Array.Copy(tag, 0, result, 12, 16);
-        Array.Copy(cipherBytes, 0, result, 28, cipherBytes.Length);
+        var result = new byte[16 + 12 + 16 + cipherBytes.Length];
+        Array.Copy(salt, 0, result, 0, 16);
+        Array.Copy(nonce, 0, result, 16, 12);
+        Array.Copy(tag, 0, result, 28, 16);
+        Array.Copy(cipherBytes, 0, result, 44, cipherBytes.Length);
 
         return Convert.ToHexString(result);
     }
@@ -41,7 +45,6 @@ public class CipherService : ICipherService
     {
         try
         {
-            var key = DeriveKey(password);
             var cipherBytesAll = Convert.FromHexString(cipherText);
 
             if (cipherBytesAll.Length < 28)
@@ -49,28 +52,19 @@ public class CipherService : ICipherService
                 return "Invalid cipher text length.";
             }
 
-            var nonce = new byte[12];
-            var tag = new byte[16];
-            var cipherBytes = new byte[cipherBytesAll.Length - 28];
-
-            Array.Copy(cipherBytesAll, 0, nonce, 0, 12);
-            Array.Copy(cipherBytesAll, 12, tag, 0, 16);
-            Array.Copy(cipherBytesAll, 28, cipherBytes, 0, cipherBytes.Length);
-
-            var plainBytes = new byte[cipherBytes.Length];
-
-            if (algorithm.ToLowerInvariant().Contains("chacha"))
+            if (cipherBytesAll.Length >= 44)
             {
-                using var chacha = new ChaCha20Poly1305(key);
-                chacha.Decrypt(nonce, cipherBytes, tag, plainBytes);
-            }
-            else
-            {
-                using var aes = new AesGcm(key, 16);
-                aes.Decrypt(nonce, cipherBytes, tag, plainBytes);
+                try
+                {
+                    return DecryptNewFormat(cipherBytesAll, password, algorithm);
+                }
+                catch (CryptographicException)
+                {
+                    // Fallback to old format
+                }
             }
 
-            return Encoding.UTF8.GetString(plainBytes);
+            return DecryptOldFormat(cipherBytesAll, password, algorithm);
         }
         catch (Exception)
         {
@@ -78,8 +72,64 @@ public class CipherService : ICipherService
         }
     }
 
-    private static byte[] DeriveKey(string password)
+    private static string DecryptNewFormat(byte[] cipherBytesAll, string password, string algorithm)
     {
-        return Rfc2898DeriveBytes.Pbkdf2(password, Salt, 10000, HashAlgorithmName.SHA256, 32);
+        var salt = new byte[16];
+        var nonce = new byte[12];
+        var tag = new byte[16];
+        var cipherBytes = new byte[cipherBytesAll.Length - 44];
+
+        Array.Copy(cipherBytesAll, 0, salt, 0, 16);
+        Array.Copy(cipherBytesAll, 16, nonce, 0, 12);
+        Array.Copy(cipherBytesAll, 28, tag, 0, 16);
+        Array.Copy(cipherBytesAll, 44, cipherBytes, 0, cipherBytes.Length);
+
+        var key = DeriveKey(password, salt);
+        var plainBytes = new byte[cipherBytes.Length];
+
+        if (algorithm.ToLowerInvariant().Contains("chacha"))
+        {
+            using var chacha = new ChaCha20Poly1305(key);
+            chacha.Decrypt(nonce, cipherBytes, tag, plainBytes);
+        }
+        else
+        {
+            using var aes = new AesGcm(key, 16);
+            aes.Decrypt(nonce, cipherBytes, tag, plainBytes);
+        }
+
+        return Encoding.UTF8.GetString(plainBytes);
+    }
+
+    private static string DecryptOldFormat(byte[] cipherBytesAll, string password, string algorithm)
+    {
+        var nonce = new byte[12];
+        var tag = new byte[16];
+        var cipherBytes = new byte[cipherBytesAll.Length - 28];
+
+        Array.Copy(cipherBytesAll, 0, nonce, 0, 12);
+        Array.Copy(cipherBytesAll, 12, tag, 0, 16);
+        Array.Copy(cipherBytesAll, 28, cipherBytes, 0, cipherBytes.Length);
+
+        var key = DeriveKey(password, DefaultSalt);
+        var plainBytes = new byte[cipherBytes.Length];
+
+        if (algorithm.ToLowerInvariant().Contains("chacha"))
+        {
+            using var chacha = new ChaCha20Poly1305(key);
+            chacha.Decrypt(nonce, cipherBytes, tag, plainBytes);
+        }
+        else
+        {
+            using var aes = new AesGcm(key, 16);
+            aes.Decrypt(nonce, cipherBytes, tag, plainBytes);
+        }
+
+        return Encoding.UTF8.GetString(plainBytes);
+    }
+
+    private static byte[] DeriveKey(string password, byte[] salt)
+    {
+        return Rfc2898DeriveBytes.Pbkdf2(password, salt, 10000, HashAlgorithmName.SHA256, 32);
     }
 }

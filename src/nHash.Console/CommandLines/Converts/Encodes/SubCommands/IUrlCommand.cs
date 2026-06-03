@@ -1,4 +1,4 @@
-namespace nHash.Console.CommandLines.Encodes.SubCommands;
+namespace nHash.Console.CommandLines.Converts.Encodes.SubCommands;
 
 public interface IUrlCommand : IFeature
 {

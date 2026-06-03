@@ -1,4 +1,4 @@
-namespace nHash.Application.Encodes;
+namespace nHash.Application.Converts.Encodes;
 
 public interface IPunycodeService
 {

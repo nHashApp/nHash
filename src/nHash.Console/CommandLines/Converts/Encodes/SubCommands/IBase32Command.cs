@@ -1,4 +1,4 @@
-namespace nHash.Console.CommandLines.Encodes.SubCommands;
+namespace nHash.Console.CommandLines.Converts.Encodes.SubCommands;
 
 public interface IBase32Command : IFeature
 {

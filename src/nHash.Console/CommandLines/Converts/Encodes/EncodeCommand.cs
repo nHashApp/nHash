@@ -1,7 +1,7 @@
 using nHash.Console.CommandLines.Base;
-using nHash.Console.CommandLines.Encodes.SubCommands;
+using nHash.Console.CommandLines.Converts.Encodes.SubCommands;
 
-namespace nHash.Console.CommandLines.Encodes;
+namespace nHash.Console.CommandLines.Converts.Encodes;
 
 public class EncodeCommand(
     IJwtTokenCommand jwtTokenFeature,

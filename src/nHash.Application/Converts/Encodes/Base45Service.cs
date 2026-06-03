@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace nHash.Application.Encodes;
+namespace nHash.Application.Converts.Encodes;
 
 public class Base45Service : IBase45Service
 {

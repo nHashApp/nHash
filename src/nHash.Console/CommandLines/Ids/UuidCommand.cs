@@ -1,8 +1,8 @@
-using nHash.Application.Uuids;
-using nHash.Application.Uuids.Models;
+using nHash.Application.Ids;
+using nHash.Application.Ids.Models;
 using nHash.Console.CommandLines.Base;
 
-namespace nHash.Console.CommandLines.Uuids;
+namespace nHash.Console.CommandLines.Ids;
 
 public class UuidCommand(IOutputProvider outputProvider, IUuidService uuidService) : IUuidCommand
 {

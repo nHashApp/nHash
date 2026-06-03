@@ -1,4 +1,4 @@
-namespace nHash.Application.Hashes.Models;
+namespace nHash.Application.Cryptos.Hashes.Models;
 
 public enum HashType
 {

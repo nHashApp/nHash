@@ -1,6 +1,6 @@
-using nHash.Application.Encodes.Models;
+using nHash.Application.Converts.Encodes.Models;
 
-namespace nHash.Application.Encodes;
+namespace nHash.Application.Converts.Encodes;
 
 public interface IJwtTokenService
 {

@@ -1,4 +1,4 @@
-namespace nHash.Application.Passwords;
+namespace nHash.Application.Cryptos.Passwords;
 
 public interface IPasswordService
 {

@@ -1,6 +1,6 @@
-using nHash.Application.Uuids.Models;
+using nHash.Application.Ids.Models;
 
-namespace nHash.Application.Uuids;
+namespace nHash.Application.Ids;
 
 public interface IUuidService
 {

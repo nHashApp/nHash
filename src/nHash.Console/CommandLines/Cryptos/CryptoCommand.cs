@@ -1,6 +1,6 @@
 using nHash.Console.CommandLines.Base;
-using nHash.Console.CommandLines.Hashes;
-using nHash.Console.CommandLines.Passwords;
+using nHash.Console.CommandLines.Cryptos.Hashes;
+using nHash.Console.CommandLines.Cryptos.Passwords;
 
 namespace nHash.Console.CommandLines.Cryptos;
 

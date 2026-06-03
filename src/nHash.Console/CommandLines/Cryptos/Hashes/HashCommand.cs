@@ -1,7 +1,7 @@
 using nHash.Console.CommandLines.Base;
-using nHash.Console.CommandLines.Hashes.SubCommands;
+using nHash.Console.CommandLines.Cryptos.Hashes.SubCommands;
 
-namespace nHash.Console.CommandLines.Hashes;
+namespace nHash.Console.CommandLines.Cryptos.Hashes;
 
 public class HashCommand(ICalcCommand calcCommand, IChecksumCommand checksumCommand) : IHashCommand
 {

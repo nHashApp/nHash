@@ -1,8 +1,8 @@
-using nHash.Application.Hashes;
-using nHash.Application.Hashes.Models;
+using nHash.Application.Cryptos.Hashes;
+using nHash.Application.Cryptos.Hashes.Models;
 using nHash.Console.CommandLines.Base;
 
-namespace nHash.Console.CommandLines.Hashes.SubCommands;
+namespace nHash.Console.CommandLines.Cryptos.Hashes.SubCommands;
 
 public class CalcCommand(IFileProvider fileProvider, IHashCalcService hashService, IOutputProvider outputProvider) : ICalcCommand
 {

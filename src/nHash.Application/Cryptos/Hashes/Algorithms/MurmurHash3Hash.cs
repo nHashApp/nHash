@@ -1,4 +1,4 @@
-namespace nHash.Application.Hashes.Algorithms;
+namespace nHash.Application.Cryptos.Hashes.Algorithms;
 
 public class MurmurHash3Hash : IHash
 {

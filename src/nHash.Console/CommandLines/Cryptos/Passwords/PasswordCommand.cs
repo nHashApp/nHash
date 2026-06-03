@@ -1,7 +1,7 @@
-using nHash.Application.Passwords;
+using nHash.Application.Cryptos.Passwords;
 using nHash.Console.CommandLines.Base;
 
-namespace nHash.Console.CommandLines.Passwords;
+namespace nHash.Console.CommandLines.Cryptos.Passwords;
 
 public class PasswordCommand(IOutputProvider outputProvider, IPasswordService passwordService) : IPasswordCommand
 {

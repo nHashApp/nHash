@@ -1,8 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using nHash.Application.Converts;
-using nHash.Application.Encodes;
-using nHash.Application.Hashes;
-using nHash.Application.Passwords;
+using nHash.Application.Converts.Encodes;
 using nHash.Application.Shared.Json;
 using nHash.Application.Shared.Yaml;
 using nHash.Application.Texts.Humanizers;
@@ -10,16 +8,16 @@ using nHash.Application.Texts.Json;
 using nHash.Application.Texts.Xml;
 using nHash.Application.Texts.Yaml;
 using nHash.Application.Texts;
-using nHash.Application.Uuids;
 using nHash.Application.Ids;
 using nHash.Application.Cryptos;
 using nHash.Application.Cryptos.Hashes;
+using nHash.Application.Cryptos.Passwords;
 using nHash.Application.Network;
 using nHash.Application.Date;
 using nHash.Application.File;
 using nHash.Application.Dev;
-using nHash.Application.Sys;
 using nHash.Application.Maths;
+using nHash.Application.Sys;
 
 namespace nHash.Application;
 

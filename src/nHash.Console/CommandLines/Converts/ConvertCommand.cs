@@ -1,6 +1,6 @@
 using nHash.Console.Base;
 using nHash.Console.CommandLines.Base;
-using nHash.Console.CommandLines.Encodes;
+using nHash.Console.CommandLines.Converts.Encodes;
 
 namespace nHash.Console.CommandLines.Converts;
 

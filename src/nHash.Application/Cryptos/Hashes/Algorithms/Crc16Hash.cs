@@ -1,6 +1,4 @@
-using System;
-
-namespace nHash.Application.Hashes.Algorithms;
+namespace nHash.Application.Cryptos.Hashes.Algorithms;
 
 public class Crc16Hash : IHash
 {

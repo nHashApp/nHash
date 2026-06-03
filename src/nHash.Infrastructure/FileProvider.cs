@@ -1,12 +1,22 @@
+using System.Text;
+using nHash.Application.Abstraction;
+
 namespace nHash.Infrastructure;
 
 public class FileProvider : IFileProvider
 {
+    private readonly IOutputProvider _outputProvider;
+
+    public FileProvider(IOutputProvider outputProvider)
+    {
+        _outputProvider = outputProvider;
+    }
+
     public Task<string> ReadAsText(string fileName)
     {
         if (!File.Exists(fileName))
         {
-            Console.WriteLine($"File {fileName} does not exists!");
+            _outputProvider.AppendLine($"File {fileName} does not exist!");
             return Task.FromResult(string.Empty);
         }
 
@@ -16,7 +26,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            Console.WriteLine("Error reading from '{0}'", fileName);
+            _outputProvider.AppendLine($"Error reading from '{fileName}'");
         }
         return Task.FromResult(string.Empty);
     }    
@@ -25,7 +35,7 @@ public class FileProvider : IFileProvider
     {
         if (!File.Exists(fileName))
         {
-            Console.WriteLine($"File {fileName} does not exists!");
+            _outputProvider.AppendLine($"File {fileName} does not exist!");
             return Task.FromResult(Array.Empty<byte>());
         }
 
@@ -35,7 +45,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            Console.WriteLine("Error reading from '{0}'", fileName);
+            _outputProvider.AppendLine($"Error reading from '{fileName}'");
         }
         return Task.FromResult(Array.Empty<byte>());
     }
@@ -44,7 +54,7 @@ public class FileProvider : IFileProvider
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            Console.WriteLine(text);
+            _outputProvider.AppendLine(text);
             return Task.CompletedTask;
         }
 
@@ -54,7 +64,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            Console.WriteLine("Error writing output to '{0}'", fileName);
+            _outputProvider.AppendLine($"Error writing output to '{fileName}'");
         }
         return Task.CompletedTask;
     }
@@ -63,7 +73,7 @@ public class FileProvider : IFileProvider
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            Console.WriteLine(content);
+            _outputProvider.AppendLine(Encoding.UTF8.GetString(content));
             return Task.CompletedTask;
         }
 
@@ -73,7 +83,7 @@ public class FileProvider : IFileProvider
         }
         catch
         {
-            Console.WriteLine("Error writing output to '{0}'", fileName);
+            _outputProvider.AppendLine($"Error writing output to '{fileName}'");
         }
         return Task.CompletedTask;
     }

@@ -1,7 +1,7 @@
 using System.Text;
 using MlkPwgen;
 
-namespace nHash.Application.Passwords;
+namespace nHash.Application.Cryptos.Passwords;
 
 public class PasswordService : IPasswordService
 {
@@ -145,7 +145,7 @@ public class PasswordService : IPasswordService
 
         if (poolSize == 0) poolSize = 1;
 
-        double entropy = length * Math.Log2(poolSize);
+        double entropy = length * System.Math.Log2(poolSize);
         
         string strength = entropy switch
         {
@@ -162,7 +162,7 @@ public class PasswordService : IPasswordService
         sb.AppendLine($"Entropy: {entropy:F2} bits");
         sb.AppendLine($"Strength: {strength}");
 
-        double totalCombinations = Math.Pow(poolSize, length);
+        double totalCombinations = System.Math.Pow(poolSize, length);
         double hashesPerSec = 100_000_000_000.0;
         double secondsToCrack = totalCombinations / hashesPerSec;
 

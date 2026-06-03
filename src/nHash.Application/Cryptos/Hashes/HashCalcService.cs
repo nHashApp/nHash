@@ -1,7 +1,7 @@
-using nHash.Application.Hashes.Algorithms;
-using nHash.Application.Hashes.Models;
+using nHash.Application.Cryptos.Hashes.Algorithms;
+using nHash.Application.Cryptos.Hashes.Models;
 
-namespace nHash.Application.Hashes;
+namespace nHash.Application.Cryptos.Hashes;
 
 public class HashCalcService : IHashCalcService
 {

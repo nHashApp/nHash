@@ -1,7 +1,7 @@
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 
-namespace nHash.Application.Uuids;
+namespace nHash.Application.Ids;
 
 public class UuidGenerator : IUuidGenerator
 {
@@ -83,7 +83,7 @@ public class UuidGenerator : IUuidGenerator
         var bytes = new byte[16];
         if (customData.Length > 0)
         {
-            Array.Copy(customData.ToArray(), bytes, Math.Min(customData.Length, 16));
+            Array.Copy(customData.ToArray(), bytes, System.Math.Min(customData.Length, 16));
         }
         else
         {

@@ -1,6 +1,6 @@
 using Blake2Fast;
 
-namespace nHash.Application.Hashes.Algorithms;
+namespace nHash.Application.Cryptos.Hashes.Algorithms;
 
 internal class Blake2SHash : IHash
 {

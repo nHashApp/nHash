@@ -7,7 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <packageReference Include="NETStandard.Library" Version="2.0.3" />
+        <PackageReference Include="NETStandard.Library" Version="2.0.3" />
+        <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
         <PackageReference Include="Humanizer.Core" Version="3.0.10" />
         <PackageReference Include="MlkPwgen" Version="0.3.0" />
         <PackageReference Include="SauceControl.Blake2Fast" Version="2.0.0" />

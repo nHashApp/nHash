@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace nHash.Application.Hashes.Algorithms;
+namespace nHash.Application.Cryptos.Hashes.Algorithms;
 
 internal class Sha512Hash : IHash
 {

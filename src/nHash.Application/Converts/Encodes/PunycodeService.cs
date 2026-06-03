@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace nHash.Application.Encodes;
+namespace nHash.Application.Converts.Encodes;
 
 public class PunycodeService : IPunycodeService
 {

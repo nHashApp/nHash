@@ -1,4 +1,4 @@
-namespace nHash.Application.Uuids.Models;
+namespace nHash.Application.Ids.Models;
 
 public enum UuidVersion
 {

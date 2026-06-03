@@ -1,4 +1,4 @@
-namespace nHash.Application.Uuids;
+namespace nHash.Application.Ids;
 
 public interface IUuidGenerator
 {

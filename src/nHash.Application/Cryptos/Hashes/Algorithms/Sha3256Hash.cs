@@ -1,6 +1,6 @@
 using SHA3.Net;
 
-namespace nHash.Application.Hashes.Algorithms;
+namespace nHash.Application.Cryptos.Hashes.Algorithms;
 
 public class Sha3256Hash : IHash
 {

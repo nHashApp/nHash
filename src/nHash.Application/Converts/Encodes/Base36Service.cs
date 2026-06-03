@@ -1,7 +1,7 @@
 using System.Numerics;
 using System.Text;
 
-namespace nHash.Application.Encodes;
+namespace nHash.Application.Converts.Encodes;
 
 public class Base36Service : IBase36Service
 {

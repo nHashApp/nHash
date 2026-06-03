@@ -1,7 +1,7 @@
-using nHash.Application.Encodes;
+using nHash.Application.Converts.Encodes;
 using nHash.Console.CommandLines.Base;
 
-namespace nHash.Console.CommandLines.Encodes.SubCommands;
+namespace nHash.Console.CommandLines.Converts.Encodes.SubCommands;
 
 public class Base58Command(IBase58Service base58Service, IOutputProvider outputProvider) : IBase58Command
 {

@@ -1,4 +1,4 @@
-namespace nHash.Console.CommandLines.Hashes.SubCommands;
+namespace nHash.Console.CommandLines.Cryptos.Hashes.SubCommands;
 
 public interface ICalcCommand : IFeature
 {

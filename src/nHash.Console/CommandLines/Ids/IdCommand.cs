@@ -1,5 +1,4 @@
 using nHash.Console.CommandLines.Base;
-using nHash.Console.CommandLines.Uuids;
 
 namespace nHash.Console.CommandLines.Ids;
 

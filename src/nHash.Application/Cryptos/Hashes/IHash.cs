@@ -1,4 +1,4 @@
-namespace nHash.Application.Hashes;
+namespace nHash.Application.Cryptos.Hashes;
 
 public interface IHash
 {

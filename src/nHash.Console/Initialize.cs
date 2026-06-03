@@ -1,10 +1,6 @@
 using System.CommandLine;
 using nHash.Console.CommandLines.Base;
-using nHash.Console.CommandLines.Encodes;
-using nHash.Console.CommandLines.Hashes;
-using nHash.Console.CommandLines.Passwords;
 using nHash.Console.CommandLines.Texts;
-using nHash.Console.CommandLines.Uuids;
 using nHash.Console.CommandLines.Ids;
 using nHash.Console.CommandLines.Cryptos;
 using nHash.Console.CommandLines.Converts;
@@ -13,8 +9,8 @@ using nHash.Console.CommandLines.Network;
 using nHash.Console.CommandLines.Date;
 using nHash.Console.CommandLines.File;
 using nHash.Console.CommandLines.Dev;
-using nHash.Console.CommandLines.Sys;
 using nHash.Console.CommandLines.Maths;
+using nHash.Console.CommandLines.Sys;
 using nHash.Console.Helper;
 using nHash.Domain.Models;
 

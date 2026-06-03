@@ -1,7 +1,7 @@
-using nHash.Application.Encodes;
+using nHash.Application.Converts.Encodes;
 using nHash.Console.CommandLines.Base;
 
-namespace nHash.Console.CommandLines.Encodes.SubCommands;
+namespace nHash.Console.CommandLines.Converts.Encodes.SubCommands;
 
 public class Base64Command(IBase64Service base64Service, IOutputProvider outputProvider) : IBase64Command 
 {

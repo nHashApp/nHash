@@ -1,4 +1,4 @@
-namespace nHash.Application.Hashes.Algorithms;
+namespace nHash.Application.Cryptos.Hashes.Algorithms;
 
 internal class Fletcher16Hash : IHash
 {

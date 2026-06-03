@@ -1,6 +1,6 @@
 using System.IO.Hashing;
 
-namespace nHash.Application.Hashes.Algorithms;
+namespace nHash.Application.Cryptos.Hashes.Algorithms;
 
 public class XxHash128Hash : IHash
 {

@@ -1,93 +1,51 @@
 using System.Security.Cryptography;
-using Blake2Fast;
+using Isopoh.Cryptography.Argon2;
 
-namespace nHash.Application.Hashes.Algorithms;
+namespace nHash.Application.Cryptos.Hashes.Algorithms;
 
 public class Argon2idHash : IHash
 {
-    private static readonly byte[] DefaultSalt = "nHashSalt1234567"u8.ToArray();
+    private readonly int _memoryKb;
+    private readonly int _iterations;
+    private readonly int _parallelism;
+    private readonly int _hashLength;
+
+    public Argon2idHash(int memoryKb = 65536, int iterations = 3, int parallelism = 4, int hashLength = 32)
+    {
+        _memoryKb = memoryKb;
+        _iterations = iterations;
+        _parallelism = parallelism;
+        _hashLength = hashLength;
+    }
 
     public byte[] ComputeHash(byte[] buffer)
     {
-        uint lanes = 1;
-        uint memoryKb = 64; 
-        uint iterations = 2;
-        uint tagLength = 32;
-
-        uint blockCount = memoryKb;
-        var blocks = new ulong[blockCount][];
-        for (int i = 0; i < blockCount; i++)
+        var salt = new byte[16];
+        using (var rng = RandomNumberGenerator.Create())
         {
-            blocks[i] = new ulong[128];
-        }
-        
-        var hasher = Blake2b.CreateIncrementalHasher(64);
-        hasher.Update(BitConverter.GetBytes(lanes));
-        hasher.Update(BitConverter.GetBytes(tagLength));
-        hasher.Update(BitConverter.GetBytes(memoryKb));
-        hasher.Update(BitConverter.GetBytes(iterations));
-        hasher.Update(buffer);
-        hasher.Update(DefaultSalt);
-        var h0 = hasher.Finish();
-
-        for (uint i = 0; i < 2; i++)
-        {
-            var temp = new byte[1024];
-            var blockHasher = Blake2b.CreateIncrementalHasher(64);
-            blockHasher.Update(h0);
-            blockHasher.Update(BitConverter.GetBytes(i)); 
-            blockHasher.Update(BitConverter.GetBytes((uint)0)); 
-            var hash = blockHasher.Finish();
-            
-            for (int offset = 0; offset < 1024; offset += 64)
-            {
-                Array.Copy(hash, 0, temp, offset, 64);
-                hash = Blake2b.ComputeHash(64, hash);
-            }
-            
-            for (int j = 0; j < 128; j++)
-            {
-                blocks[i][j] = BitConverter.ToUInt64(temp, j * 8);
-            }
+            rng.GetBytes(salt);
         }
 
-        for (uint i = 2; i < blockCount; i++)
+        var config = new Argon2Config
         {
-            uint refBlock = (i - 1) % i; 
-            MixBlocks(blocks[i - 1], blocks[refBlock], blocks[i]);
-        }
+            Type = Argon2Type.HybridAddressing,
+            Version = Argon2Version.Nineteen,
+            Password = buffer,
+            Salt = salt,
+            Threads = _parallelism,
+            Lanes = _parallelism,
+            TimeCost = _iterations,
+            MemoryCost = _memoryKb,
+            HashLength = _hashLength
+        };
 
-        var finalBlock = blocks[blockCount - 1];
-        var finalBytes = new byte[1024];
-        for (int j = 0; j < 128; j++)
+        var argon2 = new Argon2(config);
+        using (var hash = argon2.Hash())
         {
-            Array.Copy(BitConverter.GetBytes(finalBlock[j]), 0, finalBytes, j * 8, 8);
+            var result = new byte[salt.Length + hash.Buffer.Length];
+            Array.Copy(salt, 0, result, 0, salt.Length);
+            Array.Copy(hash.Buffer, 0, result, salt.Length, hash.Buffer.Length);
+            return result;
         }
-
-        var result = Blake2b.ComputeHash((int)tagLength, finalBytes);
-        return result;
-    }
-
-    private static void MixBlocks(ulong[] prev, ulong[] refBlock, ulong[] next)
-    {
-        for (int j = 0; j < 128; j++)
-        {
-            next[j] = prev[j] ^ refBlock[j];
-        }
-        for (int i = 0; i < 8; i++)
-        {
-            MixRound(next, i * 16);
-        }
-    }
-
-    private static void MixRound(ulong[] state, int offset)
-    {
-        state[offset + 0] += state[offset + 4];
-        state[offset + 12] ^= state[offset + 0];
-        state[offset + 12] = (state[offset + 12] << 32) | (state[offset + 12] >> 32);
-        
-        state[offset + 8] += state[offset + 12];
-        state[offset + 4] ^= state[offset + 8];
-        state[offset + 4] = (state[offset + 4] << 24) | (state[offset + 4] >> 40);
     }
 }

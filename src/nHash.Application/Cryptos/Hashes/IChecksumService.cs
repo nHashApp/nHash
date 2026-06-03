@@ -1,6 +1,6 @@
-using nHash.Application.Hashes.Models;
+using nHash.Application.Cryptos.Hashes.Models;
 
-namespace nHash.Application.Hashes;
+namespace nHash.Application.Cryptos.Hashes;
 
 public interface IChecksumService
 {

@@ -1,10 +1,9 @@
-using nHash.Application.Encodes;
-using nHash.Application.Encodes.Models;
+using nHash.Application.Converts.Encodes;
+using nHash.Application.Converts.Encodes.Models;
 using nHash.Application.Dev;
 using nHash.Console.CommandLines.Base;
-using System.CommandLine;
 
-namespace nHash.Console.CommandLines.Encodes.SubCommands;
+namespace nHash.Console.CommandLines.Converts.Encodes.SubCommands;
 
 public class JwtTokenCommand(IJwtTokenService jwtTokenService, IDevService devService, IOutputProvider outputProvider) : IJwtTokenCommand
 {

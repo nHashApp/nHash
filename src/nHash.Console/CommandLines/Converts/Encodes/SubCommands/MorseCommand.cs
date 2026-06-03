@@ -1,7 +1,7 @@
-using nHash.Application.Encodes;
+using nHash.Application.Converts.Encodes;
 using nHash.Console.CommandLines.Base;
 
-namespace nHash.Console.CommandLines.Encodes.SubCommands;
+namespace nHash.Console.CommandLines.Converts.Encodes.SubCommands;
 
 public class MorseCommand(IMorseService morseService, IOutputProvider outputProvider) : IMorseCommand
 {

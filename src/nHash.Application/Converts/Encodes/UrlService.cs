@@ -1,6 +1,6 @@
 using System.Web;
 
-namespace nHash.Application.Encodes;
+namespace nHash.Application.Converts.Encodes;
 
 public class UrlService : IUrlService
 {

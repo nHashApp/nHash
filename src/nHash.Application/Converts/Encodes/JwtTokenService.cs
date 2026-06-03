@@ -2,10 +2,10 @@ using System.Text;
 using System.Text.Json.Nodes;
 using System.Web;
 using nHash.Application.Abstraction;
-using nHash.Application.Encodes.Models;
+using nHash.Application.Converts.Encodes.Models;
 using nHash.Application.Shared.Json;
 
-namespace nHash.Application.Encodes;
+namespace nHash.Application.Converts.Encodes;
 
 public class JwtTokenService : IJwtTokenService
 {
