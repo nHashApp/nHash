@@ -1,42 +1,39 @@
+using System;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using nHash.Application.Texts.Models;
 
 namespace nHash.Application.Texts;
 
 public class TextStatisticsService : ITextStatisticsService
 {
-    public string Calculate(string text)
+    public TextStatisticsResult Calculate(string text)
     {
+        var result = new TextStatisticsResult();
         if (string.IsNullOrEmpty(text))
         {
-            return "Text is empty";
+            result.Success = false;
+            result.ErrorMessage = "Text is empty";
+            return result;
         }
 
-        int charCountWithSpaces = text.Length;
-        int charCountWithoutSpaces = text.Count(c => !char.IsWhiteSpace(c));
+        result.CharactersCountWithSpaces = text.Length;
+        result.CharactersCountNoSpaces = text.Count(c => !char.IsWhiteSpace(c));
         
         var lines = text.Split(["\r\n", "\n"], StringSplitOptions.None);
-        int lineCount = lines.Length;
+        result.LinesCount = lines.Length;
 
-        int wordCount = Regex.Matches(text, @"\b\w+\b").Count;
+        result.WordsCount = Regex.Matches(text, @"\b\w+\b").Count;
 
         var paragraphs = text.Split(["\r\n\r\n", "\n\n"], StringSplitOptions.RemoveEmptyEntries);
-        int paragraphCount = paragraphs.Length;
+        result.ParagraphsCount = paragraphs.Length;
 
-        int byteCountUtf8 = Encoding.UTF8.GetByteCount(text);
-        int byteCountUtf16 = Encoding.Unicode.GetByteCount(text);
-        int byteCountAscii = Encoding.ASCII.GetByteCount(text);
+        result.BytesCountUtf8 = Encoding.UTF8.GetByteCount(text);
+        result.BytesCountUtf16 = Encoding.Unicode.GetByteCount(text);
+        result.BytesCountAscii = Encoding.ASCII.GetByteCount(text);
 
-        var sb = new StringBuilder();
-        sb.AppendLine($"Lines: {lineCount}");
-        sb.AppendLine($"Paragraphs: {paragraphCount}");
-        sb.AppendLine($"Words: {wordCount}");
-        sb.AppendLine($"Characters (with spaces): {charCountWithSpaces}");
-        sb.AppendLine($"Characters (no spaces): {charCountWithoutSpaces}");
-        sb.AppendLine($"Bytes (UTF-8): {byteCountUtf8}");
-        sb.AppendLine($"Bytes (UTF-16/Unicode): {byteCountUtf16}");
-        sb.AppendLine($"Bytes (ASCII): {byteCountAscii}");
-
-        return sb.ToString();
+        result.Success = true;
+        return result;
     }
 }

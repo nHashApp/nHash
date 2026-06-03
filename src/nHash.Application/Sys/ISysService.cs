@@ -1,8 +1,10 @@
+using nHash.Application.Sys.Models;
+
 namespace nHash.Application.Sys;
 
 public interface ISysService
 {
-    string GetSystemInfo();
-    string GetEnvironmentVariables(string? filter);
-    string GetRunningProcesses(string? filter, int topN);
+    SystemInfoResult GetSystemInfo();
+    EnvVariablesResult GetEnvironmentVariables(string? filter);
+    RunningProcessesResult GetRunningProcesses(string? filter, int topN);
 }

@@ -1,14 +1,16 @@
+using nHash.Application.Network.Models;
+
 namespace nHash.Application.Network;
 
 public interface INetworkService
 {
     Task<string> GetIpAddressAsync(bool external);
-    Task<string> ResolveDnsAsync(string hostname, string recordType);
-    Task<string> ScanPortAsync(string host, int port);
-    Task<string> QueryWhoisAsync(string domain);
-    Task<string> HttpPingAsync(string url, int timeoutSeconds);
-    Task<string> GetSslInfoAsync(string hostname);
-    string CalculateCidr(string cidrNotation);
-    Task<string> LookupMacVendorAsync(string macAddress);
+    Task<DnsResolveResult> ResolveDnsAsync(string hostname, string recordType);
+    Task<PortScanResult> ScanPortAsync(string host, int port);
+    Task<WhoisResult> QueryWhoisAsync(string domain);
+    Task<HttpPingResult> HttpPingAsync(string url, int timeoutSeconds);
+    Task<SslInfoResult> GetSslInfoAsync(string hostname);
+    CidrResult CalculateCidr(string cidrNotation);
+    Task<MacLookupResult> LookupMacVendorAsync(string macAddress);
 }
 

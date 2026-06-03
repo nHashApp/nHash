@@ -1,6 +1,10 @@
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using nHash.Application.Texts.Models;
 
 namespace nHash.Application.Texts;
 
@@ -37,9 +41,15 @@ public class TextToolsService : ITextToolsService
         return result;
     }
 
-    public string CountWordFrequency(string text, int topN)
+    public WordFrequencyResult CountWordFrequency(string text, int topN)
     {
-        if (string.IsNullOrWhiteSpace(text)) return "No text provided.";
+        var result = new WordFrequencyResult();
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            result.Success = false;
+            result.ErrorMessage = "No text provided.";
+            return result;
+        }
 
         // Split by whitespace and punctuation
         var words = Regex.Split(text, @"[\s\p{P}]+")
@@ -47,7 +57,12 @@ public class TextToolsService : ITextToolsService
             .Select(w => w.ToLowerInvariant())
             .ToArray();
 
-        if (words.Length == 0) return "No words found.";
+        if (words.Length == 0)
+        {
+            result.Success = false;
+            result.ErrorMessage = "No words found.";
+            return result;
+        }
 
         var freq = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         foreach (var word in words)
@@ -58,27 +73,29 @@ public class TextToolsService : ITextToolsService
                 freq[word] = 1;
         }
 
-        var top = freq
+        result.TotalWords = words.Length;
+        result.UniqueWords = freq.Count;
+
+        result.TopWords = freq
             .OrderByDescending(kv => kv.Value)
             .ThenBy(kv => kv.Key)
             .Take(topN > 0 ? topN : 10)
+            .Select(kv => new WordFrequencyDetail { Word = kv.Key, Count = kv.Value })
             .ToList();
 
-        var sb = new StringBuilder();
-        sb.AppendLine($"Total words: {words.Length}, Unique words: {freq.Count}");
-        sb.AppendLine();
-        sb.AppendLine($"Top {top.Count} words:");
-        foreach (var kv in top)
-        {
-            sb.AppendLine($"  {kv.Key}: {kv.Value}");
-        }
-
-        return sb.ToString().TrimEnd();
+        result.Success = true;
+        return result;
     }
 
-    public string CheckPalindrome(string text, bool ignoreCase, bool ignoreSpaces)
+    public PalindromeResult CheckPalindrome(string text, bool ignoreCase, bool ignoreSpaces)
     {
-        if (string.IsNullOrEmpty(text)) return "No text provided.";
+        var result = new PalindromeResult { Input = text };
+        if (string.IsNullOrEmpty(text))
+        {
+            result.Success = false;
+            result.ErrorMessage = "No text provided.";
+            return result;
+        }
 
         var processed = text;
         if (ignoreSpaces)
@@ -89,21 +106,27 @@ public class TextToolsService : ITextToolsService
         var reversed = new string(processed.Reverse().ToArray());
         var isPalindrome = processed == reversed;
 
-        var sb = new StringBuilder();
-        sb.AppendLine($"Input:    \"{text}\"");
-        if (ignoreSpaces || ignoreCase)
-            sb.AppendLine($"Processed:\"{processed}\"");
-        sb.AppendLine($"Result:   {(isPalindrome ? "✓ IS a palindrome" : "✗ NOT a palindrome")}");
-
-        return sb.ToString().TrimEnd();
+        result.Processed = processed;
+        result.IsPalindrome = isPalindrome;
+        result.Success = true;
+        return result;
     }
 
-    public string CountOccurrences(string text, string pattern, bool useRegex)
+    public OccurrencesResult CountOccurrences(string text, string pattern, bool useRegex)
     {
-        if (string.IsNullOrEmpty(text)) return "No text provided.";
-        if (string.IsNullOrEmpty(pattern)) return "No pattern provided.";
-
-        var sb = new StringBuilder();
+        var result = new OccurrencesResult { Pattern = pattern, IsRegex = useRegex };
+        if (string.IsNullOrEmpty(text))
+        {
+            result.Success = false;
+            result.ErrorMessage = "No text provided.";
+            return result;
+        }
+        if (string.IsNullOrEmpty(pattern))
+        {
+            result.Success = false;
+            result.ErrorMessage = "No pattern provided.";
+            return result;
+        }
 
         if (useRegex)
         {
@@ -111,43 +134,44 @@ public class TextToolsService : ITextToolsService
             {
                 var regex = new Regex(pattern, RegexOptions.None);
                 var matches = regex.Matches(text);
-                sb.AppendLine($"Pattern: \"{pattern}\" (regex)");
-                sb.AppendLine($"Count:   {matches.Count}");
-                if (matches.Count > 0)
+                result.Count = matches.Count;
+                foreach (Match m in matches)
                 {
-                    sb.AppendLine("Positions:");
-                    foreach (Match m in matches)
-                        sb.AppendLine($"  [{m.Index}..{m.Index + m.Length - 1}] => \"{m.Value}\"");
+                    result.Positions.Add(new OccurrencePosition
+                    {
+                        StartIndex = m.Index,
+                        EndIndex = m.Index + m.Length - 1,
+                        Value = m.Value
+                    });
                 }
+                result.Success = true;
             }
             catch (RegexParseException ex)
             {
-                return $"Invalid regex: {ex.Message}";
+                result.Success = false;
+                result.ErrorMessage = $"Invalid regex: {ex.Message}";
             }
         }
         else
         {
             var count = 0;
-            var positions = new List<int>();
             var idx = 0;
             while ((idx = text.IndexOf(pattern, idx, StringComparison.Ordinal)) >= 0)
             {
-                positions.Add(idx);
+                result.Positions.Add(new OccurrencePosition
+                {
+                    StartIndex = idx,
+                    EndIndex = idx + pattern.Length - 1,
+                    Value = pattern
+                });
                 count++;
                 idx += pattern.Length;
             }
-
-            sb.AppendLine($"Pattern: \"{pattern}\" (literal)");
-            sb.AppendLine($"Count:   {count}");
-            if (positions.Count > 0)
-            {
-                sb.AppendLine("Positions:");
-                foreach (var pos in positions)
-                    sb.AppendLine($"  [{pos}..{pos + pattern.Length - 1}]");
-            }
+            result.Count = count;
+            result.Success = true;
         }
 
-        return sb.ToString().TrimEnd();
+        return result;
     }
 
     public string EscapeString(string text, string targetLanguage, bool unescape)

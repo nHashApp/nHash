@@ -1,4 +1,6 @@
+using System.CommandLine;
 using nHash.Application.Maths;
+using nHash.Application.Maths.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Maths;
@@ -29,7 +31,21 @@ public class MathCommand(IMathService mathService, IOutputProvider outputProvide
         {
             var num = parseResult.GetValue(numberArg);
             var res = mathService.CheckPrime(num);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"Number: {res.Number}");
+            outputProvider.AppendLine($"Is Prime: {(res.IsPrime ? "Yes" : "No")}");
+            if (!res.IsPrime)
+            {
+                outputProvider.AppendLine($"Smallest Factor: {res.SmallestFactor}");
+            }
+            outputProvider.AppendLine($"Is Perfect Number: {(res.IsPerfectNumber ? "Yes" : "No")}");
+            outputProvider.AppendLine($"Is Fibonacci Number: {(res.IsFibonacciNumber ? "Yes" : "No")}");
+            outputProvider.AppendLine($"Digit Sum: {res.DigitSum}");
         });
         return cmd;
     }
@@ -45,7 +61,13 @@ public class MathCommand(IMathService mathService, IOutputProvider outputProvide
         {
             var count = parseResult.GetValue(countOption);
             var res = mathService.GenerateFibonacci(count);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine(string.Join(", ", res.Sequence));
         });
         return cmd;
     }
@@ -61,7 +83,22 @@ public class MathCommand(IMathService mathService, IOutputProvider outputProvide
         {
             var num = parseResult.GetValue(numberArg);
             var res = mathService.Factorize(num);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.Append($"{res.Number} = ");
+            var parts = new List<string>();
+            foreach (var pair in res.Factors)
+            {
+                if (pair.Value == 1)
+                    parts.Add($"{pair.Key}");
+                else
+                    parts.Add($"{pair.Key}^{pair.Value}");
+            }
+            outputProvider.AppendLine(string.Join(" * ", parts));
         });
         return cmd;
     }
@@ -71,14 +108,20 @@ public class MathCommand(IMathService mathService, IOutputProvider outputProvide
         var expressionArg = new Argument<string>("expression") { Description = "Math expression to evaluate" };
         var cmd = new BaseCommand("evaluate", "Evaluate a mathematical expression (+, -, *, /, %, ^, sin, cos, etc.)");
         cmd.Aliases.Add("eval");
-        cmd.Aliases.Add("calc");
         cmd.Aliases.Add("c");
         cmd.Arguments.Add(expressionArg);
         cmd.SetAction(parseResult =>
         {
             var expr = parseResult.GetValue(expressionArg) ?? string.Empty;
             var res = mathService.Calculate(expr);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"Expression: {res.Expression}");
+            outputProvider.AppendLine($"Result: {res.Result}");
         });
         return cmd;
     }

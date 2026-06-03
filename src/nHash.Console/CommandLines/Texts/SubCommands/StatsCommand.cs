@@ -1,5 +1,8 @@
+using System.CommandLine;
+using System.Threading.Tasks;
 using nHash.Application;
 using nHash.Application.Texts;
+using nHash.Application.Texts.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Texts.SubCommands;
@@ -38,7 +41,20 @@ public class StatsCommand(ITextStatisticsService statsService, IOutputProvider o
         {
             text = await fileProvider.ReadAsText(fileName);
         }
-        var resultText = statsService.Calculate(text);
-        outputProvider.AppendLine(resultText);
+        var res = statsService.Calculate(text);
+        if (!res.Success)
+        {
+            outputProvider.AppendLine(res.ErrorMessage);
+            return;
+        }
+
+        outputProvider.AppendLine($"Lines: {res.LinesCount}");
+        outputProvider.AppendLine($"Paragraphs: {res.ParagraphsCount}");
+        outputProvider.AppendLine($"Words: {res.WordsCount}");
+        outputProvider.AppendLine($"Characters (with spaces): {res.CharactersCountWithSpaces}");
+        outputProvider.AppendLine($"Characters (no spaces): {res.CharactersCountNoSpaces}");
+        outputProvider.AppendLine($"Bytes (UTF-8): {res.BytesCountUtf8}");
+        outputProvider.AppendLine($"Bytes (UTF-16/Unicode): {res.BytesCountUtf16}");
+        outputProvider.AppendLine($"Bytes (ASCII): {res.BytesCountAscii}");
     }
 }

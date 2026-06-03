@@ -1,6 +1,6 @@
 using System.CommandLine;
 using nHash.Application.Texts;
-using nHash.Application.Abstraction;
+using nHash.Application.Texts.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Texts.SubCommands;
@@ -24,8 +24,30 @@ public class CountCommand(ITextToolsService textToolsService, IOutputProvider ou
             var text = parseResult.GetValue(_textArgument) ?? string.Empty;
             var pattern = parseResult.GetValue(_patternOption) ?? string.Empty;
             var useRegex = parseResult.GetValue(_regexOption);
-            var result = textToolsService.CountOccurrences(text, pattern, useRegex);
-            outputProvider.AppendLine(result);
+            var res = textToolsService.CountOccurrences(text, pattern, useRegex);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"Pattern: \"{res.Pattern}\" ({(res.IsRegex ? "regex" : "literal")})");
+            outputProvider.AppendLine($"Count:   {res.Count}");
+            if (res.Positions.Count > 0)
+            {
+                outputProvider.AppendLine("Positions:");
+                foreach (var pos in res.Positions)
+                {
+                    if (res.IsRegex)
+                    {
+                        outputProvider.AppendLine($"  [{pos.StartIndex}..{pos.EndIndex}] => \"{pos.Value}\"");
+                    }
+                    else
+                    {
+                        outputProvider.AppendLine($"  [{pos.StartIndex}..{pos.EndIndex}]");
+                    }
+                }
+            }
         });
         command.Aliases.Add("cnt");
         return command;

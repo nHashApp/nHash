@@ -1,11 +1,12 @@
+using System;
 using System.Text;
 using MlkPwgen;
+using nHash.Application.Texts.Models;
 
 namespace nHash.Application.Cryptos.Passwords;
 
 public class PasswordService : IPasswordService
 {
-
     private const string CharsLCase = "abcdefgijkmnopqrstwxyz";
     private const string CharsUCase = "ABCDEFGHJKLMNPQRSTWXYZ";
     private const string CharsNumeric = "0123456789";
@@ -115,11 +116,14 @@ public class PasswordService : IPasswordService
         return string.Join(separator, words);
     }
 
-    public string EvaluatePasswordStrength(string password)
+    public PasswordStrengthResult EvaluatePasswordStrength(string password)
     {
+        var result = new PasswordStrengthResult();
         if (string.IsNullOrEmpty(password))
         {
-            return "Password is empty";
+            result.Success = false;
+            result.ErrorMessage = "Password is empty";
+            return result;
         }
 
         int length = password.Length;
@@ -156,11 +160,14 @@ public class PasswordService : IPasswordService
             _ => "Very Strong (Virtually uncrackable)"
         };
 
-        var sb = new StringBuilder();
-        sb.AppendLine($"Password Length: {length}");
-        sb.AppendLine($"Character Pool Size: {poolSize} (Lower={hasLower}, Upper={hasUpper}, Digit={hasDigit}, Special={hasSpecial})");
-        sb.AppendLine($"Entropy: {entropy:F2} bits");
-        sb.AppendLine($"Strength: {strength}");
+        result.Length = length;
+        result.PoolSize = poolSize;
+        result.HasLower = hasLower;
+        result.HasUpper = hasUpper;
+        result.HasDigit = hasDigit;
+        result.HasSpecial = hasSpecial;
+        result.Entropy = entropy;
+        result.StrengthLabel = strength;
 
         double totalCombinations = System.Math.Pow(poolSize, length);
         double hashesPerSec = 100_000_000_000.0;
@@ -175,8 +182,8 @@ public class PasswordService : IPasswordService
         else if (secondsToCrack < 31536000000) crackTime = $"{secondsToCrack / 31536000:F0} years";
         else crackTime = "Centuries / Forever";
 
-        sb.AppendLine($"Estimated Cracking Time (at 100B hashes/sec): {crackTime}");
-
-        return sb.ToString();
+        result.EstimatedCrackTime = crackTime;
+        result.Success = true;
+        return result;
     }
 }

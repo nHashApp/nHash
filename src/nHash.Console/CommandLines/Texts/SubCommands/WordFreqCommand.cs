@@ -1,6 +1,7 @@
 using System.CommandLine;
+using System.Linq;
 using nHash.Application.Texts;
-using nHash.Application.Abstraction;
+using nHash.Application.Texts.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Texts.SubCommands;
@@ -21,8 +22,20 @@ public class WordFreqCommand(ITextToolsService textToolsService, IOutputProvider
         {
             var text = parseResult.GetValue(_textArgument) ?? string.Empty;
             var top = parseResult.GetValue(_topOption);
-            var result = textToolsService.CountWordFrequency(text, top);
-            outputProvider.AppendLine(result);
+            var res = textToolsService.CountWordFrequency(text, top);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"Total words: {res.TotalWords}, Unique words: {res.UniqueWords}");
+            outputProvider.AppendLine();
+            outputProvider.AppendLine($"Top {res.TopWords.Count} words:");
+            foreach (var kv in res.TopWords)
+            {
+                outputProvider.AppendLine($"  {kv.Word}: {kv.Count}");
+            }
         });
         command.Aliases.Add("wf");
         return command;

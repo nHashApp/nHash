@@ -1,5 +1,8 @@
+using System.CommandLine;
+using System.Threading.Tasks;
 using nHash.Application;
 using nHash.Application.Texts;
+using nHash.Application.Texts.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Texts.SubCommands;
@@ -42,7 +45,16 @@ public class DiffCommand(ITextDiffService diffService, IOutputProvider outputPro
             t1 = await fileProvider.ReadAsText(t1);
             t2 = await fileProvider.ReadAsText(t2);
         }
-        var resultText = diffService.Compare(t1, t2);
-        outputProvider.AppendLine(resultText);
+        var res = diffService.Compare(t1, t2);
+        foreach (var line in res.DiffLines)
+        {
+            var prefix = line.Type switch
+            {
+                DiffLineType.Added => "+ ",
+                DiffLineType.Removed => "- ",
+                _ => "  "
+            };
+            outputProvider.AppendLine($"{prefix}{line.Text}");
+        }
     }
 }

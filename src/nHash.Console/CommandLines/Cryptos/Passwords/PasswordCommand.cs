@@ -1,3 +1,4 @@
+using System.CommandLine;
 using nHash.Application.Cryptos.Passwords;
 using nHash.Console.CommandLines.Base;
 
@@ -43,8 +44,17 @@ public class PasswordCommand(IOutputProvider outputProvider, IPasswordService pa
             var estimate = parseResult.GetValue(_estimate);
             if (!string.IsNullOrWhiteSpace(estimate))
             {
-                var estimateResult = passwordService.EvaluatePasswordStrength(estimate);
-                outputProvider.AppendLine(estimateResult);
+                var res = passwordService.EvaluatePasswordStrength(estimate);
+                if (!res.Success)
+                {
+                    outputProvider.AppendLine(res.ErrorMessage);
+                    return;
+                }
+                outputProvider.AppendLine($"Password Length: {res.Length}");
+                outputProvider.AppendLine($"Character Pool Size: {res.PoolSize} (Lower={res.HasLower}, Upper={res.HasUpper}, Digit={res.HasDigit}, Special={res.HasSpecial})");
+                outputProvider.AppendLine($"Entropy: {res.Entropy:F2} bits");
+                outputProvider.AppendLine($"Strength: {res.StrengthLabel}");
+                outputProvider.AppendLine($"Estimated Cracking Time (at 100B hashes/sec): {res.EstimatedCrackTime}");
                 return;
             }
 

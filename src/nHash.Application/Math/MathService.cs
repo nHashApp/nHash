@@ -1,13 +1,20 @@
-using System.Text;
+using System;
+using System.Collections.Generic;
+using nHash.Application.Maths.Models;
 
 namespace nHash.Application.Maths;
 
 public class MathService : IMathService
 {
-    public string CheckPrime(long number)
+    public PrimeCheckResult CheckPrime(long number)
     {
+        var result = new PrimeCheckResult();
         if (number < 2)
-            return $"{number} is not a prime number. (Primes must be >= 2)";
+        {
+            result.Success = false;
+            result.ErrorMessage = $"{number} is not a prime number. (Primes must be >= 2)";
+            return result;
+        }
 
         long smallestFactor = -1;
         long limit = (long)System.Math.Sqrt(number);
@@ -20,25 +27,14 @@ public class MathService : IMathService
             }
         }
 
-        var isPrime = smallestFactor == -1;
-        var sb = new StringBuilder();
-        sb.AppendLine($"Number: {number}");
-        sb.AppendLine($"Is Prime: {(isPrime ? "Yes" : "No")}");
-        if (!isPrime)
-        {
-            sb.AppendLine($"Smallest Factor: {smallestFactor}");
-        }
-
-        // Perfect check
-        sb.AppendLine($"Is Perfect Number: {(IsPerfect(number) ? "Yes" : "No")}");
-
-        // Fibonacci check
-        sb.AppendLine($"Is Fibonacci Number: {(IsFibonacci(number) ? "Yes" : "No")}");
-
-        // Digit sum
-        sb.AppendLine($"Digit Sum: {DigitSum(number)}");
-
-        return sb.ToString().TrimEnd();
+        result.Number = number;
+        result.IsPrime = smallestFactor == -1;
+        result.SmallestFactor = smallestFactor;
+        result.IsPerfectNumber = IsPerfect(number);
+        result.IsFibonacciNumber = IsFibonacci(number);
+        result.DigitSum = DigitSum(number);
+        result.Success = true;
+        return result;
     }
 
     private static bool IsPerfect(long n)
@@ -95,40 +91,59 @@ public class MathService : IMathService
         return sum;
     }
 
-    public string GenerateFibonacci(int count)
+    public FibonacciResult GenerateFibonacci(int count)
     {
-        if (count <= 0) return "Count must be > 0";
+        var result = new FibonacciResult();
+        if (count <= 0)
+        {
+            result.Success = false;
+            result.ErrorMessage = "Count must be > 0";
+            return result;
+        }
         if (count > 93) count = 93; // 93 is the maximum Fibonacci number that fits in ulong
 
-        var list = new List<ulong>();
+        result.Count = count;
         ulong a = 0;
         ulong b = 1;
         for (int i = 0; i < count; i++)
         {
-            list.Add(a);
+            result.Sequence.Add(a);
             ulong temp = a + b;
             a = b;
             b = temp;
         }
 
-        return string.Join(", ", list);
+        result.Success = true;
+        return result;
     }
 
-    public string Factorize(long number)
+    public FactorizeResult Factorize(long number)
     {
-        if (number <= 0) return "Number must be a positive integer >= 1";
-        if (number == 1) return "1 = 1";
+        var result = new FactorizeResult();
+        if (number <= 0)
+        {
+            result.Success = false;
+            result.ErrorMessage = "Number must be a positive integer >= 1";
+            return result;
+        }
+
+        result.Number = number;
+        if (number == 1)
+        {
+            result.Factors[1] = 1;
+            result.Success = true;
+            return result;
+        }
 
         long temp = number;
-        var factors = new Dictionary<long, int>();
-        
+
         // Count 2s
         while (temp % 2 == 0)
         {
-            if (factors.TryGetValue(2, out var count))
-                factors[2] = count + 1;
+            if (result.Factors.TryGetValue(2, out var count))
+                result.Factors[2] = count + 1;
             else
-                factors[2] = 1;
+                result.Factors[2] = 1;
             temp /= 2;
         }
 
@@ -138,10 +153,10 @@ public class MathService : IMathService
         {
             while (temp % i == 0)
             {
-                if (factors.TryGetValue(i, out var count))
-                    factors[i] = count + 1;
+                if (result.Factors.TryGetValue(i, out var count))
+                    result.Factors[i] = count + 1;
                 else
-                    factors[i] = 1;
+                    result.Factors[i] = 1;
                 temp /= i;
             }
             limit = (long)System.Math.Sqrt(temp);
@@ -149,36 +164,35 @@ public class MathService : IMathService
 
         if (temp > 1)
         {
-            factors[temp] = 1;
+            result.Factors[temp] = 1;
         }
 
-        var sb = new StringBuilder();
-        sb.Append($"{number} = ");
-        var parts = new List<string>();
-        foreach (var pair in factors)
-        {
-            if (pair.Value == 1)
-                parts.Add($"{pair.Key}");
-            else
-                parts.Add($"{pair.Key}^{pair.Value}");
-        }
-        sb.Append(string.Join(" * ", parts));
-        return sb.ToString();
+        result.Success = true;
+        return result;
     }
 
-    public string Calculate(string expression)
+    public MathCalculateResult Calculate(string expression)
     {
+        var result = new MathCalculateResult();
         if (string.IsNullOrWhiteSpace(expression))
-            return "Error: Expression cannot be empty";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Expression cannot be empty";
+            return result;
+        }
 
         try
         {
-            var result = Evaluate(expression);
-            return $"Expression: {expression}\nResult: {result}";
+            result.Expression = expression;
+            result.Result = Evaluate(expression);
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error calculating expression: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error calculating expression: {ex.Message}";
+            return result;
         }
     }
 

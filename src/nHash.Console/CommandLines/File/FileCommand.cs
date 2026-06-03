@@ -1,5 +1,9 @@
+using System;
 using System.CommandLine;
+using System.Linq;
+using System.Threading.Tasks;
 using nHash.Application.File;
+using nHash.Application.File.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.File;
@@ -33,7 +37,31 @@ public class FileCommand(IFileService fileService, IOutputProvider outputProvide
         {
             var dir = parseResult.GetValue(dirArg) ?? ".";
             var res = await fileService.FindDuplicatesAsync(dir);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            if (!res.Groups.Any())
+            {
+                outputProvider.AppendLine("No duplicate files found.");
+                return;
+            }
+
+            outputProvider.AppendLine($"Found {res.Groups.Count} groups of duplicate files:");
+            outputProvider.AppendLine();
+
+            int groupIndex = 1;
+            foreach (var group in res.Groups)
+            {
+                outputProvider.AppendLine($"Group {groupIndex++} (Hash: {group.Hash}):");
+                foreach (var file in group.Files)
+                {
+                    outputProvider.AppendLine($"  - {file.FilePath} ({file.SizeBytes:N0} bytes)");
+                }
+                outputProvider.AppendLine();
+            }
         });
 
         return cmd;
@@ -57,7 +85,21 @@ public class FileCommand(IFileService fileService, IOutputProvider outputProvide
             var ext = parseResult.GetValue(extOption) ?? string.Empty;
 
             var res = await fileService.SearchRegexAsync(dir, regexPattern, ext);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"Scanned {res.ScannedFilesCount} files. Found {res.MatchesCount} matches.");
+            foreach (var fileResult in res.Files)
+            {
+                outputProvider.AppendLine($"File: {fileResult.FilePath}");
+                foreach (var match in fileResult.Matches)
+                {
+                    outputProvider.AppendLine($"  Line {match.LineNumber}: {match.LineContent}");
+                }
+            }
         });
 
         return cmd;
@@ -74,7 +116,18 @@ public class FileCommand(IFileService fileService, IOutputProvider outputProvide
         {
             var file = parseResult.GetValue(fileArg) ?? string.Empty;
             var res = await fileService.DetectFileTypeAsync(file);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"File: {res.FilePath}");
+            outputProvider.AppendLine($"Detected Type: {res.DetectedType}");
+            outputProvider.AppendLine($"File Size: {res.FileSizeBytes:N0} bytes");
+            outputProvider.AppendLine($"Extension: {res.Extension}");
+            outputProvider.AppendLine($"Last Modified: {res.LastModified}");
+            outputProvider.AppendLine($"First {res.BytesRead} Bytes (Hex): {res.HexBytes}");
         });
 
         return cmd;
@@ -98,10 +151,42 @@ public class FileCommand(IFileService fileService, IOutputProvider outputProvide
             var sizes = parseResult.GetValue(sizesOption);
 
             var res = fileService.GetDirectoryTree(dir, depth, sizes);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            if (res.Root != null)
+            {
+                outputProvider.AppendLine($"[DIR] {res.DirectoryName} ({res.DirectoryPath})");
+                RenderTree(res.Root, "", sizes);
+            }
         });
 
         return cmd;
+    }
+
+    private void RenderTree(FileTreeNode node, string indent, bool showSizes)
+    {
+        for (int i = 0; i < node.Children.Count; i++)
+        {
+            var child = node.Children[i];
+            bool isLast = i == node.Children.Count - 1;
+            var marker = isLast ? "└── " : "├── ";
+
+            if (child.IsDirectory)
+            {
+                outputProvider.AppendLine($"{indent}{marker}[DIR] {child.Name}");
+                var nextIndent = indent + (isLast ? "    " : "│   ");
+                RenderTree(child, nextIndent, showSizes);
+            }
+            else
+            {
+                var sizeStr = showSizes ? $" ({child.SizeBytes:N0} bytes)" : "";
+                outputProvider.AppendLine($"{indent}{marker}{child.Name}{sizeStr}");
+            }
+        }
     }
 
     private BaseCommand GetRenameCommand()
@@ -128,7 +213,19 @@ public class FileCommand(IFileService fileService, IOutputProvider outputProvide
             var ext = parseResult.GetValue(extOption) ?? string.Empty;
 
             var res = await fileService.RenameBatchAsync(dir, pattern, replace, preview, ext);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine(res.IsPreview ? "=== BATCH RENAME PREVIEW ===" : "=== BATCH RENAME EXECUTION ===");
+            foreach (var detail in res.RenamedFiles)
+            {
+                outputProvider.AppendLine($"  {detail.OriginalName} -> {detail.NewName}");
+            }
+            outputProvider.AppendLine();
+            outputProvider.AppendLine($"Total files affected: {res.RenamedFiles.Count}");
         });
 
         return cmd;
@@ -149,10 +246,25 @@ public class FileCommand(IFileService fileService, IOutputProvider outputProvide
             var expected = parseResult.GetValue(hashOption);
 
             var res = await fileService.CheckIntegrityAsync(file, expected);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"File: {res.FilePath}");
+            outputProvider.AppendLine($"Computed SHA-256: {res.ComputedHash}");
+            if (res.ExpectedHash != null)
+            {
+                outputProvider.AppendLine($"Expected SHA-256: {res.ExpectedHash}");
+                outputProvider.AppendLine($"Verification Result: {(res.IsMatch == true ? "PASS" : "FAIL")}");
+            }
+            else if (res.WrittenSidecarPath != null)
+            {
+                outputProvider.AppendLine($"Written sidecar file: {res.WrittenSidecarPath}");
+            }
         });
 
         return cmd;
     }
 }
-

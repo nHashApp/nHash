@@ -1,6 +1,8 @@
+using nHash.Application.Texts.Models;
+
 namespace nHash.Application.Texts;
 
 public interface ITextStatisticsService
 {
-    string Calculate(string text);
+    TextStatisticsResult Calculate(string text);
 }

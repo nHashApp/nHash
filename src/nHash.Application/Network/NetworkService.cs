@@ -1,6 +1,14 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using nHash.Application.Network.Models;
 
 namespace nHash.Application.Network;
 
@@ -50,8 +58,9 @@ public class NetworkService : INetworkService
         }
     }
 
-    public async Task<string> ResolveDnsAsync(string hostname, string recordType)
+    public async Task<DnsResolveResult> ResolveDnsAsync(string hostname, string recordType)
     {
+        var result = new DnsResolveResult();
         var type = recordType.ToUpperInvariant().Trim();
         try
         {
@@ -61,35 +70,42 @@ public class NetworkService : INetworkService
                 var family = type == "A" ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
                 var filtered = addresses
                     .Where(ip => ip.AddressFamily == family)
-                    .Select(ip => ip.ToString());
+                    .Select(ip => ip.ToString())
+                    .ToList();
 
-                return filtered.Any() 
-                    ? string.Join(Environment.NewLine, filtered) 
-                    : $"No {type} records found for {hostname}.";
+                result.IsSingleTypeQuery = true;
+                result.RecordType = type;
+                result.SingleTypeValues = filtered;
+                result.Success = true;
+                return result;
             }
 
             var entry = await Dns.GetHostEntryAsync(hostname);
-            var sb = new StringBuilder();
-            sb.AppendLine($"Host Name: {entry.HostName}");
-            if (entry.Aliases.Any())
-            {
-                sb.AppendLine($"Aliases: {string.Join(", ", entry.Aliases)}");
-            }
-            sb.AppendLine("IP Addresses:");
+            result.HostName = entry.HostName;
+            result.Aliases = entry.Aliases.ToList();
             foreach (var ip in entry.AddressList)
             {
-                sb.AppendLine($"- {ip} ({ip.AddressFamily})");
+                result.Records.Add(new DnsRecordDetail
+                {
+                    Value = ip.ToString(),
+                    Family = ip.AddressFamily.ToString()
+                });
             }
-            return sb.ToString();
+            result.IsSingleTypeQuery = false;
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"DNS Query Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"DNS Query Error: {ex.Message}";
+            return result;
         }
     }
 
-    public async Task<string> ScanPortAsync(string host, int port)
+    public async Task<PortScanResult> ScanPortAsync(string host, int port)
     {
+        var result = new PortScanResult { Host = host, Port = port };
         try
         {
             using var tcpClient = new TcpClient();
@@ -100,22 +116,33 @@ public class NetworkService : INetworkService
             if (completedTask == connectTask)
             {
                 await connectTask;
-                return $"Port {port} on {host} is OPEN.";
+                result.IsOpen = true;
+                result.StatusDetails = "OPEN";
             }
             else
             {
-                return $"Port {port} on {host} is CLOSED (Timeout).";
+                result.IsOpen = false;
+                result.StatusDetails = "CLOSED (Timeout)";
             }
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Port {port} on {host} is CLOSED ({ex.Message}).";
+            result.IsOpen = false;
+            result.StatusDetails = $"CLOSED ({ex.Message})";
+            return result;
         }
     }
 
-    public async Task<string> QueryWhoisAsync(string domain)
+    public async Task<WhoisResult> QueryWhoisAsync(string domain)
     {
-        if (string.IsNullOrWhiteSpace(domain)) return "Error: Domain cannot be empty.";
+        var result = new WhoisResult();
+        if (string.IsNullOrWhiteSpace(domain))
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Domain cannot be empty.";
+            return result;
+        }
         domain = domain.Trim().ToLowerInvariant();
 
         var tld = domain.Split('.').Last();
@@ -151,17 +178,28 @@ public class NetworkService : INetworkService
                 sb.AppendLine(line);
             }
 
-            return sb.ToString();
+            result.Domain = domain;
+            result.RawWhoisText = sb.ToString();
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"WHOIS Query Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"WHOIS Query Error: {ex.Message}";
+            return result;
         }
     }
 
-    public async Task<string> HttpPingAsync(string url, int timeoutSeconds)
+    public async Task<HttpPingResult> HttpPingAsync(string url, int timeoutSeconds)
     {
-        if (string.IsNullOrWhiteSpace(url)) return "Error: URL cannot be empty.";
+        var result = new HttpPingResult();
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: URL cannot be empty.";
+            return result;
+        }
         if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && 
             !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         {
@@ -177,30 +215,39 @@ public class NetworkService : INetworkService
             var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cts.Token);
             sw.Stop();
 
-            var sb = new StringBuilder();
-            sb.AppendLine($"HTTP Ping to: {url}");
-            sb.AppendLine($"Status: {response.StatusCode} ({(int)response.StatusCode})");
-            sb.AppendLine($"Latency: {sw.ElapsedMilliseconds} ms");
-            sb.AppendLine($"Content Length: {response.Content.Headers.ContentLength?.ToString() ?? "Unknown"} bytes");
+            result.Url = url;
+            result.StatusCode = response.StatusCode.ToString();
+            result.StatusCodeNumber = (int)response.StatusCode;
+            result.ElapsedMs = sw.ElapsedMilliseconds;
+            result.ContentLengthBytes = response.Content.Headers.ContentLength;
             if (response.Headers.Server.Any())
             {
-                sb.AppendLine($"Server: {string.Join(", ", response.Headers.Server)}");
+                result.Server = string.Join(", ", response.Headers.Server);
             }
             if (response.Content.Headers.ContentType != null)
             {
-                sb.AppendLine($"Content Type: {response.Content.Headers.ContentType}");
+                result.ContentType = response.Content.Headers.ContentType.ToString();
             }
-            return sb.ToString().TrimEnd();
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"HTTP Ping Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"HTTP Ping Error: {ex.Message}";
+            return result;
         }
     }
 
-    public async Task<string> GetSslInfoAsync(string hostname)
+    public async Task<SslInfoResult> GetSslInfoAsync(string hostname)
     {
-        if (string.IsNullOrWhiteSpace(hostname)) return "Error: Hostname cannot be empty.";
+        var result = new SslInfoResult();
+        if (string.IsNullOrWhiteSpace(hostname))
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Hostname cannot be empty.";
+            return result;
+        }
         hostname = hostname.Trim().Replace("https://", "").Replace("http://", "").Split('/').First();
 
         try
@@ -219,48 +266,60 @@ public class NetworkService : INetworkService
             var cert = sslStream.RemoteCertificate as System.Security.Cryptography.X509Certificates.X509Certificate2;
             if (cert == null)
             {
-                return "Error: Could not retrieve SSL certificate.";
+                result.Success = false;
+                result.ErrorMessage = "Error: Could not retrieve SSL certificate.";
+                return result;
             }
 
-            var sb = new StringBuilder();
-            sb.AppendLine($"SSL/TLS Certificate Info for: {hostname}");
-            sb.AppendLine($"Subject: {cert.Subject}");
-            sb.AppendLine($"Issuer: {cert.Issuer}");
-            sb.AppendLine($"Valid From: {cert.NotBefore}");
-            sb.AppendLine($"Valid To: {cert.NotAfter}");
-            sb.AppendLine($"Thumbprint: {cert.Thumbprint}");
-            
-            var serial = cert.SerialNumber;
-            sb.AppendLine($"Serial Number: {serial}");
-
-            var isExpired = DateTime.Now < cert.NotBefore || DateTime.Now > cert.NotAfter;
-            sb.AppendLine($"Is Expired: {(isExpired ? "Yes" : "No")}");
-            
-            var daysLeft = (cert.NotAfter - DateTime.Now).Days;
-            sb.AppendLine($"Days until expiry: {daysLeft}");
-
-            return sb.ToString().TrimEnd();
+            result.Hostname = hostname;
+            result.Subject = cert.Subject;
+            result.Issuer = cert.Issuer;
+            result.ValidFrom = cert.NotBefore;
+            result.ValidTo = cert.NotAfter;
+            result.Thumbprint = cert.Thumbprint;
+            result.SerialNumber = cert.SerialNumber;
+            result.IsExpired = DateTime.Now < cert.NotBefore || DateTime.Now > cert.NotAfter;
+            result.DaysUntilExpiry = (cert.NotAfter - DateTime.Now).Days;
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"SSL Certificate Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"SSL Certificate Error: {ex.Message}";
+            return result;
         }
     }
 
-    public string CalculateCidr(string cidrNotation)
+    public CidrResult CalculateCidr(string cidrNotation)
     {
-        if (string.IsNullOrWhiteSpace(cidrNotation)) return "Error: CIDR notation cannot be empty.";
+        var result = new CidrResult();
+        if (string.IsNullOrWhiteSpace(cidrNotation))
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: CIDR notation cannot be empty.";
+            return result;
+        }
         var parts = cidrNotation.Trim().Split('/');
-        if (parts.Length != 2) return "Error: Invalid CIDR format. Expected format: 192.168.1.0/24";
+        if (parts.Length != 2)
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Invalid CIDR format. Expected format: 192.168.1.0/24";
+            return result;
+        }
 
         if (!IPAddress.TryParse(parts[0], out var ip) || ip.AddressFamily != AddressFamily.InterNetwork)
         {
-            return "Error: Invalid IPv4 address.";
+            result.Success = false;
+            result.ErrorMessage = "Error: Invalid IPv4 address.";
+            return result;
         }
 
         if (!int.TryParse(parts[1], out var maskLen) || maskLen < 0 || maskLen > 32)
         {
-            return "Error: Invalid mask length. Must be between 0 and 32.";
+            result.Success = false;
+            result.ErrorMessage = "Error: Invalid mask length. Must be between 0 and 32.";
+            return result;
         }
 
         byte[] bytes = ip.GetAddressBytes();
@@ -293,33 +352,45 @@ public class NetworkService : INetworkService
             return $"{(val >> 24) & 0xFF}.{(val >> 16) & 0xFF}.{(val >> 8) & 0xFF}.{val & 0xFF}";
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine($"CIDR Input: {cidrNotation}");
-        sb.AppendLine($"Network Address: {UintToIp(network)}");
-        sb.AppendLine($"Broadcast Address: {UintToIp(broadcast)}");
-        sb.AppendLine($"Subnet Mask: {UintToIp(mask)}");
-        sb.AppendLine($"First Usable IP: {(usableHosts > 0 ? UintToIp(firstUsable) : "N/A")}");
-        sb.AppendLine($"Last Usable IP: {(usableHosts > 0 ? UintToIp(lastUsable) : "N/A")}");
-        sb.AppendLine($"Total Hosts: {totalHosts:N0}");
-        sb.AppendLine($"Usable Hosts: {usableHosts:N0}");
-
-        return sb.ToString().TrimEnd();
+        result.CidrNotation = cidrNotation;
+        result.NetworkAddress = UintToIp(network);
+        result.BroadcastAddress = UintToIp(broadcast);
+        result.SubnetMask = UintToIp(mask);
+        result.FirstUsableIp = usableHosts > 0 ? UintToIp(firstUsable) : "N/A";
+        result.LastUsableIp = usableHosts > 0 ? UintToIp(lastUsable) : "N/A";
+        result.TotalHosts = totalHosts;
+        result.UsableHosts = usableHosts;
+        result.Success = true;
+        return result;
     }
 
-    public async Task<string> LookupMacVendorAsync(string macAddress)
+    public async Task<MacLookupResult> LookupMacVendorAsync(string macAddress)
     {
-        if (string.IsNullOrWhiteSpace(macAddress)) return "Error: MAC address cannot be empty.";
+        var result = new MacLookupResult();
+        if (string.IsNullOrWhiteSpace(macAddress))
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: MAC address cannot be empty.";
+            return result;
+        }
         
         var cleanMac = new string(macAddress.Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant();
-        if (cleanMac.Length < 6) return "Error: Invalid MAC address. Must be at least 6 hex characters.";
+        if (cleanMac.Length < 6)
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Invalid MAC address. Must be at least 6 hex characters.";
+            return result;
+        }
 
         try
         {
             var url = $"https://api.maclookup.app/v2/macs/{cleanMac}";
             var response = await HttpClientInstance.GetStringAsync(url);
             
-            using var doc = System.Text.Json.JsonDocument.Parse(response);
+            using var doc = JsonDocument.Parse(response);
             var root = doc.RootElement;
+            result.MacAddress = macAddress;
+            
             if (root.TryGetProperty("found", out var foundProp) && foundProp.GetBoolean())
             {
                 if (root.TryGetProperty("company", out var companyProp))
@@ -327,16 +398,21 @@ public class NetworkService : INetworkService
                     var vendor = companyProp.GetString();
                     if (!string.IsNullOrWhiteSpace(vendor))
                     {
-                        return $"MAC: {macAddress}\nVendor: {vendor}";
+                        result.VendorName = vendor;
+                        result.Success = true;
+                        return result;
                     }
                 }
             }
-            return $"MAC: {macAddress}\nVendor: Unknown";
+            result.VendorName = "Unknown";
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"MAC Vendor Lookup Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"MAC Vendor Lookup Error: {ex.Message}";
+            return result;
         }
     }
 }
-

@@ -1,6 +1,6 @@
 using System.CommandLine;
 using nHash.Application.Texts;
-using nHash.Application.Abstraction;
+using nHash.Application.Texts.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Texts.SubCommands;
@@ -24,8 +24,19 @@ public class PalindromeCommand(ITextToolsService textToolsService, IOutputProvid
             var text = parseResult.GetValue(_textArgument) ?? string.Empty;
             var ignoreCase = parseResult.GetValue(_ignoreCaseOption);
             var ignoreSpaces = parseResult.GetValue(_ignoreSpacesOption);
-            var result = textToolsService.CheckPalindrome(text, ignoreCase, ignoreSpaces);
-            outputProvider.AppendLine(result);
+            var res = textToolsService.CheckPalindrome(text, ignoreCase, ignoreSpaces);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"Input:    \"{res.Input}\"");
+            if (ignoreSpaces || ignoreCase)
+            {
+                outputProvider.AppendLine($"Processed:\"{res.Processed}\"");
+            }
+            outputProvider.AppendLine($"Result:   {(res.IsPalindrome ? "✓ IS a palindrome" : "✗ NOT a palindrome")}");
         });
         command.Aliases.Add("pal");
         return command;

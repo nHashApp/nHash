@@ -1,5 +1,6 @@
 using System.CommandLine;
 using nHash.Application.Sys;
+using nHash.Application.Sys.Models;
 using nHash.Application.Abstraction;
 using nHash.Console.CommandLines.Base;
 
@@ -26,7 +27,15 @@ public class SysCommand(ISysService sysService, IOutputProvider outputProvider) 
         cmd.SetAction(parseResult =>
         {
             var res = sysService.GetSystemInfo();
-            outputProvider.AppendLine(res);
+            outputProvider.AppendLine($"OS Description: {res.OsDescription}");
+            outputProvider.AppendLine($"Architecture: {res.Architecture}");
+            outputProvider.AppendLine($"Framework Description: {res.FrameworkDescription}");
+            outputProvider.AppendLine($"Machine Name: {res.MachineName}");
+            outputProvider.AppendLine($"User Name: {res.UserName}");
+            outputProvider.AppendLine($"Processor Count: {res.ProcessorCount}");
+            outputProvider.AppendLine($"System Directory: {res.SystemDirectory}");
+            outputProvider.AppendLine($"Current Directory: {res.CurrentDirectory}");
+            outputProvider.AppendLine($"Process Working Set: {res.WorkingSetMB} MB");
         });
         return cmd;
     }
@@ -41,7 +50,10 @@ public class SysCommand(ISysService sysService, IOutputProvider outputProvider) 
         {
             var filter = parseResult.GetValue(filterOption);
             var res = sysService.GetEnvironmentVariables(filter);
-            outputProvider.AppendLine(res);
+            foreach (var variable in res.Variables)
+            {
+                outputProvider.AppendLine($"{variable.Key}={variable.Value}");
+            }
         });
         return cmd;
     }
@@ -60,7 +72,13 @@ public class SysCommand(ISysService sysService, IOutputProvider outputProvider) 
             var filter = parseResult.GetValue(filterOption);
             var top = parseResult.GetValue(topOption);
             var res = sysService.GetRunningProcesses(filter, top);
-            outputProvider.AppendLine(res);
+            
+            outputProvider.AppendLine($"{"Process Name",-30} | {"Process ID",-10} | {"Memory (MB)",-12}");
+            outputProvider.AppendLine(new string('-', 58));
+            foreach (var item in res.Processes)
+            {
+                outputProvider.AppendLine($"{item.Name,-30} | {item.Id,-10} | {item.WorkingSetMB,-12:N0}");
+            }
         });
         return cmd;
     }

@@ -1,59 +1,54 @@
 using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
+using nHash.Application.Sys.Models;
 
 namespace nHash.Application.Sys;
 
 public class SysService : ISysService
 {
-    public string GetSystemInfo()
+    public SystemInfoResult GetSystemInfo()
     {
-        var sb = new StringBuilder();
-        sb.AppendLine($"OS Description: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}");
-        sb.AppendLine($"Architecture: {System.Runtime.InteropServices.RuntimeInformation.OSArchitecture}");
-        sb.AppendLine($"Framework Description: {System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}");
-        sb.AppendLine($"Machine Name: {Environment.MachineName}");
-        sb.AppendLine($"User Name: {Environment.UserName}");
-        sb.AppendLine($"Processor Count: {Environment.ProcessorCount}");
-        sb.AppendLine($"System Directory: {Environment.SystemDirectory}");
-        sb.AppendLine($"Current Directory: {Environment.CurrentDirectory}");
-        
-        long workingSetMB = Environment.WorkingSet / (1024 * 1024);
-        sb.AppendLine($"Process Working Set: {workingSetMB} MB");
-
-        return sb.ToString().TrimEnd();
+        return new SystemInfoResult
+        {
+            OsDescription = System.Runtime.InteropServices.RuntimeInformation.OSDescription,
+            Architecture = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture.ToString(),
+            FrameworkDescription = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription,
+            MachineName = Environment.MachineName,
+            UserName = Environment.UserName,
+            ProcessorCount = Environment.ProcessorCount,
+            SystemDirectory = Environment.SystemDirectory,
+            CurrentDirectory = Environment.CurrentDirectory,
+            WorkingSetMB = Environment.WorkingSet / (1024 * 1024)
+        };
     }
 
-    public string GetEnvironmentVariables(string? filter)
+    public EnvVariablesResult GetEnvironmentVariables(string? filter)
     {
+        var result = new EnvVariablesResult();
         var envs = Environment.GetEnvironmentVariables();
-        var sortedList = new List<KeyValuePair<string, string>>();
+        var list = new List<EnvVariableDetail>();
+
         foreach (System.Collections.DictionaryEntry entry in envs)
         {
             var key = entry.Key?.ToString() ?? string.Empty;
             var val = entry.Value?.ToString() ?? string.Empty;
             if (string.IsNullOrEmpty(filter) || key.Contains(filter, StringComparison.OrdinalIgnoreCase))
             {
-                sortedList.Add(new KeyValuePair<string, string>(key, val));
+                list.Add(new EnvVariableDetail { Key = key, Value = val });
             }
         }
 
-        sortedList.Sort((x, y) => string.Compare(x.Key, y.Key, StringComparison.OrdinalIgnoreCase));
-
-        var sb = new StringBuilder();
-        foreach (var pair in sortedList)
-        {
-            sb.AppendLine($"{pair.Key}={pair.Value}");
-        }
-
-        return sb.ToString().TrimEnd();
+        list.Sort((x, y) => string.Compare(x.Key, y.Key, StringComparison.OrdinalIgnoreCase));
+        result.Variables = list;
+        return result;
     }
 
-    public string GetRunningProcesses(string? filter, int topN)
+    public RunningProcessesResult GetRunningProcesses(string? filter, int topN)
     {
+        var result = new RunningProcessesResult();
         var processes = System.Diagnostics.Process.GetProcesses();
-        var list = new List<(string Name, int Id, long WorkingSetMB)>();
+        var list = new List<ProcessDetail>();
 
         foreach (var p in processes)
         {
@@ -62,7 +57,12 @@ public class SysService : ISysService
                 var name = p.ProcessName;
                 if (string.IsNullOrEmpty(filter) || name.Contains(filter, StringComparison.OrdinalIgnoreCase))
                 {
-                    list.Add((name, p.Id, p.WorkingSet64 / (1024 * 1024)));
+                    list.Add(new ProcessDetail
+                    {
+                        Name = name,
+                        Id = p.Id,
+                        WorkingSetMB = p.WorkingSet64 / (1024 * 1024)
+                    });
                 }
             }
             catch
@@ -72,17 +72,7 @@ public class SysService : ISysService
         }
 
         list.Sort((x, y) => y.WorkingSetMB.CompareTo(x.WorkingSetMB));
-
-        var itemsToShow = list.Take(topN).ToList();
-
-        var sb = new StringBuilder();
-        sb.AppendLine($"{"Process Name",-30} | {"Process ID",-10} | {"Memory (MB)",-12}");
-        sb.AppendLine(new string('-', 58));
-        foreach (var item in itemsToShow)
-        {
-            sb.AppendLine($"{item.Name,-30} | {item.Id,-10} | {item.WorkingSetMB,-12:N0}");
-        }
-
-        return sb.ToString().TrimEnd();
+        result.Processes = list.Take(topN).ToList();
+        return result;
     }
 }

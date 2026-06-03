@@ -1,15 +1,26 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using nHash.Application.File.Models;
 
 namespace nHash.Application.File;
 
 public class FileService : IFileService
 {
-    public async Task<string> FindDuplicatesAsync(string directoryPath)
+    public async Task<FindDuplicatesResult> FindDuplicatesAsync(string directoryPath)
     {
+        var result = new FindDuplicatesResult();
         if (!Directory.Exists(directoryPath))
-            return $"Error: Directory '{directoryPath}' does not exist.";
+        {
+            result.Success = false;
+            result.ErrorMessage = $"Error: Directory '{directoryPath}' does not exist.";
+            return result;
+        }
 
         try
         {
@@ -24,9 +35,12 @@ public class FileService : IFileService
                 .ToList();
 
             if (!potentialDuplicates.Any())
-                return "No duplicate files found.";
+            {
+                result.Success = true;
+                return result;
+            }
 
-            var hashGroups = new Dictionary<string, List<string>>();
+            var hashGroups = new Dictionary<string, List<DuplicateFileDetail>>();
 
             foreach (var fileInfo in potentialDuplicates)
             {
@@ -35,9 +49,13 @@ public class FileService : IFileService
                     var hash = await ComputeFileHashAsync(fileInfo.FullName);
                     if (!hashGroups.ContainsKey(hash))
                     {
-                        hashGroups[hash] = new List<string>();
+                        hashGroups[hash] = new List<DuplicateFileDetail>();
                     }
-                    hashGroups[hash].Add(fileInfo.FullName);
+                    hashGroups[hash].Add(new DuplicateFileDetail
+                    {
+                        FilePath = fileInfo.FullName,
+                        SizeBytes = fileInfo.Length
+                    });
                 }
                 catch
                 {
@@ -45,44 +63,42 @@ public class FileService : IFileService
                 }
             }
 
-            var duplicateGroups = hashGroups
+            result.Groups = hashGroups
                 .Where(g => g.Value.Count > 1)
+                .Select(g => new DuplicateGroup
+                {
+                    Hash = g.Key,
+                    Files = g.Value
+                })
                 .ToList();
 
-            if (!duplicateGroups.Any())
-                return "No duplicate files found.";
-
-            var sb = new StringBuilder();
-            sb.AppendLine($"Found {duplicateGroups.Count} groups of duplicate files:");
-            sb.AppendLine();
-
-            int groupIndex = 1;
-            foreach (var group in duplicateGroups)
-            {
-                sb.AppendLine($"Group {groupIndex++} (Hash: {group.Key}):");
-                foreach (var filePath in group.Value)
-                {
-                    var info = new FileInfo(filePath);
-                    sb.AppendLine($"  - {filePath} ({info.Length:N0} bytes)");
-                }
-                sb.AppendLine();
-            }
-
-            return sb.ToString();
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error scanning directory: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error scanning directory: {ex.Message}";
+            return result;
         }
     }
 
-    public async Task<string> SearchRegexAsync(string directoryPath, string regexPattern, string fileExtensions)
+    public async Task<RegexSearchResult> SearchRegexAsync(string directoryPath, string regexPattern, string fileExtensions)
     {
+        var result = new RegexSearchResult();
         if (!Directory.Exists(directoryPath))
-            return $"Error: Directory '{directoryPath}' does not exist.";
+        {
+            result.Success = false;
+            result.ErrorMessage = $"Error: Directory '{directoryPath}' does not exist.";
+            return result;
+        }
 
         if (string.IsNullOrEmpty(regexPattern))
-            return "Error: Regex pattern cannot be empty.";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Regex pattern cannot be empty.";
+            return result;
+        }
 
         try
         {
@@ -95,7 +111,6 @@ public class FileService : IFileService
                     .ToHashSet();
 
             var files = Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories);
-            var sb = new StringBuilder();
             int matchCount = 0;
             int fileCount = 0;
 
@@ -116,21 +131,29 @@ public class FileService : IFileService
 
                     int lineNumber = 0;
                     string? line;
-                    bool fileHeaderPrinted = false;
+                    var fileMatches = new List<RegexSearchResultLine>();
 
                     while ((line = await reader.ReadLineAsync()) != null)
                     {
                         lineNumber++;
                         if (regex.IsMatch(line))
                         {
-                            if (!fileHeaderPrinted)
+                            fileMatches.Add(new RegexSearchResultLine
                             {
-                                sb.AppendLine($"File: {file}");
-                                fileHeaderPrinted = true;
-                            }
-                            sb.AppendLine($"  Line {lineNumber}: {line.Trim()}");
+                                LineNumber = lineNumber,
+                                LineContent = line.Trim()
+                            });
                             matchCount++;
                         }
+                    }
+
+                    if (fileMatches.Any())
+                    {
+                        result.Files.Add(new RegexSearchResultFile
+                        {
+                            FilePath = file,
+                            Matches = fileMatches
+                        });
                     }
                 }
                 catch
@@ -139,12 +162,16 @@ public class FileService : IFileService
                 }
             }
 
-            var header = $"Scanned {fileCount} files. Found {matchCount} matches.\n";
-            return header + sb.ToString();
+            result.ScannedFilesCount = fileCount;
+            result.MatchesCount = matchCount;
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Regex Search Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Regex Search Error: {ex.Message}";
+            return result;
         }
     }
 
@@ -156,14 +183,23 @@ public class FileService : IFileService
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
     }
 
-    public async Task<string> DetectFileTypeAsync(string filePath)
+    public async Task<FileTypeResult> DetectFileTypeAsync(string filePath)
     {
+        var result = new FileTypeResult { FilePath = filePath };
         if (!System.IO.File.Exists(filePath))
-            return $"Error: File '{filePath}' does not exist.";
+        {
+            result.Success = false;
+            result.ErrorMessage = $"Error: File '{filePath}' does not exist.";
+            return result;
+        }
 
         try
         {
             var info = new FileInfo(filePath);
+            result.FileSizeBytes = info.Length;
+            result.Extension = info.Extension;
+            result.LastModified = info.LastWriteTime;
+
             byte[] buffer = new byte[16];
             int bytesRead;
 
@@ -171,6 +207,9 @@ public class FileService : IFileService
             {
                 bytesRead = await stream.ReadAsync(buffer, 0, 16);
             }
+
+            result.BytesRead = bytesRead;
+            result.HexBytes = string.Join(" ", buffer.Take(bytesRead).Select(b => b.ToString("X2")));
 
             string signature = "";
             if (bytesRead >= 3 && buffer[0] == 0xFF && buffer[1] == 0xD8 && buffer[2] == 0xFF)
@@ -219,40 +258,54 @@ public class FileService : IFileService
                 }
             }
 
-            var sb = new StringBuilder();
-            sb.AppendLine($"File: {filePath}");
-            sb.AppendLine($"Detected Type: {signature}");
-            sb.AppendLine($"File Size: {info.Length:N0} bytes");
-            sb.AppendLine($"Extension: {info.Extension}");
-            sb.AppendLine($"Last Modified: {info.LastWriteTime}");
-            
-            var hexBytes = string.Join(" ", buffer.Take(bytesRead).Select(b => b.ToString("X2")));
-            sb.AppendLine($"First {bytesRead} Bytes (Hex): {hexBytes}");
-
-            return sb.ToString().TrimEnd();
+            result.DetectedType = signature;
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Error detecting file type: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Error detecting file type: {ex.Message}";
+            return result;
         }
     }
 
-    public string GetDirectoryTree(string directoryPath, int maxDepth, bool showSizes)
+    public DirectoryTreeResult GetDirectoryTree(string directoryPath, int maxDepth, bool showSizes)
     {
+        var result = new DirectoryTreeResult();
         if (!Directory.Exists(directoryPath))
-            return $"Error: Directory '{directoryPath}' does not exist.";
+        {
+            result.Success = false;
+            result.ErrorMessage = $"Error: Directory '{directoryPath}' does not exist.";
+            return result;
+        }
 
-        var sb = new StringBuilder();
-        var rootDir = new DirectoryInfo(directoryPath);
-        sb.AppendLine($"[DIR] {rootDir.Name} ({rootDir.FullName})");
-
-        RenderTree(rootDir, "", sb, 1, maxDepth, showSizes);
-        return sb.ToString().TrimEnd();
+        try
+        {
+            var rootDir = new DirectoryInfo(directoryPath);
+            result.DirectoryName = rootDir.Name;
+            result.DirectoryPath = rootDir.FullName;
+            result.Root = BuildTree(rootDir, 1, maxDepth);
+            result.Success = true;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            result.Success = false;
+            result.ErrorMessage = $"Error reading directory tree: {ex.Message}";
+            return result;
+        }
     }
 
-    private static void RenderTree(DirectoryInfo dirInfo, string indent, StringBuilder sb, int depth, int maxDepth, bool showSizes)
+    private static FileTreeNode BuildTree(DirectoryInfo dirInfo, int depth, int maxDepth)
     {
-        if (depth > maxDepth) return;
+        var node = new FileTreeNode
+        {
+            Name = dirInfo.Name,
+            IsDirectory = true
+        };
+
+        if (depth > maxDepth) return node;
 
         FileSystemInfo[] children;
         try
@@ -261,7 +314,7 @@ public class FileService : IFileService
         }
         catch
         {
-            return;
+            return node;
         }
 
         var sortedChildren = children
@@ -269,33 +322,42 @@ public class FileService : IFileService
             .ThenBy(c => c.Name)
             .ToList();
 
-        for (int i = 0; i < sortedChildren.Count; i++)
+        foreach (var item in sortedChildren)
         {
-            var item = sortedChildren[i];
-            bool isLast = i == sortedChildren.Count - 1;
-            var marker = isLast ? "└── " : "├── ";
-
             if (item is DirectoryInfo subDir)
             {
-                sb.AppendLine($"{indent}{marker}[DIR] {subDir.Name}");
-                var nextIndent = indent + (isLast ? "    " : "│   ");
-                RenderTree(subDir, nextIndent, sb, depth + 1, maxDepth, showSizes);
+                node.Children.Add(BuildTree(subDir, depth + 1, maxDepth));
             }
             else if (item is FileInfo file)
             {
-                var sizeStr = showSizes ? $" ({file.Length:N0} bytes)" : "";
-                sb.AppendLine($"{indent}{marker}{file.Name}{sizeStr}");
+                node.Children.Add(new FileTreeNode
+                {
+                    Name = file.Name,
+                    IsDirectory = false,
+                    SizeBytes = file.Length
+                });
             }
         }
+
+        return node;
     }
 
-    public async Task<string> RenameBatchAsync(string directoryPath, string pattern, string replacement, bool preview, string fileExtensions)
+    public async Task<RenameBatchResult> RenameBatchAsync(string directoryPath, string pattern, string replacement, bool preview, string fileExtensions)
     {
+        var result = new RenameBatchResult { IsPreview = preview };
         if (!Directory.Exists(directoryPath))
-            return $"Error: Directory '{directoryPath}' does not exist.";
+        {
+            result.Success = false;
+            result.ErrorMessage = $"Error: Directory '{directoryPath}' does not exist.";
+            return result;
+        }
 
         if (string.IsNullOrEmpty(pattern))
-            return "Error: Rename pattern cannot be empty.";
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Rename pattern cannot be empty.";
+            return result;
+        }
 
         try
         {
@@ -310,10 +372,7 @@ public class FileService : IFileService
                 .ToList();
 
             var regex = new Regex(pattern);
-            var sb = new StringBuilder();
-            sb.AppendLine(preview ? "=== BATCH RENAME PREVIEW ===" : "=== BATCH RENAME EXECUTION ===");
 
-            int renameCount = 0;
             foreach (var file in allFiles)
             {
                 if (allowedExtensions != null)
@@ -329,8 +388,11 @@ public class FileService : IFileService
                     var newName = regex.Replace(oldName, replacement);
                     var newPath = Path.Combine(file.DirectoryName!, newName);
 
-                    sb.AppendLine($"  {oldName} -> {newName}");
-                    renameCount++;
+                    result.RenamedFiles.Add(new RenamePreviewDetail
+                    {
+                        OriginalName = oldName,
+                        NewName = newName
+                    });
 
                     if (!preview)
                     {
@@ -339,47 +401,53 @@ public class FileService : IFileService
                 }
             }
 
-            sb.AppendLine();
-            sb.AppendLine($"Total files affected: {renameCount}");
-            return sb.ToString();
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Batch Rename Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Batch Rename Error: {ex.Message}";
+            return result;
         }
     }
 
-    public async Task<string> CheckIntegrityAsync(string filePath, string? expectedHash)
+    public async Task<IntegrityResult> CheckIntegrityAsync(string filePath, string? expectedHash)
     {
+        var result = new IntegrityResult { FilePath = filePath, ExpectedHash = expectedHash };
         if (!System.IO.File.Exists(filePath))
-            return $"Error: File '{filePath}' does not exist.";
+        {
+            result.Success = false;
+            result.ErrorMessage = $"Error: File '{filePath}' does not exist.";
+            return result;
+        }
 
         try
         {
             var computedHash = await ComputeFileHashAsync(filePath);
-            var sb = new StringBuilder();
-            sb.AppendLine($"File: {filePath}");
-            sb.AppendLine($"Computed SHA-256: {computedHash}");
+            result.ComputedHash = computedHash;
 
             if (!string.IsNullOrWhiteSpace(expectedHash))
             {
                 var cleanExpected = expectedHash.Trim().ToLowerInvariant();
-                var pass = computedHash == cleanExpected;
-                sb.AppendLine($"Expected SHA-256: {cleanExpected}");
-                sb.AppendLine($"Verification Result: {(pass ? "PASS" : "FAIL")}");
+                result.ExpectedHash = cleanExpected;
+                result.IsMatch = computedHash == cleanExpected;
             }
             else
             {
                 var sidecarPath = filePath + ".sha256";
                 await System.IO.File.WriteAllTextAsync(sidecarPath, computedHash);
-                sb.AppendLine($"Written sidecar file: {sidecarPath}");
+                result.WrittenSidecarPath = sidecarPath;
             }
 
-            return sb.ToString().TrimEnd();
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Integrity Check Error: {ex.Message}";
+            result.Success = false;
+            result.ErrorMessage = $"Integrity Check Error: {ex.Message}";
+            return result;
         }
     }
 }
@@ -392,4 +460,3 @@ public static class ExtensionHelper
         return text[0] == prefix ? text : prefix + text;
     }
 }
-

@@ -1,5 +1,7 @@
 using System.CommandLine;
+using System.Linq;
 using nHash.Application.Network;
+using nHash.Application.Network.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Network;
@@ -55,7 +57,36 @@ public class NetworkCommand(INetworkService networkService, IOutputProvider outp
             var host = parseResult.GetValue(hostArg) ?? string.Empty;
             var type = parseResult.GetValue(typeOption) ?? "A";
             var res = await networkService.ResolveDnsAsync(host, type);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            if (res.IsSingleTypeQuery)
+            {
+                if (res.SingleTypeValues.Any())
+                {
+                    outputProvider.AppendLine(string.Join(Environment.NewLine, res.SingleTypeValues));
+                }
+                else
+                {
+                    outputProvider.AppendLine($"No {res.RecordType} records found for {host}.");
+                }
+            }
+            else
+            {
+                outputProvider.AppendLine($"Host Name: {res.HostName}");
+                if (res.Aliases.Any())
+                {
+                    outputProvider.AppendLine($"Aliases: {string.Join(", ", res.Aliases)}");
+                }
+                outputProvider.AppendLine("IP Addresses:");
+                foreach (var ip in res.Records)
+                {
+                    outputProvider.AppendLine($"- {ip.Value} ({ip.Family})");
+                }
+            }
         });
 
         return cmd;
@@ -75,7 +106,7 @@ public class NetworkCommand(INetworkService networkService, IOutputProvider outp
             var host = parseResult.GetValue(hostArg) ?? "localhost";
             var port = parseResult.GetValue(portOption);
             var res = await networkService.ScanPortAsync(host, port);
-            outputProvider.AppendLine(res);
+            outputProvider.AppendLine($"Port {res.Port} on {res.Host} is {res.StatusDetails}.");
         });
 
         return cmd;
@@ -92,7 +123,13 @@ public class NetworkCommand(INetworkService networkService, IOutputProvider outp
         {
             var domain = parseResult.GetValue(domainArg) ?? string.Empty;
             var res = await networkService.QueryWhoisAsync(domain);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine(res.RawWhoisText);
         });
 
         return cmd;
@@ -112,7 +149,24 @@ public class NetworkCommand(INetworkService networkService, IOutputProvider outp
             var url = parseResult.GetValue(urlArg) ?? string.Empty;
             var timeout = parseResult.GetValue(timeoutOption);
             var res = await networkService.HttpPingAsync(url, timeout);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"HTTP Ping to: {res.Url}");
+            outputProvider.AppendLine($"Status: {res.StatusCode} ({res.StatusCodeNumber})");
+            outputProvider.AppendLine($"Latency: {res.ElapsedMs} ms");
+            outputProvider.AppendLine($"Content Length: {(res.ContentLengthBytes.HasValue ? res.ContentLengthBytes.Value.ToString() : "Unknown")} bytes");
+            if (!string.IsNullOrEmpty(res.Server))
+            {
+                outputProvider.AppendLine($"Server: {res.Server}");
+            }
+            if (!string.IsNullOrEmpty(res.ContentType))
+            {
+                outputProvider.AppendLine($"Content Type: {res.ContentType}");
+            }
         });
 
         return cmd;
@@ -129,7 +183,21 @@ public class NetworkCommand(INetworkService networkService, IOutputProvider outp
         {
             var host = parseResult.GetValue(hostArg) ?? string.Empty;
             var res = await networkService.GetSslInfoAsync(host);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"SSL/TLS Certificate Info for: {res.Hostname}");
+            outputProvider.AppendLine($"Subject: {res.Subject}");
+            outputProvider.AppendLine($"Issuer: {res.Issuer}");
+            outputProvider.AppendLine($"Valid From: {res.ValidFrom}");
+            outputProvider.AppendLine($"Valid To: {res.ValidTo}");
+            outputProvider.AppendLine($"Thumbprint: {res.Thumbprint}");
+            outputProvider.AppendLine($"Serial Number: {res.SerialNumber}");
+            outputProvider.AppendLine($"Is Expired: {(res.IsExpired ? "Yes" : "No")}");
+            outputProvider.AppendLine($"Days until expiry: {res.DaysUntilExpiry}");
         });
 
         return cmd;
@@ -146,7 +214,20 @@ public class NetworkCommand(INetworkService networkService, IOutputProvider outp
         {
             var cidr = parseResult.GetValue(cidrArg) ?? string.Empty;
             var res = networkService.CalculateCidr(cidr);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"CIDR Input: {res.CidrNotation}");
+            outputProvider.AppendLine($"Network Address: {res.NetworkAddress}");
+            outputProvider.AppendLine($"Broadcast Address: {res.BroadcastAddress}");
+            outputProvider.AppendLine($"Subnet Mask: {res.SubnetMask}");
+            outputProvider.AppendLine($"First Usable IP: {res.FirstUsableIp}");
+            outputProvider.AppendLine($"Last Usable IP: {res.LastUsableIp}");
+            outputProvider.AppendLine($"Total Hosts: {res.TotalHosts:N0}");
+            outputProvider.AppendLine($"Usable Hosts: {res.UsableHosts:N0}");
         });
 
         return cmd;
@@ -163,10 +244,16 @@ public class NetworkCommand(INetworkService networkService, IOutputProvider outp
         {
             var addr = parseResult.GetValue(addressArg) ?? string.Empty;
             var res = await networkService.LookupMacVendorAsync(addr);
-            outputProvider.AppendLine(res);
+            if (!res.Success)
+            {
+                outputProvider.AppendLine(res.ErrorMessage);
+                return;
+            }
+
+            outputProvider.AppendLine($"MAC: {res.MacAddress}");
+            outputProvider.AppendLine($"Vendor: {res.VendorName}");
         });
 
         return cmd;
     }
 }
-
