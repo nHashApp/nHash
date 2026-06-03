@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using nHash.Application.Maths.Models;
 
 namespace nHash.Application.Maths;

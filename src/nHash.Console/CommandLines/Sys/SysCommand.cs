@@ -1,7 +1,4 @@
-using System.CommandLine;
 using nHash.Application.Sys;
-using nHash.Application.Sys.Models;
-using nHash.Application.Abstraction;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Sys;

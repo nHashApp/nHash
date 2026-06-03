@@ -1,5 +1,3 @@
-using System;
-
 namespace nHash.Application.Date.Models;
 
 public class EpochToDateTimeResult

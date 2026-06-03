@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using nHash.Application.Ids.Models;
 

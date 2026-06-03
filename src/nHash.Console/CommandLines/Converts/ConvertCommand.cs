@@ -1,4 +1,3 @@
-using nHash.Console.Base;
 using nHash.Console.CommandLines.Base;
 using nHash.Console.CommandLines.Converts.Encodes;
 

@@ -1,7 +1,3 @@
-using System;
-using System.CommandLine;
-using System.Linq;
-using System.Threading.Tasks;
 using nHash.Application.File;
 using nHash.Application.File.Models;
 using nHash.Console.CommandLines.Base;

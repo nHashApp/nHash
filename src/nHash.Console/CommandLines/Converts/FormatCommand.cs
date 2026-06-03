@@ -1,4 +1,3 @@
-using System.CommandLine;
 using nHash.Application.Converts;
 using nHash.Console.CommandLines.Base;
 

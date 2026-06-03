@@ -1,6 +1,4 @@
-using System.CommandLine;
 using nHash.Application.Date;
-using nHash.Application.Date.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Date;

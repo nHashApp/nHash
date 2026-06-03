@@ -1,4 +1,3 @@
-using System.Text;
 using nHash.Application.Abstraction;
 
 namespace nHash.Application.Texts.Counter;

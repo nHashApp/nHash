@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace nHash.Application.File.Models;
 
 public class DuplicateFileDetail

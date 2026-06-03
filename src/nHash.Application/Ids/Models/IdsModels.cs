@@ -1,5 +1,3 @@
-using System;
-
 namespace nHash.Application.Ids.Models;
 
 public class TotpGenerateResult

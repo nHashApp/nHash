@@ -1,6 +1,4 @@
-using System.CommandLine;
 using nHash.Application.Dev;
-using nHash.Application.Dev.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Dev;

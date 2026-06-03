@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace nHash.Application.Texts.Models;
 
 public class WordFrequencyDetail

@@ -1,5 +1,3 @@
-using System;
-
 namespace nHash.Application.Ids;
 
 public class SnowflakeService : ISnowflakeService

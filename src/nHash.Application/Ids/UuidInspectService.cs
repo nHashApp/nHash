@@ -1,4 +1,3 @@
-using System;
 using nHash.Application.Ids.Models;
 
 namespace nHash.Application.Ids;

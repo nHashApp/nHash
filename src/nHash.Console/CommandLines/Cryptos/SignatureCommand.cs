@@ -1,4 +1,3 @@
-using System.CommandLine;
 using nHash.Application.Cryptos;
 using nHash.Console.CommandLines.Base;
 

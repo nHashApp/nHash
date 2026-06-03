@@ -1,7 +1,6 @@
 using Spectre.Console;
 using nHash.Console.CommandLines.Base;
 using nHash.Console.Services;
-using System.CommandLine;
 
 namespace nHash.Console.CommandLines.Arts;
 

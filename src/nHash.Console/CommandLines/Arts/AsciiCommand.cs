@@ -1,4 +1,3 @@
-using System.CommandLine;
 using nHash.Console.CommandLines.Base;
 using Spectre.Console;
 using nHash.Console.Services;

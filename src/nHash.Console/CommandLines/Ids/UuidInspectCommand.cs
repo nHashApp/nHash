@@ -1,7 +1,4 @@
-using System.CommandLine;
-using System.Linq;
 using nHash.Application.Ids;
-using nHash.Application.Ids.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Ids;

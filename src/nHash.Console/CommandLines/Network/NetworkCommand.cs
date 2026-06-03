@@ -1,7 +1,4 @@
-using System.CommandLine;
-using System.Linq;
 using nHash.Application.Network;
-using nHash.Application.Network.Models;
 using nHash.Console.CommandLines.Base;
 
 namespace nHash.Console.CommandLines.Network;

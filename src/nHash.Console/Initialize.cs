@@ -1,5 +1,3 @@
-using System.CommandLine;
-using nHash.Console.CommandLines.Base;
 using nHash.Console.CommandLines.Texts;
 using nHash.Console.CommandLines.Ids;
 using nHash.Console.CommandLines.Cryptos;
