@@ -15,6 +15,13 @@ public class TotpService : ITotpService
             return result;
         }
 
+        if (digits < 4 || digits > 10)
+        {
+            result.Success = false;
+            result.ErrorMessage = "Error: Digits must be between 4 and 10.";
+            return result;
+        }
+
         try
         {
             var key = Base32Decode(secretBase32);

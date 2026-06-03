@@ -20,5 +20,8 @@
     <ItemGroup>
         <ProjectReference Include="..\nHash.Domain\nHash.Domain.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Cryptos\Passwords\wordlist.json" />
+    </ItemGroup>
 
 </Project>

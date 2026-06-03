@@ -1,3 +1,4 @@
+using System;
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 
@@ -7,31 +8,38 @@ public class UuidGenerator : IUuidGenerator
 {
     public Guid GenerateUuiDv1()
     {
-        var currentTime = DateTime.UtcNow;
-        var timeBytes = BitConverter.GetBytes(currentTime.Ticks);
-        Array.Reverse(timeBytes);
+        var gregorianEpoch = new DateTime(1582, 10, 15, 0, 0, 0, DateTimeKind.Utc);
+        var ticks = DateTime.UtcNow.Ticks - gregorianEpoch.Ticks;
+
+        var timeLow = (int)(ticks & 0xFFFFFFFF);
+        var timeMid = (short)((ticks >> 32) & 0xFFFF);
+        var timeHi = (short)(((ticks >> 48) & 0x0FFF) | (1 << 12)); // Version 1
+
+        var clockSeq = (short)(RandomNumberGenerator.GetInt32(0, 16384) & 0x3FFF);
+        var clockSeqHi = (byte)(((clockSeq >> 8) & 0x3F) | 0x80);
+        var clockSeqLow = (byte)(clockSeq & 0xFF);
+
         var nodeId = GetMachineIdentifier();
-        var versionAndVariant = new byte[] { 0b00000001, 0b10000000 };
-        var uuidBytes = new byte[16];
-        Array.Copy(timeBytes, 2, uuidBytes, 0, 6);
-        Array.Copy(nodeId, 0, uuidBytes, 6, 6);
-        Array.Copy(versionAndVariant, 0, uuidBytes, 12, 2);
-        return new Guid(uuidBytes);
+
+        return new Guid(timeLow, timeMid, timeHi, clockSeqHi, clockSeqLow, nodeId[0], nodeId[1], nodeId[2], nodeId[3], nodeId[4], nodeId[5]);
     }
 
     public Guid GenerateUuiDv2()
     {
-        var currentTime = DateTime.UtcNow;
-        var timeBytes = BitConverter.GetBytes(currentTime.Ticks);
-        Array.Reverse(timeBytes);
-        var nodeId = GetMachineIdentifier();
-        var versionAndVariant = new byte[] { 0b00000010, 0b10000000 };
+        var gregorianEpoch = new DateTime(1582, 10, 15, 0, 0, 0, DateTimeKind.Utc);
+        var ticks = DateTime.UtcNow.Ticks - gregorianEpoch.Ticks;
 
-        var uuidBytes = new byte[16];
-        Array.Copy(timeBytes, 2, uuidBytes, 0, 4);
-        Array.Copy(nodeId, 0, uuidBytes, 4, 2);
-        Array.Copy(versionAndVariant, 0, uuidBytes, 6, 2);
-        return new Guid(uuidBytes);
+        var timeLow = (int)(ticks & 0xFFFFFFFF);
+        var timeMid = (short)((ticks >> 32) & 0xFFFF);
+        var timeHi = (short)(((ticks >> 48) & 0x0FFF) | (2 << 12)); // Version 2
+
+        var clockSeq = (short)(RandomNumberGenerator.GetInt32(0, 16384) & 0x3FFF);
+        var clockSeqHi = (byte)(((clockSeq >> 8) & 0x3F) | 0x80);
+        var clockSeqLow = (byte)(clockSeq & 0xFF);
+
+        var nodeId = GetMachineIdentifier();
+
+        return new Guid(timeLow, timeMid, timeHi, clockSeqHi, clockSeqLow, nodeId[0], nodeId[1], nodeId[2], nodeId[3], nodeId[4], nodeId[5]);
     }
 
     public Guid GenerateUuiDv3(Guid namespaceId, string name)
@@ -41,35 +49,68 @@ public class UuidGenerator : IUuidGenerator
         var hashBytes = MD5.HashData(ConcatenateArrays(namespaceBytes, nameBytes));
         var uuidBytes = new byte[16];
         Array.Copy(hashBytes, 0, uuidBytes, 0, 16);
-        uuidBytes[6] &= 0x0f;
-        uuidBytes[6] |= 3 << 4;
-        uuidBytes[8] &= 0x3f;
-        uuidBytes[8] |= 0x80;
+
+        if (BitConverter.IsLittleEndian)
+        {
+            uuidBytes[7] &= 0x0F;
+            uuidBytes[7] |= 3 << 4; // Version 3
+        }
+        else
+        {
+            uuidBytes[6] &= 0x0F;
+            uuidBytes[6] |= 3 << 4;
+        }
+
+        uuidBytes[8] &= 0x3F;
+        uuidBytes[8] |= 0x80; // Variant
+
         return new Guid(uuidBytes);
     }
 
     public Guid GenerateUuiDv4()
     {
-        var uuidBytes = new byte[16];
-        RandomNumberGenerator.Create().GetBytes(uuidBytes);
-        uuidBytes[6] &= 0x0f;
-        uuidBytes[6] |= 4 << 4;
-        uuidBytes[8] &= 0x3f;
-        uuidBytes[8] |= 0x80;
-        return new Guid(uuidBytes);
+        var bytes = new byte[16];
+        RandomNumberGenerator.Fill(bytes);
+
+        if (BitConverter.IsLittleEndian)
+        {
+            bytes[7] &= 0x0F;
+            bytes[7] |= 4 << 4; // Version 4
+        }
+        else
+        {
+            bytes[6] &= 0x0F;
+            bytes[6] |= 4 << 4;
+        }
+
+        bytes[8] &= 0x3F;
+        bytes[8] |= 0x80; // Variant
+
+        return new Guid(bytes);
     }
 
     public Guid GenerateUuiDv5(Guid namespaceId, string name)
     {
         var nameBytes = System.Text.Encoding.UTF8.GetBytes(name);
         var namespaceBytes = namespaceId.ToByteArray();
-        var hashBytes = SHA1.Create().ComputeHash(ConcatenateArrays(namespaceBytes, nameBytes));
+        var hashBytes = SHA1.HashData(ConcatenateArrays(namespaceBytes, nameBytes));
         var uuidBytes = new byte[16];
         Array.Copy(hashBytes, 0, uuidBytes, 0, 16);
-        uuidBytes[6] &= 0x0f;
-        uuidBytes[6] |= 5 << 4;
-        uuidBytes[8] &= 0x3f;
-        uuidBytes[8] |= 0x80;
+
+        if (BitConverter.IsLittleEndian)
+        {
+            uuidBytes[7] &= 0x0F;
+            uuidBytes[7] |= 5 << 4; // Version 5
+        }
+        else
+        {
+            uuidBytes[6] &= 0x0F;
+            uuidBytes[6] |= 5 << 4;
+        }
+
+        uuidBytes[8] &= 0x3F;
+        uuidBytes[8] |= 0x80; // Variant
+
         return new Guid(uuidBytes);
     }
 
@@ -89,10 +130,21 @@ public class UuidGenerator : IUuidGenerator
         {
             RandomNumberGenerator.Fill(bytes);
         }
-        bytes[6] &= 0x0f;
-        bytes[6] |= 8 << 4;
-        bytes[8] &= 0x3f;
-        bytes[8] |= 0x80;
+
+        if (BitConverter.IsLittleEndian)
+        {
+            bytes[7] &= 0x0F;
+            bytes[7] |= 8 << 4; // Version 8
+        }
+        else
+        {
+            bytes[6] &= 0x0F;
+            bytes[6] |= 8 << 4;
+        }
+
+        bytes[8] &= 0x3F;
+        bytes[8] |= 0x80; // Variant
+
         return new Guid(bytes);
     }
 
@@ -139,17 +191,27 @@ public class UuidGenerator : IUuidGenerator
 
     private static byte[] GetMachineIdentifier()
     {
-        var macAddress = new byte[6];
         var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-        if (interfaces.Length > 0)
+        foreach (var ni in interfaces)
         {
-            var address = interfaces[0].GetPhysicalAddress();
-            macAddress = address.GetAddressBytes();
+            var address = ni.GetPhysicalAddress();
+            if (address != null)
+            {
+                var bytes = address.GetAddressBytes();
+                if (bytes != null && bytes.Length == 6)
+                {
+                    bytes[0] |= 0b00000001;
+                    bytes[0] |= 0b00000010;
+                    return bytes;
+                }
+            }
         }
 
-        macAddress[0] |= 0b00000001;
-        macAddress[0] |= 0b00000010;
-        return macAddress;
+        var fallback = new byte[6];
+        RandomNumberGenerator.Fill(fallback);
+        fallback[0] |= 0b00000001;
+        fallback[0] |= 0b00000010;
+        return fallback;
     }
 
     private static T[] ConcatenateArrays<T>(T[] a, T[] b)

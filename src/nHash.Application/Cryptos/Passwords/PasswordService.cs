@@ -1,4 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using MlkPwgen;
 using nHash.Application.Texts.Models;
 
@@ -75,25 +81,35 @@ public class PasswordService : IPasswordService
         return passStr.ToString();
     }
 
-    private static readonly string[] WordList = [
-        "active", "agent", "alpha", "amber", "angel", "animal", "apple", "apron", "aqua", "arrow",
-        "artist", "atomic", "autumn", "baby", "bacon", "badge", "banana", "beacon", "beauty", "berry",
-        "bird", "black", "blaze", "blue", "bold", "bottle", "brass", "brave", "breeze", "brick",
-        "bright", "bronze", "brown", "brush", "bubble", "butter", "cabin", "cable", "camel", "camera",
-        "candle", "canyon", "canvas", "carbon", "castle", "cavity", "celery", "cement", "center", "chain",
-        "chair", "chalk", "charm", "cherry", "chief", "chimney", "chorus", "chrome", "cider", "cigar",
-        "cinema", "circle", "circus", "citrus", "clay", "cliff", "climb", "clock", "cloud", "clover",
-        "coal", "coast", "cobalt", "coffee", "coin", "cold", "colony", "color", "comet", "cookie",
-        "copper", "coral", "corner", "cosmic", "cotton", "county", "cousin", "cradle", "craft", "crater",
-        "crayon", "cream", "creek", "crest", "cricket", "crown", "crystal", "cube", "cuckoo", "cupcake",
-        "curry", "curtain", "custom", "cycle", "cyclone", "cynic", "dagger", "daily", "dairy", "daisy",
-        "danger", "daring", "dark", "darling", "dawn", "dazzle", "dealer", "decade", "decimal", "deck",
-        "decor", "decoy", "deep", "deer", "defend", "define", "degree", "delay", "delta", "deluge",
-        "demise", "denim", "dental", "depot", "depth", "deputy", "derby", "desert", "design", "desire",
-        "detail", "detect", "device", "devote", "diary", "dice", "diet", "differ", "digit", "dilemma",
-        "dinner", "dinosaur", "direct", "dirt", "disaster", "disc", "discuss", "disease", "dish", "dismiss",
-        "display", "distance", "divert", "divide", "divine", "dizzy", "doctor", "dodge", "dogma", "dollar"
-    ];
+    private static readonly string[] WordList;
+
+    static PasswordService()
+    {
+        try
+        {
+            var assembly = typeof(PasswordService).Assembly;
+            const string resourceName = "nHash.Application.Cryptos.Passwords.wordlist.json";
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
+            {
+                throw new InvalidOperationException($"Could not load embedded resource: {resourceName}");
+            }
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            var json = reader.ReadToEnd();
+            using var doc = JsonDocument.Parse(json);
+            var list = new List<string>();
+            foreach (var element in doc.RootElement.EnumerateArray())
+            {
+                list.Add(element.GetString() ?? string.Empty);
+            }
+            WordList = list.ToArray();
+        }
+        catch
+        {
+            // Fallback wordlist in case of resource loading failure
+            WordList = ["active", "agent", "alpha", "amber", "angel", "animal", "apple", "apron", "aqua", "arrow"];
+        }
+    }
 
     public string GeneratePassphrase(int wordCount, char separator)
     {

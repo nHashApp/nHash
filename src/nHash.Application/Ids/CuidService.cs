@@ -52,6 +52,7 @@ public class CuidService : ICuidService
 
     private static string ToBase36(long value)
     {
+        if (value == 0) return "0";
         const string Base36Alphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
         var sb = new StringBuilder();
         while (value > 0)
