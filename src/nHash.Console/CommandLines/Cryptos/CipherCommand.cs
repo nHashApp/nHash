@@ -8,12 +8,12 @@ public class CipherCommand(ICipherService cipherService, IOutputProvider outputP
     public BaseCommand Command => GetFeatureCommand();
     private readonly Argument<string> _textArgument = new("text") { Description = "Text payload to encrypt or decrypt" };
     private readonly Option<string> _passOption = new("--pass", "-p") { Description = "Password/Passphrase for key derivation", DefaultValueFactory = _ => string.Empty };
-    private readonly Option<string> _algoOption = new("--type", "-t") { Description = "Cipher type (aes, chacha)", DefaultValueFactory = _ => "aes" };
+    private readonly Option<string> _algoOption = new("--type", "-t") { Description = "Cipher type (aes, chacha, aes-cbc)", DefaultValueFactory = _ => "aes" };
     private readonly Option<bool> _decryptOption = new("--decrypt", "-d") { Description = "Decrypt the payload instead of encrypting" };
 
     private BaseCommand GetFeatureCommand()
     {
-        var command = new BaseCommand("cipher", "Symmetric encryption & decryption (AES-GCM, ChaCha20-Poly1305)", GetExamples());
+        var command = new BaseCommand("cipher", "Symmetric encryption & decryption (AES-GCM, ChaCha20-Poly1305, AES-CBC)", GetExamples());
         command.Options.Add(_passOption);
         command.Options.Add(_algoOption);
         command.Options.Add(_decryptOption);
@@ -44,6 +44,7 @@ public class CipherCommand(ICipherService cipherService, IOutputProvider outputP
         [
             new("Encrypt text using AES-GCM", "nhash crypto cipher \"sensitive data\" -p \"strongPassword\""),
             new("Decrypt ciphertext using AES-GCM", "nhash crypto cipher <HEX_STRING> --pass \"strongPassword\" --decrypt"),
+            new("Encrypt text using AES-CBC", "nhash crypto cipher \"sensitive data\" -p \"strongPassword\" -t aes-cbc"),
             new("Encrypt text using ChaCha20", "nhash crypto cipher \"sensitive data\" -p \"strongPassword\" -t chacha"),
         ];
 }

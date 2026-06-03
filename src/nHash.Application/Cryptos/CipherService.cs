@@ -1,3 +1,4 @@
+using System;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -9,11 +10,38 @@ public class CipherService : ICipherService
 
     public string Encrypt(string plainText, string password, string algorithm)
     {
+        algorithm = string.IsNullOrWhiteSpace(algorithm) ? "aes" : algorithm;
         var salt = new byte[16];
         RandomNumberGenerator.Fill(salt);
 
         var key = DeriveKey(password, salt);
         var plainBytes = Encoding.UTF8.GetBytes(plainText);
+
+        var isCbc = algorithm.ToLowerInvariant().Contains("cbc");
+        if (isCbc)
+        {
+            var iv = new byte[16];
+            RandomNumberGenerator.Fill(iv);
+
+            byte[] encrypted;
+            using (var aes = Aes.Create())
+            {
+                aes.Key = key;
+                aes.IV = iv;
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.PKCS7;
+
+                using var encryptor = aes.CreateEncryptor();
+                encrypted = encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
+            }
+
+            var result = new byte[16 + 16 + encrypted.Length];
+            Array.Copy(salt, 0, result, 0, 16);
+            Array.Copy(iv, 0, result, 16, 16);
+            Array.Copy(encrypted, 0, result, 32, encrypted.Length);
+
+            return Convert.ToHexString(result);
+        }
 
         var nonce = new byte[12];
         RandomNumberGenerator.Fill(nonce);
@@ -32,20 +60,50 @@ public class CipherService : ICipherService
             aes.Encrypt(nonce, plainBytes, cipherBytes, tag);
         }
 
-        var result = new byte[16 + 12 + 16 + cipherBytes.Length];
-        Array.Copy(salt, 0, result, 0, 16);
-        Array.Copy(nonce, 0, result, 16, 12);
-        Array.Copy(tag, 0, result, 28, 16);
-        Array.Copy(cipherBytes, 0, result, 44, cipherBytes.Length);
+        var resultGcm = new byte[16 + 12 + 16 + cipherBytes.Length];
+        Array.Copy(salt, 0, resultGcm, 0, 16);
+        Array.Copy(nonce, 0, resultGcm, 16, 12);
+        Array.Copy(tag, 0, resultGcm, 28, 16);
+        Array.Copy(cipherBytes, 0, resultGcm, 44, cipherBytes.Length);
 
-        return Convert.ToHexString(result);
+        return Convert.ToHexString(resultGcm);
     }
 
     public string Decrypt(string cipherText, string password, string algorithm)
     {
+        algorithm = string.IsNullOrWhiteSpace(algorithm) ? "aes" : algorithm;
         try
         {
             var cipherBytesAll = Convert.FromHexString(cipherText);
+
+            var isCbc = algorithm.ToLowerInvariant().Contains("cbc");
+            if (isCbc)
+            {
+                if (cipherBytesAll.Length < 32)
+                {
+                    return "Invalid cipher text length.";
+                }
+
+                var salt = new byte[16];
+                var iv = new byte[16];
+                var cipherBytes = new byte[cipherBytesAll.Length - 32];
+
+                Array.Copy(cipherBytesAll, 0, salt, 0, 16);
+                Array.Copy(cipherBytesAll, 16, iv, 0, 16);
+                Array.Copy(cipherBytesAll, 32, cipherBytes, 0, cipherBytes.Length);
+
+                var key = DeriveKey(password, salt);
+
+                using var aes = Aes.Create();
+                aes.Key = key;
+                aes.IV = iv;
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.PKCS7;
+
+                using var decryptor = aes.CreateDecryptor();
+                var plainBytes = decryptor.TransformFinalBlock(cipherBytes, 0, cipherBytes.Length);
+                return Encoding.UTF8.GetString(plainBytes);
+            }
 
             if (cipherBytesAll.Length < 28)
             {

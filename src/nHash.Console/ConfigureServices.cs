@@ -73,11 +73,13 @@ public static class ConfigureServices
         services.AddSingleton<IHmacCommand, HmacCommand>();
         services.AddSingleton<ICipherCommand, CipherCommand>();
         services.AddSingleton<ISignatureCommand, SignatureCommand>();
+        services.AddSingleton<IPbkdf2Command, Pbkdf2Command>();
     }
 
     private static void RegisterPasswordServices(IServiceCollection services)
     {
         services.AddSingleton<IPasswordCommand, PasswordCommand>();
+        services.AddSingleton<IBCryptCommand, BCryptCommand>();
     }
 
     private static void RegisterTextServices(IServiceCollection services)
@@ -106,6 +108,8 @@ public static class ConfigureServices
         services.AddSingleton<ICuidCommand, CuidCommand>();
         services.AddSingleton<IUuidInspectCommand, UuidInspectCommand>();
         services.AddSingleton<ITotpCommand, TotpCommand>();
+        services.AddSingleton<IUlidCommand, UlidCommand>();
+        services.AddSingleton<INanoIdCommand, NanoIdCommand>();
     }
 
     private static void RegisterConvertServices(IServiceCollection services)

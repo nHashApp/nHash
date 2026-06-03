@@ -69,11 +69,13 @@ public static class ConfigureServices
         services.AddSingleton<IHmacService, HmacService>();
         services.AddSingleton<ICipherService, CipherService>();
         services.AddSingleton<ISignatureService, SignatureService>();
+        services.AddSingleton<IPbkdf2Service, Pbkdf2Service>();
     }
 
     private static void RegisterPasswordServices(IServiceCollection services)
     {
         services.AddSingleton<IPasswordService, PasswordService>();
+        services.AddSingleton<IBCryptService, BCryptService>();
     }
 
     private static void RegisterTextServices(IServiceCollection services)
@@ -101,6 +103,8 @@ public static class ConfigureServices
         services.AddSingleton<ICuidService, CuidService>();
         services.AddSingleton<ITotpService, TotpService>();
         services.AddSingleton<IUuidInspectService, UuidInspectService>();
+        services.AddSingleton<IUlidService, UlidService>();
+        services.AddSingleton<INanoIdService, NanoIdService>();
     }
 
     private static void RegisterConvertServices(IServiceCollection services)

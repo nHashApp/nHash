@@ -7,7 +7,9 @@ public class IdCommand(
     ISnowflakeCommand snowflakeFeature,
     ICuidCommand cuidFeature,
     IUuidInspectCommand uuidInspectFeature,
-    ITotpCommand totpFeature)
+    ITotpCommand totpFeature,
+    IUlidCommand ulidFeature,
+    INanoIdCommand nanoidFeature)
     : IIdCommand
 {
     public BaseCommand Command => GetCommand();
@@ -20,10 +22,12 @@ public class IdCommand(
             snowflakeFeature,
             cuidFeature,
             uuidInspectFeature,
-            totpFeature
+            totpFeature,
+            ulidFeature,
+            nanoidFeature
         ];
 
-        var command = new BaseCommand("id", "Unique Identifier utilities (UUID, Snowflake, CUID2, UUID Inspect, TOTP)");
+        var command = new BaseCommand("id", "Unique Identifier utilities (UUID, Snowflake, CUID2, UUID Inspect, TOTP, ULID, NanoID)");
         foreach (var feature in features)
         {
             command.Subcommands.Add(feature.Command);

@@ -9,7 +9,8 @@ public class CryptoCommand(
     IPasswordCommand passwordFeature,
     IHmacCommand hmacFeature,
     ICipherCommand cipherFeature,
-    ISignatureCommand signatureFeature)
+    ISignatureCommand signatureFeature,
+    IBCryptCommand bcryptFeature)
     : ICryptoCommand
 {
     public BaseCommand Command => GetCommand();
@@ -22,10 +23,11 @@ public class CryptoCommand(
             passwordFeature,
             hmacFeature,
             cipherFeature,
-            signatureFeature
+            signatureFeature,
+            bcryptFeature
         ];
 
-        var command = new BaseCommand("crypto", "Security & Cryptography utilities (Hash, Password, HMAC, Cipher, RSA Signature)");
+        var command = new BaseCommand("crypto", "Security & Cryptography utilities (Hash, Password, HMAC, Cipher, RSA Signature, BCrypt)");
         command.Aliases.Add("cr");
         foreach (var feature in features)
         {
