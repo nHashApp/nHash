@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace nHash.Application.Ids;
 
 public class UlidResult

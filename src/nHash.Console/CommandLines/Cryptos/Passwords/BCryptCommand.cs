@@ -1,6 +1,3 @@
-using System;
-using System.CommandLine;
-using System.Collections.Generic;
 using nHash.Application.Cryptos.Passwords;
 using nHash.Console.CommandLines.Base;
 

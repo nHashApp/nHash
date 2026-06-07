@@ -1,5 +1,3 @@
-using BCrypt.Net;
-
 namespace nHash.Application.Cryptos.Passwords;
 
 public class BCryptService : IBCryptService
