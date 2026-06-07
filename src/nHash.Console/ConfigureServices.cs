@@ -1,5 +1,7 @@
 using nHash.Console.CommandLines.Texts;
 using nHash.Console.CommandLines.Texts.SubCommands;
+using nHash.Console.CommandLines.Qrs;
+using nHash.Console.CommandLines.Qrs.SubCommands;
 using nHash.Console.CommandLines.Ids;
 using nHash.Console.CommandLines.Cryptos;
 using nHash.Console.CommandLines.Converts;
@@ -29,6 +31,7 @@ public static class ConfigureServices
         RegisterTextServices(services);
         RegisterUuidServices(services);
         RegisterConvertServices(services);
+        RegisterQrServices(services);
         RegisterArtServices(services);
         RegisterNetworkServices(services);
         RegisterDateServices(services);
@@ -154,5 +157,11 @@ public static class ConfigureServices
     private static void RegisterMathServices(IServiceCollection services)
     {
         services.AddSingleton<IMathCommand, MathCommand>();
+    }
+
+    private static void RegisterQrServices(IServiceCollection services)
+    {
+        services.AddSingleton<IQrCommand, QrCommand>();
+        services.AddSingleton<IQrGenerateCommand, QrGenerateCommand>();
     }
 }

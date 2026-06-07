@@ -3,6 +3,7 @@ using nHash.Console.CommandLines.Ids;
 using nHash.Console.CommandLines.Cryptos;
 using nHash.Console.CommandLines.Converts;
 using nHash.Console.CommandLines.Arts;
+using nHash.Console.CommandLines.Qrs;
 using nHash.Console.CommandLines.Network;
 using nHash.Console.CommandLines.Date;
 using nHash.Console.CommandLines.File;
@@ -23,6 +24,7 @@ public static class Initialize
         var features = new List<IFeature>
         {
             Get<IIdCommand>(provider),
+            Get<IQrCommand>(provider),
             Get<IConvertCommand>(provider),
             Get<ICryptoCommand>(provider),
             Get<ITextCommand>(provider),

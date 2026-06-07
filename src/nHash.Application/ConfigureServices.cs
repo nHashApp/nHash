@@ -19,6 +19,7 @@ using nHash.Application.File;
 using nHash.Application.Dev;
 using nHash.Application.Maths;
 using nHash.Application.Sys;
+using nHash.Application.Qrs;
 
 namespace nHash.Application;
 
@@ -38,6 +39,7 @@ public static class ConfigureServices
         RegisterDevServices(services);
         RegisterSysServices(services);
         RegisterMathServices(services);
+        RegisterQrServices(services);
 
         return services;
     }
@@ -142,5 +144,10 @@ public static class ConfigureServices
     private static void RegisterMathServices(IServiceCollection services)
     {
         services.AddSingleton<IMathService, MathService>();
+    }
+
+    private static void RegisterQrServices(IServiceCollection services)
+    {
+        services.AddSingleton<IQrService, QrService>();
     }
 }
