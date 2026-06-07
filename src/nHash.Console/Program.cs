@@ -1,4 +1,3 @@
-﻿
 var services = new ServiceCollection();
 Startup.RegisterServices(services);
 var provider = services.BuildServiceProvider();

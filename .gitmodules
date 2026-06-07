@@ -1,0 +1,6 @@
+[submodule "shared/FastText"]
+	path = shared/FastText
+	url = https://github.com/nRafinia/FastText.NetWrapper.git
+[submodule "src/shared/FastText"]
+	path = src/shared/FastText
+	url = https://github.com/nRafinia/FastText.NetWrapper.git

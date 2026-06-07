@@ -87,3 +87,11 @@ public class OccurrencesResult
     public int Count { get; set; }
     public List<OccurrencePosition> Positions { get; set; } = new();
 }
+
+public class LanguageResult
+{
+    public bool Success { get; set; }
+    public string ErrorMessage { get; set; } = string.Empty;
+    public string LanguageCode { get; set; } = string.Empty;
+    public double Confidence { get; set; }
+}

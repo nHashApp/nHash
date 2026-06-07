@@ -16,7 +16,8 @@ public class TextCommand(
     IWordFreqCommand wordFreqFeature,
     IPalindromeCommand palindromeFeature,
     ICountCommand countFeature,
-    IEscapeCommand escapeFeature)
+    IEscapeCommand escapeFeature,
+    ILanguageCommand languageFeature)
     : ITextCommand
 {
     public BaseCommand Command => GetCommand();
@@ -37,10 +38,11 @@ public class TextCommand(
             wordFreqFeature,
             palindromeFeature,
             countFeature,
-            escapeFeature
+            escapeFeature,
+            languageFeature
         ];
 
-        var command = new BaseCommand("text", "Text utilities (Humanizer, JSON, YAML, XML, Case, Diff, Stats, Lorem, Slug, WordFreq, Palindrome, Count, Escape)");
+        var command = new BaseCommand("text", "Text utilities (Humanizer, JSON, YAML, XML, Case, Diff, Stats, Lorem, Slug, WordFreq, Palindrome, Count, Escape, Lang)");
         command.Aliases.Add("t");
         foreach (var feature in features)
         {

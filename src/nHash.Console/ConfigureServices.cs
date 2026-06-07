@@ -98,6 +98,7 @@ public static class ConfigureServices
         services.AddSingleton<IPalindromeCommand, PalindromeCommand>();
         services.AddSingleton<ICountCommand, CountCommand>();
         services.AddSingleton<IEscapeCommand, EscapeCommand>();
+        services.AddSingleton<ILanguageCommand, LanguageCommand>();
     }
 
     private static void RegisterUuidServices(IServiceCollection services)

@@ -90,6 +90,7 @@ public static class ConfigureServices
         services.AddSingleton<ILoremIpsumService, LoremIpsumService>();
         services.AddSingleton<ITextToolsService, TextToolsService>();
         services.AddSingleton<ITextCounterService, TextCounterService>();
+        services.AddSingleton<ILanguageDetectorService, LanguageDetectorService>();
         
         services.AddSingleton<IJsonTools, JsonTools>();
         services.AddSingleton<IYamlTools, YamlTools>();
